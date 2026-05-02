@@ -86,6 +86,16 @@ describe('login', () => {
       password: 'pass123',
     })
   })
+
+  it('gibt Supabase-Fehler zurück', async () => {
+    mockSupabase.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid credentials' } })
+    const fd = new FormData()
+    fd.set('email', 'test@example.com')
+    fd.set('password', 'wrongpass')
+
+    const result = await login(undefined, fd)
+    expect(result).toEqual({ error: 'Invalid credentials' })
+  })
 })
 
 describe('logout', () => {

@@ -6,9 +6,9 @@ import { createClient } from '@/lib/supabase/server'
 type FormState = { error: string } | undefined
 
 export async function signUp(state: FormState, formData: FormData): Promise<FormState> {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const username = formData.get('username') as string
+  const email = (formData.get('email') as string)?.trim()
+  const password = (formData.get('password') as string)?.trim()
+  const username = (formData.get('username') as string)?.trim()
 
   if (!email || !password || !username) {
     return { error: 'Email, Passwort und Username sind erforderlich' }
@@ -27,8 +27,8 @@ export async function signUp(state: FormState, formData: FormData): Promise<Form
 }
 
 export async function login(state: FormState, formData: FormData): Promise<FormState> {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+  const email = (formData.get('email') as string)?.trim()
+  const password = (formData.get('password') as string)?.trim()
 
   if (!email || !password) {
     return { error: 'Email und Passwort sind erforderlich' }
@@ -44,6 +44,7 @@ export async function login(state: FormState, formData: FormData): Promise<FormS
 
 export async function logout() {
   const supabase = await createClient()
-  await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut()
+  if (error) console.error('Sign out error:', error.message)
   redirect('/')
 }

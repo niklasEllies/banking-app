@@ -11,9 +11,9 @@ import type { Bench } from '@/components/BenchMap'
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const [{ data: benches }, { data: { session } }] = await Promise.all([
+  const [{ data: benches }, { data: { user } }] = await Promise.all([
     supabase.from('benches').select('id, lat, lng, name'),
-    supabase.auth.getSession(),
+    supabase.auth.getUser(),
   ])
 
   const benchList: Bench[] = benches ?? []
@@ -21,7 +21,7 @@ export default async function HomePage() {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
-      <BenchMapClient benches={benchList} isAuthenticated={!!session} />
+      <BenchMapClient benches={benchList} isAuthenticated={!!user} />
       <BottomSheet benchCount={benchList.length} />
     </div>
   )

@@ -131,7 +131,7 @@ function LocationController({
           }, 0)
         }
       },
-      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+      { enableHighAccuracy: false, maximumAge: 60000 }
     )
 
     // Phase 2: Accurate GPS — flies to corrected position when ready

@@ -65,6 +65,7 @@ interface BenchMapProps {
   benches: Bench[]
   isAuthenticated: boolean
   userId: string | null
+  sheetExpanded: boolean
 }
 
 function benchDisplayName(bench: Bench) {
@@ -163,7 +164,7 @@ function LocationController({
   return null
 }
 
-export default function BenchMap({ benches: initialBenches, isAuthenticated, userId }: BenchMapProps) {
+export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded }: BenchMapProps) {
   const router = useRouter()
   const [localBenches, setLocalBenches] = useState(initialBenches)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
@@ -270,7 +271,11 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
       {isAuthenticated && (
         <button
           onClick={handleFabClick}
-          className="absolute bottom-28 right-4 z-1000 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center text-2xl hover:bg-primary-dark active:scale-95 transition-all"
+          className="absolute right-4 z-1000 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex items-center justify-center text-2xl hover:bg-primary-dark active:scale-95"
+          style={{
+            bottom: sheetExpanded ? 'calc(55vh + 16px)' : '5rem',
+            transition: 'bottom 0.25s ease',
+          }}
           aria-label="Bank eintragen"
         >
           +

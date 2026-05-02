@@ -4,8 +4,6 @@ import { useState, useRef, useTransition } from 'react'
 import type { Bench } from '@/components/BenchMap'
 import { deleteBench } from '@/actions/benches'
 
-type SheetState = 'hidden' | 'peek' | 'expanded'
-
 function benchLabel(bench: Bench): string {
   if (bench.name) return bench.name
   const d = new Date(bench.created_at)
@@ -15,23 +13,25 @@ function benchLabel(bench: Bench): string {
 interface BottomSheetProps {
   benches: Bench[]
   userId: string | null
+  onExpandedChange: (expanded: boolean) => void
 }
 
-export default function BottomSheet({ benches: initialBenches, userId }: BottomSheetProps) {
-  const [state, setState] = useState<SheetState>('peek')
+export default function BottomSheet({ benches: initialBenches, userId, onExpandedChange }: BottomSheetProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const [dragY, setDragY] = useState(0)
   const [benches, setBenches] = useState(initialBenches)
   const [isPending, startTransition] = useTransition()
   const startYRef = useRef(0)
   const count = benches.length
 
+  const expand = () => { setIsExpanded(true); onExpandedChange(true) }
+  const collapse = () => { setIsExpanded(false); onExpandedChange(false) }
+
   const handleDelete = (id: string) => {
     setBenches(prev => prev.filter(b => b.id !== id))
     startTransition(async () => {
       const result = await deleteBench(id)
-      if (result.error) {
-        setBenches(initialBenches)
-      }
+      if (result.error) setBenches(initialBenches)
     })
   }
 
@@ -41,27 +41,19 @@ export default function BottomSheet({ benches: initialBenches, userId }: BottomS
 
   const handleTouchMove = (e: React.TouchEvent) => {
     const delta = e.touches[0].clientY - startYRef.current
-    if (state === 'peek' && delta < -40) {
-      setState('expanded')
-      setDragY(0)
-    } else if (state === 'expanded' && delta > 40) {
-      setState('peek')
-      setDragY(0)
-    } else if (state === 'peek' && delta > 0) {
-      setDragY(delta)
-    }
+    if (isExpanded && delta > 0) setDragY(delta)
   }
 
   const handleTouchEnd = () => {
-    if (state === 'peek' && dragY > 60) setState('hidden')
+    if (isExpanded && dragY > 80) collapse()
     setDragY(0)
   }
 
-  if (state === 'hidden') {
+  if (!isExpanded) {
     return (
       <button
-        onClick={() => setState('peek')}
-        className="absolute bottom-28 left-1/2 -translate-x-1/2 z-1000 bg-white rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 border border-surface-border"
+        onClick={expand}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 border border-gray-200"
       >
         {count} {count === 1 ? 'Bank' : 'Bänke'} ↑
       </button>
@@ -70,12 +62,11 @@ export default function BottomSheet({ benches: initialBenches, userId }: BottomS
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-1000 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)]"
+      className="absolute bottom-0 left-0 right-0 z-1000 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
+        maxHeight: '55vh',
         transform: `translateY(${dragY}px)`,
         transition: dragY === 0 ? 'transform 0.25s ease' : 'none',
-        maxHeight: state === 'expanded' ? '55vh' : '88px',
-        overflow: state === 'expanded' ? 'hidden' : 'visible',
       }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -87,7 +78,7 @@ export default function BottomSheet({ benches: initialBenches, userId }: BottomS
           {count} {count === 1 ? 'Bank' : 'Bänke'}
         </p>
         <button
-          onClick={() => setState('hidden')}
+          onClick={collapse}
           className="mt-2 text-gray-400 hover:text-gray-600 text-lg leading-none"
           aria-label="Schließen"
         >
@@ -95,38 +86,30 @@ export default function BottomSheet({ benches: initialBenches, userId }: BottomS
         </button>
       </div>
 
-      {state === 'expanded' && (
-        <div className="overflow-y-auto pb-8" style={{ maxHeight: 'calc(55vh - 56px)' }}>
-          {count === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-6">Noch keine Bänke eingetragen</p>
-          ) : (
-            <ul>
-              {benches.map((bench) => (
-                <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
-                  <span className="text-xl shrink-0">🪑</span>
-                  <span className="text-sm text-gray-800 truncate flex-1">
-                    {benchLabel(bench)}
-                  </span>
-                  {userId && bench.created_by === userId && (
-                    <button
-                      onClick={() => handleDelete(bench.id)}
-                      disabled={isPending}
-                      className="shrink-0 text-gray-300 hover:text-red-500 transition-colors text-base disabled:opacity-40"
-                      aria-label="Bank löschen"
-                    >
-                      🗑
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-
-      {state === 'peek' && (
-        <p className="text-xs text-gray-400 text-center pb-3">nach oben wischen für Details</p>
-      )}
+      <div className="overflow-y-auto pb-8" style={{ maxHeight: 'calc(55vh - 56px)' }}>
+        {count === 0 ? (
+          <p className="text-sm text-gray-500 text-center py-6">Noch keine Bänke eingetragen</p>
+        ) : (
+          <ul>
+            {benches.map((bench) => (
+              <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
+                <span className="text-xl shrink-0">🪑</span>
+                <span className="text-sm text-gray-800 truncate flex-1">{benchLabel(bench)}</span>
+                {userId && bench.created_by === userId && (
+                  <button
+                    onClick={() => handleDelete(bench.id)}
+                    disabled={isPending}
+                    className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
+                    aria-label="Bank löschen"
+                  >
+                    🗑
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }

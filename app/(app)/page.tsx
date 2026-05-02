@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import MapHeader from '@/components/MapHeader'
-import BottomSheet from '@/components/BottomSheet'
-import BenchMapClient from '@/components/BenchMapClient'
+import MapLayout from '@/components/MapLayout'
 import type { Bench } from '@/components/BenchMap'
 
 // Leaflet läuft nicht auf dem Server — BenchMapClient enthält den dynamic-Import
@@ -21,8 +20,7 @@ export default async function HomePage() {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
-      <BenchMapClient benches={benchList} isAuthenticated={!!user} userId={user?.id ?? null} />
-      <BottomSheet benches={benchList} userId={user?.id ?? null} />
+      <MapLayout benches={benchList} isAuthenticated={!!user} userId={user?.id ?? null} />
     </div>
   )
 }

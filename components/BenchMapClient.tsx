@@ -11,8 +11,9 @@ interface BenchMapClientProps {
   benches: Bench[]
   isAuthenticated: boolean
   userId: string | null
+  sheetExpanded: boolean
 }
 
-export default function BenchMapClient({ benches, isAuthenticated, userId }: BenchMapClientProps) {
-  return <BenchMap benches={benches} isAuthenticated={isAuthenticated} userId={userId} />
+export default function BenchMapClient({ benches, isAuthenticated, userId, sheetExpanded }: BenchMapClientProps) {
+  return <BenchMap benches={benches} isAuthenticated={isAuthenticated} userId={userId} sheetExpanded={sheetExpanded} />
 }

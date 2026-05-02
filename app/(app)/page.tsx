@@ -22,7 +22,7 @@ export default async function HomePage() {
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
       <BenchMapClient benches={benchList} isAuthenticated={!!user} />
-      <BottomSheet benchCount={benchList.length} />
+      <BottomSheet benches={benchList} />
     </div>
   )
 }

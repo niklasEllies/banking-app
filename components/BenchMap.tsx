@@ -1,13 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
-// Leaflet-Icons zeigen mit Webpack/Next.js auf den falschen Pfad.
-// Wir verweisen manuell auf die Dateien in public/leaflet/.
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: '/leaflet/marker-icon-2x.png',
@@ -15,13 +13,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/leaflet/marker-shadow.png',
 })
 
-const selectedIcon = new L.Icon({
-  iconUrl: '/leaflet/marker-icon.png',
-  iconRetinaUrl: '/leaflet/marker-icon-2x.png',
-  shadowUrl: '/leaflet/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  className: 'hue-rotate-90',
+const userLocationIcon = new L.DivIcon({
+  html: '<div style="font-size:22px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));transform:translateX(-4px)">🧍</div>',
+  className: '',
+  iconSize: [22, 30],
+  iconAnchor: [11, 30],
 })
 
 export interface Bench {
@@ -36,45 +32,57 @@ interface BenchMapProps {
   isAuthenticated: boolean
 }
 
-function LocationController() {
+function LocationController({ onPositionFound }: { onPositionFound: (pos: [number, number]) => void }) {
   const map = useMap()
+  const centeredRef = { current: false }
+
   useEffect(() => {
     if (!navigator.geolocation) {
-      map.setView([51.1, 10.4], 6)
+      map.setView([51.1, 10.4], 11)
       return
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
-      () => map.setView([51.1, 10.4], 6)
+      (pos) => {
+        const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+        if (!centeredRef.current) {
+          map.setView(latlng, 14)
+          centeredRef.current = true
+        }
+        onPositionFound(latlng)
+      },
+      () => {
+        map.setView([51.1, 10.4], 11)
+      }
     )
   }, [map])
-  return null
-}
 
-function ClickHandler({
-  enabled,
-  onMapClick,
-}: {
-  enabled: boolean
-  onMapClick: (lat: number, lng: number) => void
-}) {
-  useMapEvents({
-    click: (e) => {
-      if (enabled) onMapClick(e.latlng.lat, e.latlng.lng)
-    },
-  })
   return null
 }
 
 export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
   const router = useRouter()
-  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
+
+  const handlePositionFound = useCallback((pos: [number, number]) => {
+    setUserPosition(pos)
+  }, [])
+
+  const handleFabClick = () => {
+    if (userPosition) {
+      router.push(`/benches/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
+    } else {
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => router.push(`/benches/new?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`),
+        () => router.push('/benches/new?lat=51.1&lng=10.4')
+      )
+    }
+  }
 
   return (
     <div className="relative w-full h-full">
       <MapContainer
         center={[51.1, 10.4]}
-        zoom={6}
+        zoom={11}
         className="w-full h-full"
         zoomControl={false}
       >
@@ -82,43 +90,29 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationController />
-        <ClickHandler
-          enabled={isAuthenticated}
-          onMapClick={(lat, lng) => setSelectedCoords({ lat, lng })}
-        />
+        <LocationController onPositionFound={handlePositionFound} />
+
         {benches.map((bench) => (
           <Marker key={bench.id} position={[bench.lat, bench.lng]}>
             <Popup>{bench.name || 'Bank'}</Popup>
           </Marker>
         ))}
-        {selectedCoords && (
-          <Marker
-            position={[selectedCoords.lat, selectedCoords.lng]}
-            icon={selectedIcon}
-          />
+
+        {userPosition && (
+          <Marker position={userPosition} icon={userLocationIcon}>
+            <Popup>Dein Standort</Popup>
+          </Marker>
         )}
       </MapContainer>
 
-      {selectedCoords && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-1000 flex gap-2">
-          <button
-            onClick={() =>
-              router.push(
-                `/benches/new?lat=${selectedCoords.lat.toFixed(6)}&lng=${selectedCoords.lng.toFixed(6)}`
-              )
-            }
-            className="bg-green-700 text-white px-5 py-2.5 rounded-full shadow-lg font-medium text-sm whitespace-nowrap"
-          >
-            Hier eintragen
-          </button>
-          <button
-            onClick={() => setSelectedCoords(null)}
-            className="bg-white text-gray-600 px-3 py-2.5 rounded-full shadow-lg text-sm"
-          >
-            ✕
-          </button>
-        </div>
+      {isAuthenticated && (
+        <button
+          onClick={handleFabClick}
+          className="absolute bottom-28 right-4 z-1000 w-14 h-14 bg-green-700 text-white rounded-full shadow-xl flex items-center justify-center text-2xl hover:bg-green-800 active:scale-95 transition-all"
+          aria-label="Bank eintragen"
+        >
+          +
+        </button>
       )}
     </div>
   )

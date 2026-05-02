@@ -4,12 +4,17 @@
 
 - [x] Supabase Auth (Email/Passwort)
 - [x] Interaktive Leaflet-Karte
-- [x] Karte zentriert auf Nutzerstandort (Fallback: Deutschland)
-- [x] Bänke auf der Karte anzeigen (Marker)
-- [x] Bank eintragen (Kartenklick oder aktueller Standort)
+- [x] Two-Phase GPS (Netzwerk < 1s + GPS-Upgrade)
+- [x] localStorage Position-Cache (sofortiger Start)
+- [x] Bänke auf der Karte (Marker + Clustering 🪑×N)
+- [x] Bank eintragen via FAB-Button
+- [x] Nominatim Auto-Name (Reverse Geocoding, dauerhaft gespeichert)
+- [x] Bank löschen (eigene Bänke, im Popup + BottomSheet)
 - [x] Route-Schutz für nicht-eingeloggte Nutzer
-- [x] Anonyme Nutzer: Karte sichtbar, keine Interaktion
-- [x] Bottom Sheet mit swipe-to-dismiss
+- [x] Anonyme Nutzer: Karte lesbar, keine Interaktion
+- [x] Bottom Sheet (peek/expanded/hidden, Bank-Liste)
+- [x] Profilseite /profil mit Marker-Emoji Auswahl (🧍‍♂️ 🧍‍♀️ 👫 🐕)
+- [x] Theme: Park Bench (Olivgrün + Walnussbraun)
 
 ## Phase 2 – Bank-Details 🔜
 

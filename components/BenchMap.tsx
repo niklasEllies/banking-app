@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { MapContainer, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
-import { Marker, Popup } from 'react-leaflet'
 import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import { deleteBench } from '@/actions/benches'
 
 const LOCATION_KEY = 'benchmarks_last_location'
+const EMOJI_KEY = 'benchmarks_user_emoji'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -17,9 +18,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/leaflet/marker-shadow.png',
 })
 
-const makeUserIcon = (grayscale: boolean) =>
+const makeUserIcon = (emoji: string, grayscale: boolean) =>
   new L.DivIcon({
-    html: `<div style="font-size:30px;line-height:1;filter:${grayscale ? 'grayscale(100%) ' : ''}drop-shadow(0 2px 4px rgba(0,0,0,0.4))">🧍</div>`,
+    html: `<div style="font-size:30px;line-height:1;filter:${grayscale ? 'grayscale(100%) ' : ''}drop-shadow(0 4px 8px rgba(0,0,0,0.7))">
+      ${emoji}
+    </div>`,
     className: '',
     iconSize: [30, 41],
     iconAnchor: [15, 41],
@@ -28,10 +31,24 @@ const makeUserIcon = (grayscale: boolean) =>
 const createClusterIcon = (cluster: any) => {
   const count = cluster.getChildCount()
   return new L.DivIcon({
-    html: `<div style="background:#3d6b2c;color:white;border:2px solid white;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:system-ui,sans-serif">${count}</div>`,
+    html: `<div style="
+      background:white;
+      border:2px solid #3d6b2c;
+      border-radius:20px;
+      padding:4px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      font-family:system-ui,sans-serif;
+      box-shadow:0 2px 8px rgba(0,0,0,0.2);
+      white-space:nowrap;
+    ">
+      <span style="font-size:16px;line-height:1">🪑</span>
+      <span style="font-weight:700;font-size:13px;color:#3d6b2c">×${count}</span>
+    </div>`,
     className: '',
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
+    iconSize: [70, 32],
+    iconAnchor: [35, 16],
   })
 }
 
@@ -47,6 +64,13 @@ export interface Bench {
 interface BenchMapProps {
   benches: Bench[]
   isAuthenticated: boolean
+  userId: string | null
+}
+
+function benchDisplayName(bench: Bench) {
+  if (bench.name) return bench.name
+  const d = new Date(bench.created_at)
+  return `Bank vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
 }
 
 function LocationController({
@@ -61,8 +85,8 @@ function LocationController({
   const map = useMap()
   const centeredRef = useRef(false)
 
+  // Center on cached position immediately (deferred so Leaflet container is ready)
   useEffect(() => {
-    // Defer setView to next tick so Leaflet's container is fully initialized
     if (cachedPosition && !centeredRef.current) {
       const t = setTimeout(() => {
         map.setView(cachedPosition, 14)
@@ -72,6 +96,7 @@ function LocationController({
     }
   }, [cachedPosition, map])
 
+  // Two-phase GPS: fast network first, then accurate GPS
   useEffect(() => {
     if (!navigator.geolocation) {
       setTimeout(() => {
@@ -84,55 +109,93 @@ function LocationController({
     }
 
     onLocating(true)
+    let watchId: number | undefined
+
+    // Phase 1: Quick network/wifi position (~< 1s)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
         localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
         onPositionFound(latlng)
-        onLocating(false)
-        map.setView(latlng, 14)
-        centeredRef.current = true
-      },
-      () => {
-        onLocating(false)
         if (!centeredRef.current) {
-          map.setView([51.1, 10.4], 11)
+          map.setView(latlng, 14)
           centeredRef.current = true
         }
       },
-      // enableHighAccuracy: false uses network/wifi positioning — much faster (~1s vs 5-10s)
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 30000 }
+      () => {
+        if (!centeredRef.current) {
+          setTimeout(() => {
+            map.setView([51.1, 10.4], 11)
+            centeredRef.current = true
+          }, 0)
+        }
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
     )
+
+    // Phase 2: Accurate GPS — flies to corrected position when ready
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (pos.coords.accuracy < 80) {
+          const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+          localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
+          onPositionFound(latlng)
+          onLocating(false)
+          map.flyTo(latlng, Math.max(map.getZoom(), 14), { duration: 1.5 })
+          if (watchId !== undefined) {
+            navigator.geolocation.clearWatch(watchId)
+            watchId = undefined
+          }
+        }
+      },
+      () => { onLocating(false) },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+    )
+
+    return () => {
+      if (watchId !== undefined) {
+        navigator.geolocation.clearWatch(watchId)
+        onLocating(false)
+      }
+    }
   }, [map])
 
   return null
 }
 
-export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
+export default function BenchMap({ benches: initialBenches, isAuthenticated, userId }: BenchMapProps) {
   const router = useRouter()
+  const [localBenches, setLocalBenches] = useState(initialBenches)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
-  const [isGpsLive, setIsGpsLive] = useState(false)
+  const [hasLivePosition, setHasLivePosition] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [cachedPosition, setCachedPosition] = useState<[number, number] | null>(null)
+  const [userEmoji, setUserEmoji] = useState('🧍‍♂️')
 
   useEffect(() => {
+    setUserEmoji(localStorage.getItem(EMOJI_KEY) ?? '🧍‍♂️')
     const raw = localStorage.getItem(LOCATION_KEY)
     if (raw) {
       try {
         const pos = JSON.parse(raw) as [number, number]
         setCachedPosition(pos)
         setUserPosition(pos)
-        setIsGpsLive(false)
       } catch {}
     }
   }, [])
 
   const handlePositionFound = useCallback((pos: [number, number]) => {
     setUserPosition(pos)
-    setIsGpsLive(true)
+    setHasLivePosition(true)
   }, [])
 
   const handleLocating = useCallback((v: boolean) => setIsLocating(v), [])
+
+  const handleDelete = useCallback(async (id: string) => {
+    setLocalBenches(prev => prev.filter(b => b.id !== id))
+    const result = await deleteBench(id)
+    if (result.error) setLocalBenches(initialBenches)
+  }, [initialBenches])
 
   const handleFabClick = () => {
     if (userPosition) {
@@ -159,18 +222,40 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
         />
 
         <MarkerClusterGroup chunkedLoading maxClusterRadius={60} iconCreateFunction={createClusterIcon}>
-          {benches.map((bench) => (
+          {localBenches.map((bench) => (
             <Marker key={bench.id} position={[bench.lat, bench.lng]}>
               <Popup>
-                {bench.name || `Bank vom ${new Date(bench.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`}
+                <div style={{ minWidth: '140px' }}>
+                  <strong style={{ fontSize: '13px', display: 'block', marginBottom: '6px' }}>
+                    {benchDisplayName(bench)}
+                  </strong>
+                  {userId && bench.created_by === userId && (
+                    <button
+                      onClick={() => handleDelete(bench.id)}
+                      style={{
+                        color: '#ef4444',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        padding: '2px 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      🗑 Löschen
+                    </button>
+                  )}
+                </div>
               </Popup>
             </Marker>
           ))}
         </MarkerClusterGroup>
 
         {userPosition && (
-          <Marker position={userPosition} icon={makeUserIcon(!isGpsLive)}>
-            <Popup>{isGpsLive ? 'Dein Standort' : 'Letzter Standort (GPS lädt...)'}</Popup>
+          <Marker position={userPosition} icon={makeUserIcon(userEmoji, !hasLivePosition)}>
+            <Popup>{hasLivePosition ? 'Dein Standort' : 'Letzter Standort (GPS lädt…)'}</Popup>
           </Marker>
         )}
       </MapContainer>

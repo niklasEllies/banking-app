@@ -21,7 +21,7 @@ export default async function HomePage() {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
-      <BenchMapClient benches={benchList} isAuthenticated={!!user} />
+      <BenchMapClient benches={benchList} isAuthenticated={!!user} userId={user?.id ?? null} />
       <BottomSheet benches={benchList} userId={user?.id ?? null} />
     </div>
   )

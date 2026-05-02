@@ -10,8 +10,9 @@ const BenchMap = dynamic(() => import('@/components/BenchMap'), { ssr: false })
 interface BenchMapClientProps {
   benches: Bench[]
   isAuthenticated: boolean
+  userId: string | null
 }
 
-export default function BenchMapClient({ benches, isAuthenticated }: BenchMapClientProps) {
-  return <BenchMap benches={benches} isAuthenticated={isAuthenticated} />
+export default function BenchMapClient({ benches, isAuthenticated, userId }: BenchMapClientProps) {
+  return <BenchMap benches={benches} isAuthenticated={isAuthenticated} userId={userId} />
 }

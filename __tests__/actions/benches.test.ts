@@ -62,9 +62,10 @@ describe('createBench', () => {
     })
   })
 
-  it('speichert null wenn Name leer', async () => {
+  it('speichert null wenn Name leer und Nominatim fehlschlägt', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     mockInsert.mockResolvedValue({ error: null })
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({ ok: false } as any)
 
     const fd = new FormData()
     fd.set('lat', '51.5074')

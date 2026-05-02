@@ -1,19 +1,33 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useTransition } from 'react'
 import type { Bench } from '@/components/BenchMap'
+import { deleteBench } from '@/actions/benches'
 
 type SheetState = 'hidden' | 'peek' | 'expanded'
 
 interface BottomSheetProps {
   benches: Bench[]
+  userId: string | null
 }
 
-export default function BottomSheet({ benches }: BottomSheetProps) {
+export default function BottomSheet({ benches: initialBenches, userId }: BottomSheetProps) {
   const [state, setState] = useState<SheetState>('peek')
   const [dragY, setDragY] = useState(0)
+  const [benches, setBenches] = useState(initialBenches)
+  const [isPending, startTransition] = useTransition()
   const startYRef = useRef(0)
   const count = benches.length
+
+  const handleDelete = (id: string) => {
+    setBenches(prev => prev.filter(b => b.id !== id))
+    startTransition(async () => {
+      const result = await deleteBench(id)
+      if (result.error) {
+        setBenches(initialBenches)
+      }
+    })
+  }
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startYRef.current = e.touches[0].clientY
@@ -33,9 +47,7 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
   }
 
   const handleTouchEnd = () => {
-    if (state === 'peek' && dragY > 60) {
-      setState('hidden')
-    }
+    if (state === 'peek' && dragY > 60) setState('hidden')
     setDragY(0)
   }
 
@@ -43,7 +55,7 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
     return (
       <button
         onClick={() => setState('peek')}
-        className="absolute bottom-28 left-1/2 -translate-x-1/2 z-1000 bg-white rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 border border-gray-200"
+        className="absolute bottom-28 left-1/2 -translate-x-1/2 z-1000 bg-white rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 border border-surface-border"
       >
         {count} {count === 1 ? 'Bank' : 'Bänke'} ↑
       </button>
@@ -63,7 +75,6 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Drag handle + header */}
       <div className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none">
         <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 rounded-full" />
         <p className="text-sm font-semibold text-gray-900 mt-2">
@@ -78,7 +89,6 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
         </button>
       </div>
 
-      {/* Bench list — only visible in expanded state */}
       {state === 'expanded' && (
         <div className="overflow-y-auto pb-8" style={{ maxHeight: 'calc(55vh - 56px)' }}>
           {count === 0 ? (
@@ -86,14 +96,21 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
           ) : (
             <ul>
               {benches.map((bench) => (
-                <li
-                  key={bench.id}
-                  className="flex items-center gap-3 px-5 py-3 border-t border-gray-100"
-                >
+                <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
                   <span className="text-xl shrink-0">🪑</span>
-                  <span className="text-sm text-gray-800 truncate">
-                    {bench.name || <span className="text-gray-400 italic">Bank ohne Namen</span>}
+                  <span className="text-sm text-gray-800 truncate flex-1">
+                    {bench.name ?? <span className="text-gray-400 italic">Bank ohne Namen</span>}
                   </span>
+                  {userId && bench.created_by === userId && (
+                    <button
+                      onClick={() => handleDelete(bench.id)}
+                      disabled={isPending}
+                      className="shrink-0 text-gray-300 hover:text-red-500 transition-colors text-base disabled:opacity-40"
+                      aria-label="Bank löschen"
+                    >
+                      🗑
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -101,7 +118,6 @@ export default function BottomSheet({ benches }: BottomSheetProps) {
         </div>
       )}
 
-      {/* Hint when in peek state */}
       {state === 'peek' && (
         <p className="text-xs text-gray-400 text-center pb-3">nach oben wischen für Details</p>
       )}

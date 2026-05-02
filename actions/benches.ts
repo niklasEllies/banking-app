@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 type FormState = { error: string } | undefined
@@ -29,4 +30,18 @@ export async function createBench(state: FormState, formData: FormData): Promise
   if (error) return { error: error.message }
 
   redirect('/')
+}
+
+export async function deleteBench(id: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Nicht eingeloggt' }
+
+  const { error } = await supabase.from('benches').delete().eq('id', id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/')
+  return {}
 }

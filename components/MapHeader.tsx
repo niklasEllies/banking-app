@@ -16,7 +16,7 @@ export default async function MapHeader() {
           </button>
         </form>
       ) : (
-        <Link href="/login" className="text-sm text-green-700 font-medium hover:underline">
+        <Link href="/login" className="text-sm text-primary font-medium hover:underline">
           Login
         </Link>
       )}

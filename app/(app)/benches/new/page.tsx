@@ -18,7 +18,7 @@ export default async function NewBenchPage({ searchParams }: PageProps) {
   const lng = parseFloat(params.lng ?? '10.4')
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-sm mx-auto px-4 py-8">
         <Link
           href="/"

@@ -8,12 +8,12 @@ export default function SignupPage() {
   const [state, action, pending] = useActionState(signUp, undefined)
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold text-center mb-8">🪑 BenchMarks</h1>
         <form action={action} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="username" className="block text-sm text-gray-800 font-medium mb-1">
               Username
             </label>
             <input
@@ -21,11 +21,11 @@ export default function SignupPage() {
               name="username"
               type="text"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm text-gray-800 font-medium mb-1">
               Email
             </label>
             <input
@@ -33,11 +33,11 @@ export default function SignupPage() {
               name="email"
               type="email"
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm text-gray-800 font-medium mb-1">
               Passwort
             </label>
             <input
@@ -46,7 +46,7 @@ export default function SignupPage() {
               type="password"
               required
               minLength={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+              className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           {state?.error && (
@@ -55,14 +55,14 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full bg-green-700 text-white rounded-lg py-2 text-sm font-medium hover:bg-green-800 disabled:opacity-50"
+            className="w-full bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
           >
             {pending ? 'Registrieren...' : 'Konto erstellen'}
           </button>
         </form>
         <p className="text-center text-sm text-gray-600 mt-4">
           Schon ein Konto?{' '}
-          <Link href="/login" className="text-green-700 font-medium hover:underline">
+          <Link href="/login" className="text-primary font-medium hover:underline">
             Einloggen
           </Link>
         </p>

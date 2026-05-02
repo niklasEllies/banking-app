@@ -12,7 +12,7 @@ export default async function HomePage() {
   const supabase = await createClient()
 
   const [{ data: benches }, { data: { user } }] = await Promise.all([
-    supabase.from('benches').select('id, lat, lng, name'),
+    supabase.from('benches').select('id, lat, lng, name, created_by'),
     supabase.auth.getUser(),
   ])
 
@@ -22,7 +22,7 @@ export default async function HomePage() {
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
       <BenchMapClient benches={benchList} isAuthenticated={!!user} />
-      <BottomSheet benches={benchList} />
+      <BottomSheet benches={benchList} userId={user?.id ?? null} />
     </div>
   )
 }

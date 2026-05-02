@@ -25,7 +25,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
 
   return (
     <form action={action} className="space-y-5">
-      <div className="bg-gray-50 rounded-xl p-4">
+      <div className="bg-surface rounded-xl p-4">
         <p className="text-xs text-gray-500 mb-1">Position</p>
         <p className="text-sm font-mono text-gray-800">
           {lat.toFixed(5)}, {lng.toFixed(5)}
@@ -35,14 +35,14 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         <button
           type="button"
           onClick={handleUseCurrentLocation}
-          className="mt-2 text-xs text-green-700 font-medium hover:underline"
+          className="mt-2 text-xs text-primary font-medium hover:underline"
         >
           📍 Meinen Standort verwenden
         </button>
       </div>
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="name" className="block text-sm text-gray-800 font-medium mb-1">
           Name / Bezeichnung{' '}
           <span className="text-gray-400 font-normal">(optional)</span>
         </label>
@@ -51,7 +51,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
           name="name"
           type="text"
           placeholder="z.B. Bank am Teich"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
 
@@ -63,14 +63,14 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50"
+          className="flex-1 border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-surface"
         >
           Abbrechen
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 bg-green-700 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-green-800 disabled:opacity-50"
+          className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
         >
           {pending ? 'Speichern...' : 'Bank eintragen'}
         </button>

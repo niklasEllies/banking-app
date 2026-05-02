@@ -36,8 +36,7 @@ export default async function ProfilPage() {
               <div className="rounded-xl border-2 border-primary bg-primary-light p-3 flex flex-col items-center gap-1 relative">
                 <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Aktiv</span>
                 <span className="text-2xl mt-1">🌱</span>
-                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Gratis</p>
-                <p className="text-[10px] text-gray-500 text-center leading-tight italic">Small pp</p>
+                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Small pp</p>
                 <p className="text-xs font-semibold text-primary mt-1">0 €</p>
               </div>
 
@@ -49,8 +48,7 @@ export default async function ProfilPage() {
                 className="rounded-xl border-2 border-gray-200 bg-white p-3 flex flex-col items-center gap-1 hover:border-gray-300 transition-colors cursor-pointer"
               >
                 <span className="text-2xl mt-1">🪵</span>
-                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Normal</p>
-                <p className="text-[10px] text-gray-500 text-center leading-tight italic">Average size</p>
+                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Average size</p>
                 <p className="text-xs font-semibold text-gray-700 mt-1">9,99 €/mo</p>
               </a>
 
@@ -62,8 +60,7 @@ export default async function ProfilPage() {
                 className="rounded-xl border-2 border-gray-200 bg-white p-3 flex flex-col items-center gap-1 hover:border-gray-300 transition-colors cursor-pointer"
               >
                 <span className="text-2xl mt-1">🌳</span>
-                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Premium</p>
-                <p className="text-[10px] text-gray-500 text-center leading-tight italic">Humongous</p>
+                <p className="text-xs font-bold text-gray-900 text-center leading-tight">Humongous</p>
                 <p className="text-xs font-semibold text-gray-700 mt-1">99,99 €/mo</p>
               </a>
             </div>

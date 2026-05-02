@@ -12,7 +12,7 @@ export default async function HomePage() {
   const supabase = await createClient()
 
   const [{ data: benches }, { data: { user } }] = await Promise.all([
-    supabase.from('benches').select('id, lat, lng, name, created_by'),
+    supabase.from('benches').select('id, lat, lng, name, created_by, created_at'),
     supabase.auth.getUser(),
   ])
 

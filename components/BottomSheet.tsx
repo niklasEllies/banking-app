@@ -6,6 +6,12 @@ import { deleteBench } from '@/actions/benches'
 
 type SheetState = 'hidden' | 'peek' | 'expanded'
 
+function benchLabel(bench: Bench): string {
+  if (bench.name) return bench.name
+  const d = new Date(bench.created_at)
+  return `Bank vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
+}
+
 interface BottomSheetProps {
   benches: Bench[]
   userId: string | null
@@ -99,7 +105,7 @@ export default function BottomSheet({ benches: initialBenches, userId }: BottomS
                 <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
                   <span className="text-xl shrink-0">🪑</span>
                   <span className="text-sm text-gray-800 truncate flex-1">
-                    {bench.name ?? <span className="text-gray-400 italic">Bank ohne Namen</span>}
+                    {benchLabel(bench)}
                   </span>
                   {userId && bench.created_by === userId && (
                     <button

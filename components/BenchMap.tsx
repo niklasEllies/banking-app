@@ -19,11 +19,21 @@ L.Icon.Default.mergeOptions({
 
 const makeUserIcon = (grayscale: boolean) =>
   new L.DivIcon({
-    html: `<div style="font-size:22px;line-height:1;filter:${grayscale ? 'grayscale(100%) ' : ''}drop-shadow(0 2px 4px rgba(0,0,0,0.4));transform:translateX(-4px)">🧍</div>`,
+    html: `<div style="font-size:30px;line-height:1;filter:${grayscale ? 'grayscale(100%) ' : ''}drop-shadow(0 2px 4px rgba(0,0,0,0.4))">🧍</div>`,
     className: '',
-    iconSize: [22, 30],
-    iconAnchor: [11, 30],
+    iconSize: [30, 41],
+    iconAnchor: [15, 41],
   })
+
+const createClusterIcon = (cluster: any) => {
+  const count = cluster.getChildCount()
+  return new L.DivIcon({
+    html: `<div style="background:#3d6b2c;color:white;border:2px solid white;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-family:system-ui,sans-serif">${count}</div>`,
+    className: '',
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+  })
+}
 
 export interface Bench {
   id: string
@@ -31,6 +41,7 @@ export interface Bench {
   lng: number
   name: string | null
   created_by: string | null
+  created_at: string
 }
 
 interface BenchMapProps {
@@ -41,42 +52,56 @@ interface BenchMapProps {
 function LocationController({
   cachedPosition,
   onPositionFound,
+  onLocating,
 }: {
   cachedPosition: [number, number] | null
   onPositionFound: (pos: [number, number]) => void
+  onLocating: (v: boolean) => void
 }) {
   const map = useMap()
   const centeredRef = useRef(false)
 
   useEffect(() => {
+    // Defer setView to next tick so Leaflet's container is fully initialized
     if (cachedPosition && !centeredRef.current) {
-      map.setView(cachedPosition, 14)
-      centeredRef.current = true
+      const t = setTimeout(() => {
+        map.setView(cachedPosition, 14)
+        centeredRef.current = true
+      }, 0)
+      return () => clearTimeout(t)
     }
   }, [cachedPosition, map])
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      if (!centeredRef.current) {
-        map.setView([51.1, 10.4], 11)
-        centeredRef.current = true
-      }
+      setTimeout(() => {
+        if (!centeredRef.current) {
+          map.setView([51.1, 10.4], 11)
+          centeredRef.current = true
+        }
+      }, 0)
       return
     }
+
+    onLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
         localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
         onPositionFound(latlng)
+        onLocating(false)
         map.setView(latlng, 14)
         centeredRef.current = true
       },
       () => {
+        onLocating(false)
         if (!centeredRef.current) {
           map.setView([51.1, 10.4], 11)
           centeredRef.current = true
         }
-      }
+      },
+      // enableHighAccuracy: false uses network/wifi positioning — much faster (~1s vs 5-10s)
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 30000 }
     )
   }, [map])
 
@@ -87,6 +112,7 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
   const router = useRouter()
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [isGpsLive, setIsGpsLive] = useState(false)
+  const [isLocating, setIsLocating] = useState(false)
   const [cachedPosition, setCachedPosition] = useState<[number, number] | null>(null)
 
   useEffect(() => {
@@ -106,6 +132,8 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
     setIsGpsLive(true)
   }, [])
 
+  const handleLocating = useCallback((v: boolean) => setIsLocating(v), [])
+
   const handleFabClick = () => {
     if (userPosition) {
       router.push(`/benches/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
@@ -124,12 +152,18 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationController cachedPosition={cachedPosition} onPositionFound={handlePositionFound} />
+        <LocationController
+          cachedPosition={cachedPosition}
+          onPositionFound={handlePositionFound}
+          onLocating={handleLocating}
+        />
 
-        <MarkerClusterGroup chunkedLoading maxClusterRadius={60}>
+        <MarkerClusterGroup chunkedLoading maxClusterRadius={60} iconCreateFunction={createClusterIcon}>
           {benches.map((bench) => (
             <Marker key={bench.id} position={[bench.lat, bench.lng]}>
-              <Popup>{bench.name || 'Bank'}</Popup>
+              <Popup>
+                {bench.name || `Bank vom ${new Date(bench.created_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`}
+              </Popup>
             </Marker>
           ))}
         </MarkerClusterGroup>
@@ -140,6 +174,13 @@ export default function BenchMap({ benches, isAuthenticated }: BenchMapProps) {
           </Marker>
         )}
       </MapContainer>
+
+      {isLocating && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-1000 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 text-xs text-gray-600">
+          <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+          Standort wird ermittelt…
+        </div>
+      )}
 
       {isAuthenticated && (
         <button

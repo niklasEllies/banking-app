@@ -64,7 +64,7 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
     <div
       className="absolute bottom-0 left-0 right-0 z-1000 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
-        maxHeight: '55vh',
+        height: '55vh',
         transform: `translateY(${dragY}px)`,
         transition: dragY === 0 ? 'transform 0.25s ease' : 'none',
       }}
@@ -86,7 +86,7 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
         </button>
       </div>
 
-      <div className="overflow-y-auto pb-8" style={{ maxHeight: 'calc(55vh - 56px)' }}>
+      <div className="overflow-y-auto pb-8" style={{ height: 'calc(55vh - 56px)' }}>
         {count === 0 ? (
           <p className="text-sm text-gray-500 text-center py-6">Noch keine Bänke eingetragen</p>
         ) : (

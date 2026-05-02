@@ -42,3 +42,8 @@ next-env.d.ts
 
 # superpowers visual companion
 .superpowers/
+
+# claude code / AI tooling
+.agents/
+.claude/
+skills-lock.json

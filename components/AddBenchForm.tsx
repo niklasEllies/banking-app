@@ -15,7 +15,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
   const [lat, setLat] = useState(initialLat)
   const [lng, setLng] = useState(initialLng)
 
-  const useCurrentLocation = () => {
+  const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition((pos) => {
       setLat(pos.coords.latitude)
@@ -34,7 +34,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         <input type="hidden" name="lng" value={lng} />
         <button
           type="button"
-          onClick={useCurrentLocation}
+          onClick={handleUseCurrentLocation}
           className="mt-2 text-xs text-green-700 font-medium hover:underline"
         >
           📍 Meinen Standort verwenden

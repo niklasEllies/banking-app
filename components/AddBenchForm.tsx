@@ -25,9 +25,9 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
 
   return (
     <form action={action} className="space-y-5">
-      <div className="bg-surface rounded-xl p-4">
-        <p className="text-xs text-gray-500 mb-1">Position</p>
-        <p className="text-sm font-mono text-gray-800">
+      <div className="bg-surface dark:bg-[#252720] rounded-xl p-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Position</p>
+        <p className="text-sm font-mono text-gray-800 dark:text-gray-200">
           {lat.toFixed(5)}, {lng.toFixed(5)}
         </p>
         <input type="hidden" name="lat" value={lat} />
@@ -42,16 +42,16 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
       </div>
 
       <div>
-        <label htmlFor="name" className="block text-sm text-gray-800 font-medium mb-1">
+        <label htmlFor="name" className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-1">
           Name / Bezeichnung{' '}
-          <span className="text-gray-400 font-normal">(optional)</span>
+          <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
         </label>
         <input
           id="name"
           name="name"
           type="text"
           placeholder="z.B. Bank am Teich"
-          className="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
 
@@ -63,7 +63,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-surface"
+          className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-surface"
         >
           Abbrechen
         </button>

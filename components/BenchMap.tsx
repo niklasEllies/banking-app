@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { deleteBench } from '@/actions/benches'
+import { benchDisplayName } from '@/lib/bench-utils'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 const EMOJI_KEY = 'benchmarks_user_emoji'
@@ -68,10 +69,17 @@ interface BenchMapProps {
   sheetExpanded: boolean
 }
 
-function benchDisplayName(bench: Bench) {
-  if (bench.name) return bench.name
-  const d = new Date(bench.created_at)
-  return `Bank vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
+
+function CenterController({ position, trigger }: { position: [number, number] | null; trigger: number }) {
+  const map = useMap()
+  const prev = useRef(0)
+  useEffect(() => {
+    if (trigger !== prev.current && position) {
+      prev.current = trigger
+      map.flyTo(position, Math.max(map.getZoom(), 15), { duration: 1 })
+    }
+  }, [trigger, position, map])
+  return null
 }
 
 function LocationController({
@@ -118,12 +126,14 @@ function LocationController({
         const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
         localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
         onPositionFound(latlng)
+        onLocating(false)
         if (!centeredRef.current) {
           map.setView(latlng, 14)
           centeredRef.current = true
         }
       },
       () => {
+        onLocating(false)
         if (!centeredRef.current) {
           setTimeout(() => {
             map.setView([51.1, 10.4], 11)
@@ -172,6 +182,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
   const [isLocating, setIsLocating] = useState(false)
   const [cachedPosition, setCachedPosition] = useState<[number, number] | null>(null)
   const [userEmoji, setUserEmoji] = useState('🧍‍♂️')
+  const [centerTrigger, setCenterTrigger] = useState(0)
 
   useEffect(() => {
     setUserEmoji(localStorage.getItem(EMOJI_KEY) ?? '🧍‍♂️')
@@ -216,6 +227,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <CenterController position={userPosition} trigger={centerTrigger} />
         <LocationController
           cachedPosition={cachedPosition}
           onPositionFound={handlePositionFound}
@@ -228,7 +240,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
               <Popup>
                 <div style={{ minWidth: '140px' }}>
                   <strong style={{ fontSize: '13px', display: 'block', marginBottom: '6px' }}>
-                    {benchDisplayName(bench)}
+                    {benchDisplayName(bench.name, bench.created_at)}
                   </strong>
                   {userId && bench.created_by === userId && (
                     <button
@@ -262,10 +274,26 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
       </MapContainer>
 
       {isLocating && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-1000 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 text-xs text-gray-600">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-1000 bg-white/90 dark:bg-[#252720]/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
           <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
           Standort wird ermittelt…
         </div>
+      )}
+
+      {userPosition && (
+        <button
+          onClick={() => setCenterTrigger(t => t + 1)}
+          className="absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#252720] rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 dark:hover:bg-[#2e3028] active:scale-95 transition-transform"
+          style={{
+            bottom: sheetExpanded
+              ? `calc(55vh + ${isAuthenticated ? 88 : 16}px)`
+              : isAuthenticated ? '9.5rem' : '5rem',
+            transition: 'bottom 0.25s ease',
+          }}
+          aria-label="Auf Standort zentrieren"
+        >
+          📍
+        </button>
       )}
 
       {isAuthenticated && (

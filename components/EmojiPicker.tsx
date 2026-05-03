@@ -19,7 +19,7 @@ export default function EmojiPicker() {
 
   return (
     <div>
-      <p className="text-sm font-medium text-gray-800 mb-3">Dein Marker auf der Karte</p>
+      <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">Dein Marker auf der Karte</p>
       <div className="flex gap-3 flex-wrap">
         {EMOJIS.map((emoji) => (
           <button
@@ -28,7 +28,7 @@ export default function EmojiPicker() {
             className={`text-3xl p-3 rounded-xl border-2 transition-all ${
               selected === emoji
                 ? 'border-primary bg-primary-light scale-110'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
             aria-label={emoji}
           >
@@ -36,7 +36,7 @@ export default function EmojiPicker() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-gray-400 mt-2">Wird lokal auf diesem Gerät gespeichert</p>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Wird lokal auf diesem Gerät gespeichert</p>
     </div>
   )
 }

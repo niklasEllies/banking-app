@@ -3,12 +3,7 @@
 import { useState, useRef, useTransition } from 'react'
 import type { Bench } from '@/components/BenchMap'
 import { deleteBench } from '@/actions/benches'
-
-function benchLabel(bench: Bench): string {
-  if (bench.name) return bench.name
-  const d = new Date(bench.created_at)
-  return `Bank vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
-}
+import { benchDisplayName } from '@/lib/bench-utils'
 
 interface BottomSheetProps {
   benches: Bench[]
@@ -53,7 +48,7 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
     return (
       <button
         onClick={expand}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 border border-gray-200"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#252720] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#3a3c32]"
       >
         {count} {count === 1 ? 'Bank' : 'Bänke'} ↑
       </button>
@@ -62,7 +57,7 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-1000 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
+      className="absolute bottom-0 left-0 right-0 z-1000 bg-white dark:bg-[#252720] rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
         height: '55vh',
         transform: `translateY(${dragY}px)`,
@@ -73,13 +68,13 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
       onTouchEnd={handleTouchEnd}
     >
       <div className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none">
-        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 rounded-full" />
-        <p className="text-sm font-semibold text-gray-900 mt-2">
+        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
           {count} {count === 1 ? 'Bank' : 'Bänke'}
         </p>
         <button
           onClick={collapse}
-          className="mt-2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+          className="mt-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none"
           aria-label="Schließen"
         >
           ✕
@@ -88,13 +83,13 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
 
       <div className="overflow-y-auto pb-8" style={{ height: 'calc(55vh - 56px)' }}>
         {count === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-6">Noch keine Bänke eingetragen</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">Noch keine Bänke eingetragen</p>
         ) : (
           <ul>
             {benches.map((bench) => (
-              <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
+              <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700">
                 <span className="text-xl shrink-0">🪑</span>
-                <span className="text-sm text-gray-800 truncate flex-1">{benchLabel(bench)}</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">{benchDisplayName(bench.name, bench.created_at)}</span>
                 {userId && bench.created_by === userId && (
                   <button
                     onClick={() => handleDelete(bench.id)}

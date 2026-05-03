@@ -18,15 +18,15 @@ export default async function NewBenchPage({ searchParams }: PageProps) {
   const lng = parseFloat(params.lng ?? '10.4')
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface dark:bg-[#1a1c17]">
       <div className="max-w-sm mx-auto px-4 py-8">
         <Link
           href="/"
-          className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-6"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
           ← Zurück zur Karte
         </Link>
-        <h1 className="text-xl font-bold text-gray-900 mb-6">Bank eintragen</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Bank eintragen</h1>
         <AddBenchForm initialLat={lat} initialLng={lng} />
       </div>
     </div>

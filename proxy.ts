@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const protectedRoutes = ['/benches/new']
+const protectedRoutes = ['/benches']
 
 export default async function proxy(req: NextRequest) {
   const res = NextResponse.next()
@@ -26,7 +26,7 @@ export default async function proxy(req: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (protectedRoutes.includes(req.nextUrl.pathname) && !user) {
+  if (protectedRoutes.some(r => req.nextUrl.pathname.startsWith(r)) && !user) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 

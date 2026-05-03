@@ -26,7 +26,7 @@ export default async function proxy(req: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (protectedRoutes.includes(req.nextUrl.pathname) && !user) {
+  if (protectedRoutes.some(r => req.nextUrl.pathname.startsWith(r)) && !user) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 

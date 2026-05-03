@@ -52,7 +52,11 @@ export async function createBench(state: FormState, formData: FormData): Promise
 
   const photoFile = formData.get('photo') as File
   if (photoFile && photoFile.size > 0) {
-    await uploadBenchPhoto(bench.id, formData)
+    const photoResult = await uploadBenchPhoto(bench.id, formData)
+    if (photoResult.error) {
+      revalidatePath('/')
+      redirect(`/benches/${bench.id}/edit-photo`)
+    }
   }
 
   revalidatePath('/')

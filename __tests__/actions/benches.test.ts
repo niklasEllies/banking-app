@@ -14,15 +14,24 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 const mockInsert = vi.fn()
+const mockSelect = vi.fn()
+const mockSingle = vi.fn()
+
 const mockSupabase = {
   auth: {
     getUser: vi.fn(),
   },
-  from: vi.fn(() => ({ insert: mockInsert })),
+  from: vi.fn(() => ({
+    insert: mockInsert,
+  })),
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // Setup the chain: insert().select().single()
+  mockSingle.mockResolvedValue({ data: { id: 'bench-1' }, error: null })
+  mockSelect.mockReturnValue({ single: mockSingle })
+  mockInsert.mockReturnValue({ select: mockSelect })
   vi.mocked(supabaseServer.createClient).mockResolvedValue(mockSupabase as any)
 })
 
@@ -47,7 +56,6 @@ describe('createBench', () => {
 
   it('legt Bank in Supabase an und redirectet zu /', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockInsert.mockResolvedValue({ error: null })
 
     const fd = new FormData()
     fd.set('lat', '51.5074')
@@ -65,7 +73,6 @@ describe('createBench', () => {
 
   it('speichert null wenn Name leer und Nominatim fehlschlägt', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    mockInsert.mockResolvedValue({ error: null })
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({ ok: false } as any)
 
     const fd = new FormData()

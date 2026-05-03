@@ -42,14 +42,18 @@ export async function createBench(state: FormState, formData: FormData): Promise
   const nameRaw = formData.get('name') as string
   const name = nameRaw?.trim() || await getLocationName(lat, lng)
 
-  const { error } = await supabase.from('benches').insert({
-    lat,
-    lng,
-    name,
-    created_by: user.id,
-  })
+  const { data: bench, error } = await supabase
+    .from('benches')
+    .insert({ lat, lng, name, created_by: user.id })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
+
+  const photoFile = formData.get('photo') as File
+  if (photoFile && photoFile.size > 0) {
+    await uploadBenchPhoto(bench.id, formData)
+  }
 
   revalidatePath('/')
   redirect('/')

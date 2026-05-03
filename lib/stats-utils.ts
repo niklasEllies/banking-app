@@ -41,7 +41,7 @@ const SHADOW_MAP: Record<string, string> = {
 }
 
 export function shadowLabel(value: string | null): string | null {
-  if (!value) return null
+  if (value === null || value === undefined) return null
   return SHADOW_MAP[value] ?? null
 }
 

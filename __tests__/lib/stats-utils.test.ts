@@ -5,6 +5,7 @@ import {
   shadowLabel,
   extrasIcon,
   floatToConditionPreset,
+  conditionToPreset,
 } from '@/lib/stats-utils'
 
 describe('conditionLabel', () => {
@@ -49,6 +50,7 @@ describe('extrasIcon', () => {
   it('returns icon for accessible', () => expect(extrasIcon('accessible')).toBe('♿'))
   it('returns icon for table', () => expect(extrasIcon('table')).toBe('🍽'))
   it('returns icon for bicycle', () => expect(extrasIcon('bicycle')).toBe('🚲'))
+  it('returns ? for unknown key', () => expect(extrasIcon('unknown')).toBe('?'))
 })
 
 describe('floatToConditionPreset', () => {
@@ -58,4 +60,13 @@ describe('floatToConditionPreset', () => {
   it('returns BS midpoint for BS selection', () => {
     expect(floatToConditionPreset('BS')).toBe(0.075)
   })
+})
+
+describe('conditionToPreset', () => {
+  it('returns FN for 0.9+', () => expect(conditionToPreset(0.95)).toBe('FN'))
+  it('returns MW for 0.7–0.9', () => expect(conditionToPreset(0.75)).toBe('MW'))
+  it('returns FT for 0.4–0.7', () => expect(conditionToPreset(0.5)).toBe('FT'))
+  it('returns WW for 0.15–0.4', () => expect(conditionToPreset(0.25)).toBe('WW'))
+  it('returns BS for <0.15', () => expect(conditionToPreset(0.05)).toBe('BS'))
+  it('returns null for null', () => expect(conditionToPreset(null)).toBeNull())
 })

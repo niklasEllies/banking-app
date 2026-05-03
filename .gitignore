@@ -43,6 +43,9 @@ next-env.d.ts
 # superpowers visual companion
 .superpowers/
 
+# git worktrees
+.worktrees/
+
 # claude code / AI tooling
 .agents/
 .claude/

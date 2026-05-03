@@ -8,6 +8,7 @@ Nutzerprofil, verknüpft mit Supabase Auth.
 |---|---|---|
 | `id` | `uuid` | PK, FK → `auth.users.id` |
 | `username` | `text` | Unique |
+| `is_admin` | `boolean` | Default: `false` |
 | `created_at` | `timestamptz` | Auto: `now()` |
 
 **Trigger:** `on_auth_user_created` — legt Zeile automatisch bei Registrierung an.
@@ -32,5 +33,6 @@ Username kommt aus `user_metadata` (`options.data.username` beim `signUp`-Aufruf
 |---|---|---|
 | `benches` | SELECT | Alle (auch anonym) |
 | `benches` | INSERT | `auth.uid() IS NOT NULL` |
+| `benches` | DELETE | `auth.uid() = created_by` ODER Admin |
 | `profiles` | SELECT | Alle |
-| `profiles` | INSERT/UPDATE | `id = auth.uid()` |
+| `profiles` | INSERT/UPDATE | `id = auth.uid()` ODER Admin |

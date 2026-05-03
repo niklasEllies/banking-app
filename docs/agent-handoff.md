@@ -23,20 +23,19 @@ Der Nutzer hat ein Supabase-Projekt. Connection-Daten liegen in `.env` (gitignor
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...   ← nicht ANON_KEY!
+SUPABASE_SERVICE_ROLE_KEY=...              ← nur server-seitig, für Admin auth.admin.listUsers()
 ```
 
 **Achtung:** Neuer Supabase Key-Name. Code nutzt `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-## Ausstehende manuelle Schritte (Supabase SQL)
+## Ausgeführte Migrationen
 
-Folgender SQL muss im Supabase Dashboard (SQL Editor) ausgeführt werden, falls noch nicht geschehen:
+Alle Migrationen sind in `supabase/migrations/` dokumentiert und wurden ausgeführt.
 
-```sql
--- DELETE Policy für eigene Bänke
-create policy "nutzer kann eigene bänke löschen"
-  on public.benches for delete
-  using (auth.uid() = created_by);
-```
+| Datei | Inhalt |
+|---|---|
+| `001_add_admin.sql` | `is_admin` Spalte in profiles, ersten Admin setzen |
+| `002_admin_rls.sql` | RLS: Admins können beliebige Profile updaten + Bänke löschen |
 
 ## Architektur-Entscheidungen (Begründungen)
 
@@ -105,10 +104,27 @@ create table public.rarity_votes (
 
 4. **Rarity-Voting** — Median-Berechnung, Stufen: 1=Common, 2=Uncommon, 3=Rare, 4=Epic, 5=Legendary
 
+## Dark Mode
+
+- Toggle 🌙/☀️ im MapHeader, persistiert in `localStorage` (`benchmarks-theme`)
+- FOUC-Prevention: Inline-Script in `layout.tsx` `<head>` setzt `.dark` Klasse vor React-Hydration
+- `suppressHydrationWarning` auf `<html>` nötig (Script modifiziert className vor Hydration)
+- `@variant dark (.dark &)` in `globals.css` — Tailwind v4 class-based dark mode
+- `.dark { ... }` in `globals.css` überschreibt CSS-Vars für Theme-Colors
+- Kacheln: CSS-Filter `invert(100%) hue-rotate(180deg)` auf `.leaflet-tile-pane` — kein JS nötig
+- **Achtung `@theme inline`**: Tailwind backt Werte literal ein (kein `var()`). CSS-Var-Overrides in `.dark` wirken NICHT auf Tailwind-Utilities. Immer explizite `dark:` Klassen oder `dark:bg-[#hex]` nutzen.
+
+## Admin
+
+- `/admin` Route — nur für `is_admin = true` in profiles, sonst redirect `/`
+- `lib/supabase/admin.ts`: Service-Role-Client (umgeht RLS) — NUR für `auth.admin.listUsers()`
+- `actions/admin.ts`: nutzt normalen User-Client mit RLS-Policies
+- Admin-Link erscheint auf Profilseite wenn `is_admin = true`
+
 ## Stil-Guide
 
 - **Tailwind v4**: Custom-Colors via `bg-primary`, `text-accent` etc. (definiert in `globals.css`)
-- Keine Dark Mode Unterstützung in Phase 1
+- Dark Mode aktiv — immer `dark:` Varianten für neue UI-Elemente hinzufügen
 - Mobile-first: alle UI-Elemente auf 360px-Breite testen
 - Commits nach jedem Feature-Slice mit sinnvoller Message
 - Frag vor Umsetzung nach Optionen + Empfehlung (Nutzerwunsch)

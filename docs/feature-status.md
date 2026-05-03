@@ -4,17 +4,25 @@
 
 - [x] Supabase Auth (Email/Passwort)
 - [x] Interaktive Leaflet-Karte
-- [x] Two-Phase GPS (Netzwerk < 1s + GPS-Upgrade)
-- [x] localStorage Position-Cache (sofortiger Start)
+- [x] Two-Phase GPS (Netzwerk < 1s + GPS-Upgrade, silent)
+- [x] localStorage Position-Cache (sofortiger Start, greyscale Marker)
 - [x] Bänke auf der Karte (Marker + Clustering 🪑×N)
 - [x] Bank eintragen via FAB-Button
 - [x] Nominatim Auto-Name (Reverse Geocoding, dauerhaft gespeichert)
 - [x] Bank löschen (eigene Bänke, im Popup + BottomSheet)
 - [x] Route-Schutz für nicht-eingeloggte Nutzer
 - [x] Anonyme Nutzer: Karte lesbar, keine Interaktion
-- [x] Bottom Sheet (peek/expanded/hidden, Bank-Liste)
+- [x] Bottom Sheet (peek/expanded/swipe-to-dismiss, Bank-Liste)
 - [x] Profilseite /profil mit Marker-Emoji Auswahl (🧍‍♂️ 🧍‍♀️ 👫 🐕)
 - [x] Theme: Park Bench (Olivgrün + Walnussbraun)
+
+## Post-Phase-1 Verbesserungen ✅
+
+- [x] Dark Mode (Toggle im Header, CSS-invert Kacheln, FOUC-Prevention)
+- [x] Zentrieren-Button (📍 über FAB, flyTo auf Nutzerstandort)
+- [x] Logout auf Profilseite (statt Header)
+- [x] Admin-Dashboard /admin (Userliste + Bänke, Admin-Rolle vergeben)
+- [x] Admin RLS-Policies (Bench delete, Profile update)
 
 ## Phase 2 – Bank-Details 🔜
 

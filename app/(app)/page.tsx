@@ -3,10 +3,6 @@ import MapHeader from '@/components/MapHeader'
 import MapLayout from '@/components/MapLayout'
 import type { Bench } from '@/components/BenchMap'
 
-// Leaflet läuft nicht auf dem Server — BenchMapClient enthält den dynamic-Import
-// mit ssr: false in einem Client Component, wie von Next.js 16 gefordert.
-// Die Bankdaten werden vom Server geladen und als Props übergeben.
-
 export default async function HomePage() {
   const supabase = await createClient()
 
@@ -15,12 +11,27 @@ export default async function HomePage() {
     supabase.auth.getUser(),
   ])
 
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    isAdmin = profile?.is_admin ?? false
+  }
+
   const benchList: Bench[] = benches ?? []
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
-      <MapLayout benches={benchList} isAuthenticated={!!user} userId={user?.id ?? null} />
+      <MapLayout
+        benches={benchList}
+        isAuthenticated={!!user}
+        userId={user?.id ?? null}
+        isAdmin={isAdmin}
+      />
     </div>
   )
 }

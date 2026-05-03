@@ -9,12 +9,14 @@ interface MapLayoutProps {
   benches: Bench[]
   isAuthenticated: boolean
   userId: string | null
+  isAdmin?: boolean
 }
 
-export default function MapLayout({ benches, isAuthenticated, userId }: MapLayoutProps) {
+export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = false }: MapLayoutProps) {
   const [sheetExpanded, setSheetExpanded] = useState(false)
   const [selectedBenchId, setSelectedBenchId] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null)
+  const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null)
 
   const handleBenchSelect = useCallback((benchId: string) => {
     setSelectedBenchId(benchId)
@@ -28,6 +30,10 @@ export default function MapLayout({ benches, isAuthenticated, userId }: MapLayou
     setFlyTarget({ lat: bench.lat, lng: bench.lng })
   }, [])
 
+  const handlePositionUpdate = useCallback((pos: { lat: number; lng: number }) => {
+    setUserPosition(pos)
+  }, [])
+
   return (
     <>
       <BenchMapClient
@@ -38,14 +44,18 @@ export default function MapLayout({ benches, isAuthenticated, userId }: MapLayou
         onBenchSelect={handleBenchSelect}
         flyTarget={flyTarget}
         onFlyTargetUsed={() => setFlyTarget(null)}
+        isAdmin={isAdmin}
+        onPositionUpdate={handlePositionUpdate}
       />
       <BottomSheet
         benches={benches}
         userId={userId}
         onExpandedChange={setSheetExpanded}
         selectedBenchId={selectedBenchId}
+        onBenchSelect={handleBenchSelect}
         onBenchDeselect={handleBenchDeselect}
         onFlyToBench={handleFlyToBench}
+        userPosition={userPosition}
       />
     </>
   )

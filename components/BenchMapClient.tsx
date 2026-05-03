@@ -13,6 +13,8 @@ interface BenchMapClientProps {
   onBenchSelect?: (benchId: string) => void
   flyTarget?: { lat: number; lng: number } | null
   onFlyTargetUsed?: () => void
+  isAdmin?: boolean
+  onPositionUpdate?: (pos: { lat: number; lng: number }) => void
 }
 
 export default function BenchMapClient(props: BenchMapClientProps) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
@@ -72,6 +72,8 @@ interface BenchMapProps {
   onBenchSelect?: (benchId: string) => void
   flyTarget?: { lat: number; lng: number } | null
   onFlyTargetUsed?: () => void
+  isAdmin?: boolean
+  onPositionUpdate?: (pos: { lat: number; lng: number }) => void
 }
 
 
@@ -91,6 +93,18 @@ function FlyController({
       onUsed()
     }
   }, [target, map, onUsed])
+  return null
+}
+
+function AdminClickController({ isAdmin }: { isAdmin: boolean }) {
+  const router = useRouter()
+  useMapEvents({
+    click(e) {
+      if (isAdmin) {
+        router.push(`/benches/new?lat=${e.latlng.lat.toFixed(6)}&lng=${e.latlng.lng.toFixed(6)}`)
+      }
+    },
+  })
   return null
 }
 
@@ -198,7 +212,17 @@ function LocationController({
   return null
 }
 
-export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded, onBenchSelect, flyTarget, onFlyTargetUsed }: BenchMapProps) {
+export default function BenchMap({
+  benches: initialBenches,
+  isAuthenticated,
+  userId,
+  sheetExpanded,
+  onBenchSelect,
+  flyTarget,
+  onFlyTargetUsed,
+  isAdmin = false,
+  onPositionUpdate,
+}: BenchMapProps) {
   const router = useRouter()
   const [localBenches, setLocalBenches] = useState(initialBenches)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
@@ -223,7 +247,8 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
   const handlePositionFound = useCallback((pos: [number, number]) => {
     setUserPosition(pos)
     setHasLivePosition(true)
-  }, [])
+    onPositionUpdate?.({ lat: pos[0], lng: pos[1] })
+  }, [onPositionUpdate])
 
   const handleLocating = useCallback((v: boolean) => setIsLocating(v), [])
 
@@ -246,13 +271,20 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
 
   return (
     <div className="relative w-full h-full">
-      <MapContainer center={[51.1, 10.4]} zoom={11} className="w-full h-full" zoomControl={false}>
+      <MapContainer
+          center={[51.1, 10.4]}
+          zoom={11}
+          className="w-full h-full"
+          zoomControl={false}
+          style={isAdmin ? { cursor: 'crosshair' } : undefined}
+        >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <CenterController position={userPosition} trigger={centerTrigger} />
         <FlyController target={flyTarget ?? null} onUsed={onFlyTargetUsed ?? (() => {})} />
+        <AdminClickController isAdmin={isAdmin} />
         <LocationController
           cachedPosition={cachedPosition}
           onPositionFound={handlePositionFound}

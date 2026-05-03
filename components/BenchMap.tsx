@@ -70,8 +70,29 @@ interface BenchMapProps {
   userId: string | null
   sheetExpanded: boolean
   onBenchSelect?: (benchId: string) => void
+  flyTarget?: { lat: number; lng: number } | null
+  onFlyTargetUsed?: () => void
 }
 
+
+function FlyController({
+  target,
+  onUsed,
+}: {
+  target: { lat: number; lng: number } | null
+  onUsed: () => void
+}) {
+  const map = useMap()
+  const prev = useRef<typeof target>(null)
+  useEffect(() => {
+    if (target && target !== prev.current) {
+      prev.current = target
+      map.flyTo([target.lat, target.lng], 16, { duration: 1 })
+      onUsed()
+    }
+  }, [target, map, onUsed])
+  return null
+}
 
 function CenterController({ position, trigger }: { position: [number, number] | null; trigger: number }) {
   const map = useMap()
@@ -177,7 +198,7 @@ function LocationController({
   return null
 }
 
-export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded, onBenchSelect }: BenchMapProps) {
+export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded, onBenchSelect, flyTarget, onFlyTargetUsed }: BenchMapProps) {
   const router = useRouter()
   const [localBenches, setLocalBenches] = useState(initialBenches)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
@@ -231,6 +252,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <CenterController position={userPosition} trigger={centerTrigger} />
+        <FlyController target={flyTarget ?? null} onUsed={onFlyTargetUsed ?? (() => {})} />
         <LocationController
           cachedPosition={cachedPosition}
           onPositionFound={handlePositionFound}

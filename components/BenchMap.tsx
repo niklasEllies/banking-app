@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { deleteBench } from '@/actions/benches'
 import { benchDisplayName } from '@/lib/bench-utils'
+import BenchPopup from '@/components/BenchPopup'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 const EMOJI_KEY = 'benchmarks_user_emoji'
@@ -60,6 +61,7 @@ export interface Bench {
   name: string | null
   created_by: string | null
   created_at: string
+  photo_url: string | null
 }
 
 interface BenchMapProps {
@@ -67,8 +69,30 @@ interface BenchMapProps {
   isAuthenticated: boolean
   userId: string | null
   sheetExpanded: boolean
+  onBenchSelect?: (benchId: string) => void
+  flyTarget?: { lat: number; lng: number } | null
+  onFlyTargetUsed?: () => void
 }
 
+
+function FlyController({
+  target,
+  onUsed,
+}: {
+  target: { lat: number; lng: number } | null
+  onUsed: () => void
+}) {
+  const map = useMap()
+  const prev = useRef<typeof target>(null)
+  useEffect(() => {
+    if (target && target !== prev.current) {
+      prev.current = target
+      map.flyTo([target.lat, target.lng], 16, { duration: 1 })
+      onUsed()
+    }
+  }, [target, map, onUsed])
+  return null
+}
 
 function CenterController({ position, trigger }: { position: [number, number] | null; trigger: number }) {
   const map = useMap()
@@ -174,7 +198,7 @@ function LocationController({
   return null
 }
 
-export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded }: BenchMapProps) {
+export default function BenchMap({ benches: initialBenches, isAuthenticated, userId, sheetExpanded, onBenchSelect, flyTarget, onFlyTargetUsed }: BenchMapProps) {
   const router = useRouter()
   const [localBenches, setLocalBenches] = useState(initialBenches)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
@@ -228,6 +252,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <CenterController position={userPosition} trigger={centerTrigger} />
+        <FlyController target={flyTarget ?? null} onUsed={onFlyTargetUsed ?? (() => {})} />
         <LocationController
           cachedPosition={cachedPosition}
           onPositionFound={handlePositionFound}
@@ -238,29 +263,13 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
           {localBenches.map((bench) => (
             <Marker key={bench.id} position={[bench.lat, bench.lng]}>
               <Popup>
-                <div style={{ minWidth: '140px' }}>
-                  <strong style={{ fontSize: '13px', display: 'block', marginBottom: '6px' }}>
-                    {benchDisplayName(bench.name, bench.created_at)}
-                  </strong>
-                  {userId && bench.created_by === userId && (
-                    <button
-                      onClick={() => handleDelete(bench.id)}
-                      style={{
-                        color: '#ef4444',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        background: 'none',
-                        border: 'none',
-                        padding: '2px 0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      🗑 Löschen
-                    </button>
-                  )}
-                </div>
+                <BenchPopup
+                  bench={bench}
+                  userId={userId}
+                  rarityMedian={null}
+                  onDetails={() => onBenchSelect?.(bench.id)}
+                  onDelete={() => handleDelete(bench.id)}
+                />
               </Popup>
             </Marker>
           ))}

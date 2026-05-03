@@ -14,6 +14,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
   const [state, action, pending] = useActionState(createBench, undefined)
   const [lat, setLat] = useState(initialLat)
   const [lng, setLng] = useState(initialLng)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) return
@@ -24,6 +25,11 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
       },
       () => {}
     )
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) setPhotoPreview(URL.createObjectURL(file))
   }
 
   return (
@@ -55,6 +61,25 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
           type="text"
           placeholder="z.B. Bank am Teich"
           className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+      </div>
+
+      {/* Optional photo */}
+      <div>
+        <label htmlFor="photo" className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-1">
+          Foto{' '}
+          <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
+        </label>
+        {photoPreview && (
+          <img src={photoPreview} alt="Vorschau" className="w-full h-32 object-cover rounded-lg mb-2" />
+        )}
+        <input
+          id="photo"
+          name="photo"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handlePhotoChange}
+          className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary file:text-white hover:file:bg-primary-dark"
         />
       </div>
 

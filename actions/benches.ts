@@ -42,14 +42,22 @@ export async function createBench(state: FormState, formData: FormData): Promise
   const nameRaw = formData.get('name') as string
   const name = nameRaw?.trim() || await getLocationName(lat, lng)
 
-  const { error } = await supabase.from('benches').insert({
-    lat,
-    lng,
-    name,
-    created_by: user.id,
-  })
+  const { data: bench, error } = await supabase
+    .from('benches')
+    .insert({ lat, lng, name, created_by: user.id })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
+
+  const photoFile = formData.get('photo') as File
+  if (photoFile && photoFile.size > 0) {
+    const photoResult = await uploadBenchPhoto(bench.id, formData)
+    if (photoResult.error) {
+      revalidatePath('/')
+      redirect(`/benches/${bench.id}/edit-photo`)
+    }
+  }
 
   revalidatePath('/')
   redirect('/')
@@ -75,4 +83,47 @@ export async function deleteBench(id: string): Promise<{ error?: string }> {
 
   revalidatePath('/')
   return {}
+}
+
+export async function uploadBenchPhoto(
+  benchId: string,
+  formData: FormData
+): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Nicht eingeloggt' }
+
+  const { data: bench } = await supabase
+    .from('benches')
+    .select('created_by')
+    .eq('id', benchId)
+    .single()
+  if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
+
+  const file = formData.get('photo') as File
+  if (!file || file.size === 0) return { error: 'Kein Foto ausgewählt' }
+  if (file.size > 5 * 1024 * 1024) return { error: 'Foto zu groß (max 5MB)' }
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    return { error: 'Ungültiges Format (nur jpg, png, webp)' }
+  }
+
+  const { error: uploadError } = await supabase.storage
+    .from('bench-photos')
+    .upload(`${benchId}/photo`, file, { contentType: file.type, upsert: true })
+
+  if (uploadError) return { error: uploadError.message }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('bench-photos')
+    .getPublicUrl(`${benchId}/photo`)
+
+  const { error: updateError } = await supabase
+    .from('benches')
+    .update({ photo_url: publicUrl })
+    .eq('id', benchId)
+
+  if (updateError) return { error: updateError.message }
+
+  revalidatePath('/')
+  return { url: publicUrl }
 }

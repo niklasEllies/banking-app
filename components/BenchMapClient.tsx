@@ -1,7 +1,5 @@
 'use client'
 
-// ssr: false is not allowed in Server Components (Next.js 16).
-// This thin client wrapper owns the dynamic import so the restriction is satisfied.
 import dynamic from 'next/dynamic'
 import type { Bench } from '@/components/BenchMap'
 
@@ -12,8 +10,11 @@ interface BenchMapClientProps {
   isAuthenticated: boolean
   userId: string | null
   sheetExpanded: boolean
+  onBenchSelect?: (benchId: string) => void
+  flyTarget?: { lat: number; lng: number } | null
+  onFlyTargetUsed?: () => void
 }
 
-export default function BenchMapClient({ benches, isAuthenticated, userId, sheetExpanded }: BenchMapClientProps) {
-  return <BenchMap benches={benches} isAuthenticated={isAuthenticated} userId={userId} sheetExpanded={sheetExpanded} />
+export default function BenchMapClient(props: BenchMapClientProps) {
+  return <BenchMap {...props} />
 }

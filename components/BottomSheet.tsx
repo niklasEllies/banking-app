@@ -1,17 +1,28 @@
 'use client'
 
-import { useState, useRef, useTransition } from 'react'
+import { useState, useRef, useTransition, useEffect } from 'react'
 import type { Bench } from '@/components/BenchMap'
 import { deleteBench } from '@/actions/benches'
 import { benchDisplayName } from '@/lib/bench-utils'
+import BenchDetail from '@/components/BenchDetail'
 
 interface BottomSheetProps {
   benches: Bench[]
   userId: string | null
   onExpandedChange: (expanded: boolean) => void
+  selectedBenchId: string | null
+  onBenchDeselect: () => void
+  onFlyToBench: (bench: Bench) => void
 }
 
-export default function BottomSheet({ benches: initialBenches, userId, onExpandedChange }: BottomSheetProps) {
+export default function BottomSheet({
+  benches: initialBenches,
+  userId,
+  onExpandedChange,
+  selectedBenchId,
+  onBenchDeselect,
+  onFlyToBench,
+}: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [dragY, setDragY] = useState(0)
   const [benches, setBenches] = useState(initialBenches)
@@ -19,8 +30,19 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
   const startYRef = useRef(0)
   const count = benches.length
 
+  useEffect(() => {
+    if (selectedBenchId) {
+      setIsExpanded(true)
+      onExpandedChange(true)
+    }
+  }, [selectedBenchId, onExpandedChange])
+
   const expand = () => { setIsExpanded(true); onExpandedChange(true) }
-  const collapse = () => { setIsExpanded(false); onExpandedChange(false) }
+  const collapse = () => {
+    setIsExpanded(false)
+    onExpandedChange(false)
+    onBenchDeselect()
+  }
 
   const handleDelete = (id: string) => {
     setBenches(prev => prev.filter(b => b.id !== id))
@@ -69,9 +91,18 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
     >
       <div className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none">
         <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
-          {count} {count === 1 ? 'Bank' : 'Bänke'}
-        </p>
+        {selectedBenchId ? (
+          <button
+            onClick={onBenchDeselect}
+            className="text-sm text-primary mt-2"
+          >
+            ← Alle Bänke
+          </button>
+        ) : (
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
+            {count} {count === 1 ? 'Bank' : 'Bänke'}
+          </p>
+        )}
         <button
           onClick={collapse}
           className="mt-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none"
@@ -82,27 +113,43 @@ export default function BottomSheet({ benches: initialBenches, userId, onExpande
       </div>
 
       <div className="overflow-y-auto pb-8" style={{ height: 'calc(55vh - 56px)' }}>
-        {count === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">Noch keine Bänke eingetragen</p>
+        {selectedBenchId ? (
+          <BenchDetail benchId={selectedBenchId} userId={userId} />
         ) : (
-          <ul>
-            {benches.map((bench) => (
-              <li key={bench.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700">
-                <span className="text-xl shrink-0">🪑</span>
-                <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">{benchDisplayName(bench.name, bench.created_at)}</span>
-                {userId && bench.created_by === userId && (
-                  <button
-                    onClick={() => handleDelete(bench.id)}
-                    disabled={isPending}
-                    className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
-                    aria-label="Bank löschen"
-                  >
-                    🗑
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+          count === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+              Noch keine Bänke eingetragen
+            </p>
+          ) : (
+            <ul>
+              {benches.map((bench) => (
+                <li
+                  key={bench.id}
+                  className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2019] active:bg-gray-100 dark:active:bg-[#1a1c17]"
+                  onClick={() => {
+                    onFlyToBench(bench)
+                    setIsExpanded(false)
+                    onExpandedChange(false)
+                  }}
+                >
+                  <span className="text-xl shrink-0">🪑</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">
+                    {benchDisplayName(bench.name, bench.created_at)}
+                  </span>
+                  {userId && bench.created_by === userId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(bench.id) }}
+                      disabled={isPending}
+                      className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
+                      aria-label="Bank löschen"
+                    >
+                      🗑
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )
         )}
       </div>
     </div>

@@ -17,7 +17,7 @@ export default async function ProfilPage() {
     .single()
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-[#1a1c17]">
+    <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-sm mx-auto px-4 py-8">
         <Link href="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-8">
           ← Zurück zur Karte
@@ -34,7 +34,7 @@ export default async function ProfilPage() {
             <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">Abonnement</p>
             <div className="grid grid-cols-3 gap-3">
               {/* Free */}
-              <div className="rounded-xl border-2 border-primary bg-primary-light dark:bg-[#2d4525] p-3 flex flex-col items-center gap-1 relative">
+              <div className="rounded-xl border-2 border-primary bg-primary-light dark:bg-[#2a3f1e] p-3 flex flex-col items-center gap-1 relative">
                 <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Aktiv</span>
                 <span className="text-2xl mt-1">🌱</span>
                 <p className="text-xs font-bold text-gray-900 dark:text-gray-100 text-center leading-tight">Small pp</p>
@@ -46,7 +46,7 @@ export default async function ProfilPage() {
                 href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-[#252720] p-3 flex flex-col items-center gap-1 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
+                className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1e231a] p-3 flex flex-col items-center gap-1 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
               >
                 <span className="text-2xl mt-1">🪵</span>
                 <p className="text-xs font-bold text-gray-900 dark:text-gray-100 text-center leading-tight">Average size</p>
@@ -58,7 +58,7 @@ export default async function ProfilPage() {
                 href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-[#252720] p-3 flex flex-col items-center gap-1 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
+                className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1e231a] p-3 flex flex-col items-center gap-1 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
               >
                 <span className="text-2xl mt-1">🌳</span>
                 <p className="text-xs font-bold text-gray-900 dark:text-gray-100 text-center leading-tight">Humongous</p>

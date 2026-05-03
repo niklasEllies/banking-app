@@ -8,13 +8,13 @@
 }
 
 .dark {
-  --background: #1a1c17;
+  --background: #141810;
   --foreground: #f0f0e8;
-  --color-primary: #6aab4a;
-  --color-primary-dark: #5a9940;
-  --color-primary-light: #2d4525;
-  --color-surface: #1a1c17;
-  --color-surface-border: #3a3c32;
+  --color-primary: #5e9e3e;
+  --color-primary-dark: #4e8e30;
+  --color-primary-light: #2a3f1e;
+  --color-surface: #141810;
+  --color-surface-border: #2a2f24;
 }
 
 @theme inline {

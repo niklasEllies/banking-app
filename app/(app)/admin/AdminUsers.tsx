@@ -41,7 +41,7 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
   }
 
   return (
-    <div className="bg-white dark:bg-[#252720] rounded-xl p-3 flex items-start gap-3">
+    <div className="bg-white dark:bg-[#1e231a] rounded-xl p-3 flex items-start gap-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -70,7 +70,7 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
           disabled={isPending}
           className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 ${
             isAdmin
-              ? 'border-primary text-primary hover:bg-primary-light dark:hover:bg-[#2d4525]'
+              ? 'border-primary text-primary hover:bg-primary-light dark:hover:bg-[#2a3f1e]'
               : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary'
           }`}
         >

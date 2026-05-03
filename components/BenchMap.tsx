@@ -283,7 +283,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
       </MapContainer>
 
       {isLocating && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-1000 bg-white/90 dark:bg-[#252720]/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-1000 bg-white/90 dark:bg-[#1e231a]/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
           <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
           Standort wird ermittelt…
         </div>
@@ -292,7 +292,7 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
       {userPosition && (
         <button
           onClick={() => setCenterTrigger(t => t + 1)}
-          className="absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#252720] rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 dark:hover:bg-[#2e3028] active:scale-95 transition-transform"
+          className="absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#1e231a] rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 dark:hover:bg-[#242a1e] active:scale-95 transition-transform"
           style={{
             bottom: sheetExpanded
               ? `calc(55vh + ${isAuthenticated ? 88 : 16}px)`

@@ -52,12 +52,12 @@ export default function BenchDetail({ benchId, userId }: BenchDetailProps) {
       {hasAnyStats && (
         <div className="flex flex-wrap gap-2">
           {aggregated.comfort_median !== null && (
-            <div className="bg-gray-100 dark:bg-[#1a1c17] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+            <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
               ⭐ <strong>{aggregated.comfort_median.toFixed(1)}</strong>/5 Komfort
             </div>
           )}
           {aggregated.view_median !== null && (
-            <div className="bg-gray-100 dark:bg-[#1a1c17] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+            <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
               🌄 <strong>{aggregated.view_median.toFixed(1)}</strong>/5 Aussicht
             </div>
           )}
@@ -70,12 +70,12 @@ export default function BenchDetail({ benchId, userId }: BenchDetailProps) {
             </div>
           )}
           {shadow && (
-            <div className="bg-gray-100 dark:bg-[#1a1c17] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+            <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
               ☀️ {shadow}
             </div>
           )}
           {(aggregated.extras_threshold?.length ?? 0) > 0 && (
-            <div className="bg-gray-100 dark:bg-[#1a1c17] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
+            <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
               {aggregated.extras_threshold.map(e => extrasIcon(e)).join(' ')}
             </div>
           )}

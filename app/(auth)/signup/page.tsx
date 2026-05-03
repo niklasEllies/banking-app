@@ -8,7 +8,7 @@ export default function SignupPage() {
   const [state, action, pending] = useActionState(signUp, undefined)
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface dark:bg-[#1a1c17] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface dark:bg-[#141810] px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold text-center mb-8">🪑 BenchMarks</h1>
         <form action={action} className="space-y-4">
@@ -21,7 +21,7 @@ export default function SignupPage() {
               name="username"
               type="text"
               required
-              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1a1f14] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
@@ -33,7 +33,7 @@ export default function SignupPage() {
               name="email"
               type="email"
               required
-              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1a1f14] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
@@ -46,7 +46,7 @@ export default function SignupPage() {
               type="password"
               required
               minLength={6}
-              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1a1f14] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           {state?.error && (

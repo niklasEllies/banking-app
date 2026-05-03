@@ -37,7 +37,7 @@ export default function EditPhotoPage({
   }
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-[#1a1c17]">
+    <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-sm mx-auto px-4 py-8">
         <Link
           href="/"
@@ -55,7 +55,7 @@ export default function EditPhotoPage({
               className="w-full h-48 object-cover rounded-xl"
             />
           ) : (
-            <div className="w-full h-48 bg-gray-100 dark:bg-[#252720] rounded-xl flex items-center justify-center text-4xl">
+            <div className="w-full h-48 bg-gray-100 dark:bg-[#1e231a] rounded-xl flex items-center justify-center text-4xl">
               🪑
             </div>
           )}

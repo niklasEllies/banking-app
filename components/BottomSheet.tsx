@@ -70,7 +70,7 @@ export default function BottomSheet({
     return (
       <button
         onClick={expand}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#252720] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#3a3c32]"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#1e231a] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a2f24]"
       >
         {count} {count === 1 ? 'Bank' : 'Bänke'} ↑
       </button>
@@ -79,7 +79,7 @@ export default function BottomSheet({
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 z-1000 bg-white dark:bg-[#252720] rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
+      className="absolute bottom-0 left-0 right-0 z-1000 bg-white dark:bg-[#1e231a] rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
         height: '55vh',
         transform: `translateY(${dragY}px)`,
@@ -125,7 +125,7 @@ export default function BottomSheet({
               {benches.map((bench) => (
                 <li
                   key={bench.id}
-                  className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2019] active:bg-gray-100 dark:active:bg-[#1a1c17]"
+                  className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1f14] active:bg-gray-100 dark:active:bg-[#161a10]"
                   onClick={() => {
                     onFlyToBench(bench)
                     setIsExpanded(false)

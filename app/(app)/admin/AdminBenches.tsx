@@ -36,7 +36,7 @@ export default function AdminBenches({ benches: initial }: { benches: AdminBench
         {benches.map((bench) => (
           <div
             key={bench.id}
-            className="bg-white dark:bg-[#252720] rounded-xl px-3 py-2.5 flex items-center gap-3"
+            className="bg-white dark:bg-[#1e231a] rounded-xl px-3 py-2.5 flex items-center gap-3"
           >
             <span className="text-xl shrink-0">🪑</span>
             <div className="flex-1 min-w-0">

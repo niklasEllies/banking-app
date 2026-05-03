@@ -98,7 +98,7 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                 condition === preset
                   ? 'text-[#1a1c17]'
-                  : 'bg-gray-100 dark:bg-[#1a1c17] text-gray-600 dark:text-gray-400'
+                  : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
               }`}
               style={condition === preset ? { background: CONDITION_PRESETS[preset].color } : {}}
             >
@@ -118,7 +118,7 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
               className={`px-3 py-1 rounded-lg text-xs transition-all ${
                 shadow === opt.value
                   ? 'bg-primary text-white'
-                  : 'bg-gray-100 dark:bg-[#1a1c17] text-gray-600 dark:text-gray-400'
+                  : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
               }`}
             >
               {opt.label}
@@ -137,7 +137,7 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
               className={`px-3 py-1 rounded-lg text-xs transition-all ${
                 extras.includes(opt.value)
                   ? 'bg-primary text-white'
-                  : 'bg-gray-100 dark:bg-[#1a1c17] text-gray-600 dark:text-gray-400'
+                  : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
               }`}
             >
               {opt.icon} {opt.label}

@@ -131,7 +131,6 @@ export default function BottomSheet({
       {/* Content */}
       <div className="overflow-y-auto pb-8" style={{ height: 'calc(55vh - 56px)' }}>
         {selectedBench ? (
-          // @ts-ignore — bench prop added in Task 6
           <BenchDetail bench={selectedBench} userId={userId} />
         ) : count === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">

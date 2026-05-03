@@ -76,3 +76,46 @@ export async function deleteBench(id: string): Promise<{ error?: string }> {
   revalidatePath('/')
   return {}
 }
+
+export async function uploadBenchPhoto(
+  benchId: string,
+  formData: FormData
+): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Nicht eingeloggt' }
+
+  const { data: bench } = await supabase
+    .from('benches')
+    .select('created_by')
+    .eq('id', benchId)
+    .single()
+  if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
+
+  const file = formData.get('photo') as File
+  if (!file || file.size === 0) return { error: 'Kein Foto ausgewählt' }
+  if (file.size > 5 * 1024 * 1024) return { error: 'Foto zu groß (max 5MB)' }
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    return { error: 'Ungültiges Format (nur jpg, png, webp)' }
+  }
+
+  const { error: uploadError } = await supabase.storage
+    .from('bench-photos')
+    .upload(`${benchId}/photo`, file, { contentType: file.type, upsert: true })
+
+  if (uploadError) return { error: uploadError.message }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('bench-photos')
+    .getPublicUrl(`${benchId}/photo`)
+
+  const { error: updateError } = await supabase
+    .from('benches')
+    .update({ photo_url: publicUrl })
+    .eq('id', benchId)
+
+  if (updateError) return { error: updateError.message }
+
+  revalidatePath('/')
+  return { url: publicUrl }
+}

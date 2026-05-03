@@ -60,6 +60,7 @@ export interface Bench {
   name: string | null
   created_by: string | null
   created_at: string
+  photo_url: string | null
 }
 
 interface BenchMapProps {

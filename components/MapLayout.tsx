@@ -43,11 +43,8 @@ export default function MapLayout({ benches, isAuthenticated, userId }: MapLayou
         benches={benches}
         userId={userId}
         onExpandedChange={setSheetExpanded}
-        // @ts-ignore Task 8 adds these props to BottomSheet
         selectedBenchId={selectedBenchId}
-        // @ts-ignore Task 8 adds these props to BottomSheet
         onBenchDeselect={handleBenchDeselect}
-        // @ts-ignore Task 8 adds these props to BottomSheet
         onFlyToBench={handleFlyToBench}
       />
     </>

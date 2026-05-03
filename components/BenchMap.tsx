@@ -169,7 +169,7 @@ function LocationController({
         onLocating(false)
       }
     }
-  }, [map])
+  }, [map, onPositionFound, onLocating])
 
   return null
 }

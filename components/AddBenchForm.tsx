@@ -17,10 +17,13 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
 
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setLat(pos.coords.latitude)
-      setLng(pos.coords.longitude)
-    })
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude)
+        setLng(pos.coords.longitude)
+      },
+      () => {}
+    )
   }
 
   return (

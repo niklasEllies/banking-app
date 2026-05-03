@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 type FormState = { error: string } | undefined
@@ -44,7 +45,7 @@ export async function login(state: FormState, formData: FormData): Promise<FormS
 
 export async function logout() {
   const supabase = await createClient()
-  const { error } = await supabase.auth.signOut()
-  if (error) console.error('Sign out error:', error.message)
+  await supabase.auth.signOut()
+  revalidatePath('/', 'layout')
   redirect('/')
 }

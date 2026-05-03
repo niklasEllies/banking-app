@@ -51,6 +51,7 @@ export async function createBench(state: FormState, formData: FormData): Promise
 
   if (error) return { error: error.message }
 
+  revalidatePath('/')
   redirect('/')
 }
 
@@ -59,6 +60,14 @@ export async function deleteBench(id: string): Promise<{ error?: string }> {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { error: 'Nicht eingeloggt' }
+
+  const { data: bench } = await supabase
+    .from('benches')
+    .select('created_by')
+    .eq('id', id)
+    .single()
+
+  if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
 
   const { error } = await supabase.from('benches').delete().eq('id', id)
 

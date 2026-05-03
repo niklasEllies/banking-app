@@ -46,7 +46,7 @@ export default async function AdminPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-[#1a1c17]">
+    <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-lg mx-auto px-4 py-8">
         <Link
           href="/"

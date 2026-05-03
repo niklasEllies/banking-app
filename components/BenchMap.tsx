@@ -266,7 +266,6 @@ export default function BenchMap({ benches: initialBenches, isAuthenticated, use
                 <BenchPopup
                   bench={bench}
                   userId={userId}
-                  rarityMedian={null}
                   onDetails={() => onBenchSelect?.(bench.id)}
                   onDelete={() => handleDelete(bench.id)}
                 />

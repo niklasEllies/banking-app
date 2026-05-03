@@ -1,11 +1,14 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import type { Bench } from '@/components/BenchMap'
 import RarityBadge from '@/components/RarityBadge'
 import { benchDisplayName } from '@/lib/bench-utils'
+import { getBenchStats } from '@/actions/stats'
 
 interface BenchPopupProps {
   bench: Bench
   userId: string | null
-  rarityMedian: number | null
   onDetails: () => void
   onDelete: () => void
 }
@@ -13,11 +16,17 @@ interface BenchPopupProps {
 export default function BenchPopup({
   bench,
   userId,
-  rarityMedian,
   onDetails,
   onDelete,
 }: BenchPopupProps) {
   const isOwner = userId && bench.created_by === userId
+  const [rarityMedian, setRarityMedian] = useState<number | null>(null)
+
+  useEffect(() => {
+    getBenchStats(bench.id).then(({ aggregated }) => {
+      setRarityMedian(aggregated?.rarity_median ?? null)
+    })
+  }, [bench.id])
 
   return (
     <div style={{ minWidth: '160px', fontFamily: 'system-ui' }}>

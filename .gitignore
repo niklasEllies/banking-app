@@ -50,5 +50,7 @@ next-env.d.ts
 .agents/
 .claude/
 skills-lock.json
+.mcp.json
+.junie/
 
 .vercel

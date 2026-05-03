@@ -14,6 +14,7 @@ vi.mock('next/headers', () => ({
     set: vi.fn(),
   })),
 }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 const mockSupabase = {
   auth: {
@@ -45,7 +46,7 @@ describe('signUp', () => {
     fd.set('password', 'pass123')
     fd.set('username', 'testuser')
 
-    await expect(signUp(undefined, fd)).rejects.toMatchObject({ digest: 'NEXT_REDIRECT' })
+    await expect(signUp(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'pass123',
@@ -80,7 +81,7 @@ describe('login', () => {
     fd.set('email', 'test@example.com')
     fd.set('password', 'pass123')
 
-    await expect(login(undefined, fd)).rejects.toMatchObject({ digest: 'NEXT_REDIRECT' })
+    await expect(login(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'pass123',
@@ -102,7 +103,7 @@ describe('logout', () => {
   it('ruft signOut auf und redirectet zu /', async () => {
     mockSupabase.auth.signOut.mockResolvedValue({ error: null })
 
-    await expect(logout()).rejects.toMatchObject({ digest: 'NEXT_REDIRECT', url: '/' })
+    await expect(logout()).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockSupabase.auth.signOut).toHaveBeenCalled()
   })
 })

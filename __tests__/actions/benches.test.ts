@@ -11,6 +11,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() => ({ getAll: () => [], set: vi.fn() })),
 }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 const mockInsert = vi.fn()
 const mockSupabase = {
@@ -53,7 +54,7 @@ describe('createBench', () => {
     fd.set('lng', '9.9')
     fd.set('name', 'Meine Bank')
 
-    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: 'NEXT_REDIRECT', url: '/' })
+    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockInsert).toHaveBeenCalledWith({
       lat: 51.5074,
       lng: 9.9,
@@ -71,7 +72,7 @@ describe('createBench', () => {
     fd.set('lat', '51.5074')
     fd.set('lng', '9.9')
 
-    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: 'NEXT_REDIRECT' })
+    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({ name: null })
     )

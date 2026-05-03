@@ -71,7 +71,7 @@ export default async function ProfilPage() {
         {profile?.is_admin && (
           <Link
             href="/admin"
-            className="mt-10 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#252720] transition-colors"
+            className="mt-10 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
           >
             🔧 Admin Dashboard
           </Link>

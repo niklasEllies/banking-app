@@ -46,16 +46,16 @@ body {
 
 .dark .leaflet-popup-content-wrapper,
 .dark .leaflet-popup-tip {
-  background-color: #252720;
+  background-color: #1e231a;
   color: #f0f0e8;
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.5);
 }
 
 .dark .leaflet-control-attribution {
-  background: rgba(26, 28, 23, 0.85) !important;
+  background: rgba(20, 24, 16, 0.85) !important;
   color: #888 !important;
 }
 
 .dark .leaflet-control-attribution a {
-  color: #6aab4a !important;
+  color: #5e9e3e !important;
 }

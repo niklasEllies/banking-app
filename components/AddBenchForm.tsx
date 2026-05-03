@@ -34,7 +34,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
 
   return (
     <form action={action} className="space-y-5">
-      <div className="bg-surface dark:bg-[#252720] rounded-xl p-4">
+      <div className="bg-surface dark:bg-[#1e231a] rounded-xl p-4">
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Position</p>
         <p className="text-sm font-mono text-gray-800 dark:text-gray-200">
           {lat.toFixed(5)}, {lng.toFixed(5)}
@@ -60,7 +60,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
           name="name"
           type="text"
           placeholder="z.B. Bank am Teich"
-          className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1e2019] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1a1f14] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
 

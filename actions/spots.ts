@@ -14,7 +14,7 @@ async function getLocationName(lat: number, lng: number): Promise<string | null>
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17&accept-language=de`,
       {
-        headers: { 'User-Agent': 'BenchMarks/1.0 (community bench finder)' },
+        headers: { 'User-Agent': 'Plaetzchen/1.0 (community spot finder)' },
         signal: AbortSignal.timeout(5000),
       }
     )

@@ -74,18 +74,18 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
       </p>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">⭐ Komfort</p>
-        <StarPicker value={comfort} onChange={setComfort} />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="comfort-label">⭐ Komfort</p>
+        <StarPicker value={comfort} onChange={setComfort} ariaLabel="Komfort-Bewertung" />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">🌄 Aussicht</p>
-        <StarPicker value={viewRating} onChange={setViewRating} />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="view-label">🌄 Aussicht</p>
+        <StarPicker value={viewRating} onChange={setViewRating} ariaLabel="Aussicht-Bewertung" />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">🏆 Rarität</p>
-        <StarPicker value={rarity} onChange={setRarity} />
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="rarity-label">🏆 Rarität</p>
+        <StarPicker value={rarity} onChange={setRarity} ariaLabel="Raritäts-Bewertung" />
       </div>
 
       <div>
@@ -95,7 +95,8 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
             <button
               key={preset}
               onClick={() => setCondition(condition === preset ? null : preset)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+              aria-pressed={condition === preset}
+              className={`min-h-11 px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
                 condition === preset
                   ? 'text-[#1a1c17]'
                   : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
@@ -115,7 +116,8 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
             <button
               key={opt.value}
               onClick={() => setShadow(shadow === opt.value ? null : opt.value)}
-              className={`px-3 py-1 rounded-lg text-xs transition-all ${
+              aria-pressed={shadow === opt.value}
+              className={`min-h-11 px-4 py-2.5 rounded-lg text-xs transition-all ${
                 shadow === opt.value
                   ? 'bg-primary text-white'
                   : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
@@ -134,7 +136,9 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
             <button
               key={opt.value}
               onClick={() => toggleExtra(opt.value)}
-              className={`px-3 py-1 rounded-lg text-xs transition-all ${
+              aria-pressed={extras.includes(opt.value)}
+              aria-label={opt.label}
+              className={`min-h-11 px-4 py-2.5 rounded-lg text-xs transition-all ${
                 extras.includes(opt.value)
                   ? 'bg-primary text-white'
                   : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
@@ -163,19 +167,24 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
 function StarPicker({
   value,
   onChange,
+  ariaLabel,
 }: {
   value: number | null
   onChange: (v: number | null) => void
+  ariaLabel: string
 }) {
   return (
-    <div className="flex gap-1">
+    <div role="radiogroup" aria-label={ariaLabel} className="flex gap-1">
       {[1, 2, 3, 4, 5].map(n => (
         <button
           key={n}
+          type="button"
+          role="radio"
+          aria-checked={value === n}
+          aria-label={`${n} von 5 Sternen`}
           onClick={() => onChange(value === n ? null : n)}
-          className="text-2xl leading-none transition-opacity"
+          className="min-w-11 min-h-11 flex items-center justify-center text-2xl leading-none transition-opacity"
           style={{ opacity: value !== null && n <= value ? 1 : 0.25 }}
-          aria-label={`${n} Stern${n > 1 ? 'e' : ''}`}
         >
           ⭐
         </button>

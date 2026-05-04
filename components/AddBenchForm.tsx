@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBench } from '@/actions/benches'
+import { resizeImage } from '@/lib/image-utils'
 
 interface AddBenchFormProps {
   initialLat: number
@@ -32,8 +33,17 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
     if (file) setPhotoPreview(URL.createObjectURL(file))
   }
 
+  const handleAction = async (formData: FormData) => {
+    const photo = formData.get('photo') as File | null
+    if (photo && photo.size > 0) {
+      const resized = await resizeImage(photo)
+      formData.set('photo', resized)
+    }
+    action(formData)
+  }
+
   return (
-    <form action={action} className="space-y-5">
+    <form action={handleAction} className="space-y-5">
       <div className="bg-surface dark:bg-[#1e231a] rounded-xl p-4">
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Position</p>
         <p className="text-sm font-mono text-gray-800 dark:text-gray-200">

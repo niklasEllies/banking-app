@@ -14,7 +14,7 @@ export default async function AdminPage() {
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!self?.is_admin) redirect('/')
 

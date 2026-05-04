@@ -64,6 +64,8 @@ export interface Bench {
   photo_url: string | null
 }
 
+type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
+
 interface BenchMapProps {
   benches: Bench[]
   isAuthenticated: boolean
@@ -74,6 +76,8 @@ interface BenchMapProps {
   onFlyTargetUsed?: () => void
   isAdmin?: boolean
   onPositionUpdate?: (pos: { lat: number; lng: number }) => void
+  onGpsStateChange?: (state: GpsState) => void
+  gpsState?: GpsState
 }
 
 
@@ -124,10 +128,12 @@ function LocationController({
   cachedPosition,
   onPositionFound,
   onLocating,
+  onGpsStateChange,
 }: {
   cachedPosition: [number, number] | null
   onPositionFound: (pos: [number, number]) => void
   onLocating: (v: boolean) => void
+  onGpsStateChange?: (state: GpsState) => void
 }) {
   const map = useMap()
   const centeredRef = useRef(false)
@@ -145,7 +151,8 @@ function LocationController({
 
   // Two-phase GPS: fast network first, then accurate GPS
   useEffect(() => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      onGpsStateChange?.('unavailable')
       setTimeout(() => {
         if (!centeredRef.current) {
           map.setView([51.1, 10.4], 11)
@@ -165,13 +172,19 @@ function LocationController({
         localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
         onPositionFound(latlng)
         onLocating(false)
+        onGpsStateChange?.('available')
         if (!centeredRef.current) {
           map.setView(latlng, 14)
           centeredRef.current = true
         }
       },
-      () => {
+      (err) => {
         onLocating(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          onGpsStateChange?.('denied')
+        } else {
+          onGpsStateChange?.('unavailable')
+        }
         if (!centeredRef.current) {
           setTimeout(() => {
             map.setView([51.1, 10.4], 11)
@@ -190,6 +203,7 @@ function LocationController({
           localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
           onPositionFound(latlng)
           onLocating(false)
+          onGpsStateChange?.('available')
           map.flyTo(latlng, Math.max(map.getZoom(), 14), { duration: 1.5 })
           if (watchId !== undefined) {
             navigator.geolocation.clearWatch(watchId)
@@ -197,7 +211,12 @@ function LocationController({
           }
         }
       },
-      () => { onLocating(false) },
+      (err) => {
+        onLocating(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          onGpsStateChange?.('denied')
+        }
+      },
       { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
     )
 
@@ -207,7 +226,7 @@ function LocationController({
         onLocating(false)
       }
     }
-  }, [map, onPositionFound, onLocating])
+  }, [map, onPositionFound, onLocating, onGpsStateChange])
 
   return null
 }
@@ -222,6 +241,8 @@ export default function BenchMap({
   onFlyTargetUsed,
   isAdmin = false,
   onPositionUpdate,
+  onGpsStateChange,
+  gpsState = 'unknown',
 }: BenchMapProps) {
   const router = useRouter()
   const [localBenches, setLocalBenches] = useState(initialBenches)
@@ -289,6 +310,7 @@ export default function BenchMap({
           cachedPosition={cachedPosition}
           onPositionFound={handlePositionFound}
           onLocating={handleLocating}
+          onGpsStateChange={onGpsStateChange}
         />
 
         <MarkerClusterGroup chunkedLoading maxClusterRadius={60} iconCreateFunction={createClusterIcon}>
@@ -323,14 +345,19 @@ export default function BenchMap({
       {userPosition && (
         <button
           onClick={() => setCenterTrigger(t => t + 1)}
-          className="absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#1e231a] rounded-full shadow-lg flex items-center justify-center text-xl hover:bg-gray-50 dark:hover:bg-[#242a1e] active:scale-95 transition-transform"
+          disabled={gpsState !== 'available'}
+          className={`absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#1e231a] rounded-full shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform ${
+            gpsState !== 'available'
+              ? 'opacity-40 cursor-not-allowed'
+              : 'hover:bg-gray-50 dark:hover:bg-[#242a1e]'
+          }`}
           style={{
             bottom: sheetExpanded
               ? `calc(55vh + ${isAuthenticated ? 88 : 16}px)`
               : isAuthenticated ? '9.5rem' : '5rem',
             transition: 'bottom 0.25s ease',
           }}
-          aria-label="Auf Standort zentrieren"
+          aria-label={gpsState === 'available' ? 'Auf Standort zentrieren' : 'Standort nicht verfügbar'}
         >
           📍
         </button>

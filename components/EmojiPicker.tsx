@@ -5,6 +5,13 @@ import { useState, useEffect } from 'react'
 const EMOJI_KEY = 'benchmarks_user_emoji'
 const EMOJIS = ['🧍‍♂️', '🧍‍♀️', '👫', '🐕'] as const
 
+const EMOJI_LABELS: Record<typeof EMOJIS[number], string> = {
+  '🧍‍♂️': 'Stehende Person (männlich)',
+  '🧍‍♀️': 'Stehende Person (weiblich)',
+  '👫': 'Paar',
+  '🐕': 'Hund',
+}
+
 export default function EmojiPicker() {
   const [selected, setSelected] = useState('🧍‍♂️')
 
@@ -20,17 +27,20 @@ export default function EmojiPicker() {
   return (
     <div>
       <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">Dein Marker auf der Karte</p>
-      <div className="flex gap-3 flex-wrap">
+      <div role="radiogroup" aria-label="Marker-Emoji für die Karte" className="flex gap-3 flex-wrap">
         {EMOJIS.map((emoji) => (
           <button
             key={emoji}
+            type="button"
+            role="radio"
+            aria-checked={selected === emoji}
+            aria-label={EMOJI_LABELS[emoji]}
             onClick={() => handleSelect(emoji)}
             className={`text-3xl p-3 rounded-xl border-2 transition-all ${
               selected === emoji
                 ? 'border-primary bg-primary-light scale-110'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
-            aria-label={emoji}
           >
             {emoji}
           </button>

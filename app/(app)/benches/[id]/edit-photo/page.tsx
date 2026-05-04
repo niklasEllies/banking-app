@@ -4,6 +4,7 @@ import { use, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { uploadBenchPhoto } from '@/actions/benches'
+import { resizeImage } from '@/lib/image-utils'
 
 export default function EditPhotoPage({
   params,
@@ -27,6 +28,11 @@ export default function EditPhotoPage({
     setError(null)
     const formData = new FormData(e.currentTarget)
     startTransition(async () => {
+      const photo = formData.get('photo') as File | null
+      if (photo && photo.size > 0) {
+        const resized = await resizeImage(photo)
+        formData.set('photo', resized)
+      }
       const result = await uploadBenchPhoto(benchId, formData)
       if (result.error) {
         setError(result.error)

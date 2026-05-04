@@ -3,8 +3,11 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import type { SpotType } from '@/lib/spot-types'
 
 type FormState = { error: string } | undefined
+
+const VALID_TYPES: SpotType[] = ['bench', 'viewpoint', 'shelter', 'picnic', 'meadow', 'water']
 
 async function getLocationName(lat: number, lng: number): Promise<string | null> {
   try {
@@ -28,7 +31,7 @@ async function getLocationName(lat: number, lng: number): Promise<string | null>
   }
 }
 
-export async function createBench(state: FormState, formData: FormData): Promise<FormState> {
+export async function createSpot(state: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -39,12 +42,18 @@ export async function createBench(state: FormState, formData: FormData): Promise
 
   if (isNaN(lat) || isNaN(lng)) return { error: 'Koordinaten fehlen' }
 
+  const typeRaw = (formData.get('type') as string | null) ?? 'bench'
+  if (!VALID_TYPES.includes(typeRaw as SpotType)) {
+    return { error: 'Ungültiger Spot-Typ' }
+  }
+  const type = typeRaw as SpotType
+
   const nameRaw = formData.get('name') as string
   const name = nameRaw?.trim() || await getLocationName(lat, lng)
 
-  const { data: bench, error } = await supabase
-    .from('benches')
-    .insert({ lat, lng, name, created_by: user.id })
+  const { data: spot, error } = await supabase
+    .from('spots')
+    .insert({ lat, lng, name, type, created_by: user.id })
     .select('id')
     .single()
 
@@ -52,10 +61,10 @@ export async function createBench(state: FormState, formData: FormData): Promise
 
   const photoFile = formData.get('photo') as File
   if (photoFile && photoFile.size > 0) {
-    const photoResult = await uploadBenchPhoto(bench.id, formData)
+    const photoResult = await uploadSpotPhoto(spot.id, formData)
     if (photoResult.error) {
       revalidatePath('/')
-      redirect(`/benches/${bench.id}/edit-photo`)
+      redirect(`/spots/${spot.id}/edit-photo`)
     }
   }
 
@@ -63,22 +72,22 @@ export async function createBench(state: FormState, formData: FormData): Promise
   redirect('/')
 }
 
-export async function deleteBench(id: string): Promise<{ error?: string }> {
+export async function deleteSpot(id: string): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { error: 'Nicht eingeloggt' }
 
-  const { data: bench, error: benchError } = await supabase
-    .from('benches')
+  const { data: spot, error: spotError } = await supabase
+    .from('spots')
     .select('created_by')
     .eq('id', id)
     .maybeSingle()
 
-  if (benchError) return { error: 'Bank konnte nicht geprüft werden' }
-  if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
+  if (spotError) return { error: 'Plätzchen konnte nicht geprüft werden' }
+  if (!spot || spot.created_by !== user.id) return { error: 'Keine Berechtigung' }
 
-  const { error } = await supabase.from('benches').delete().eq('id', id)
+  const { error } = await supabase.from('spots').delete().eq('id', id)
 
   if (error) return { error: error.message }
 
@@ -86,21 +95,21 @@ export async function deleteBench(id: string): Promise<{ error?: string }> {
   return {}
 }
 
-export async function uploadBenchPhoto(
-  benchId: string,
+export async function uploadSpotPhoto(
+  spotId: string,
   formData: FormData
 ): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Nicht eingeloggt' }
 
-  const { data: bench, error: benchError } = await supabase
-    .from('benches')
+  const { data: spot, error: spotError } = await supabase
+    .from('spots')
     .select('created_by')
-    .eq('id', benchId)
+    .eq('id', spotId)
     .maybeSingle()
-  if (benchError) return { error: 'Bank konnte nicht geprüft werden' }
-  if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
+  if (spotError) return { error: 'Plätzchen konnte nicht geprüft werden' }
+  if (!spot || spot.created_by !== user.id) return { error: 'Keine Berechtigung' }
 
   const file = formData.get('photo') as File
   if (!file || file.size === 0) return { error: 'Kein Foto ausgewählt' }
@@ -109,7 +118,7 @@ export async function uploadBenchPhoto(
     return { error: 'Ungültiges Format (nur jpg, png, webp)' }
   }
 
-  const uploadPath = `${benchId}/photo`
+  const uploadPath = `${spotId}/photo`
 
   const { error: uploadError } = await supabase.storage
     .from('bench-photos')
@@ -122,9 +131,9 @@ export async function uploadBenchPhoto(
     .getPublicUrl(uploadPath)
 
   const { error: updateError } = await supabase
-    .from('benches')
+    .from('spots')
     .update({ photo_url: publicUrl })
-    .eq('id', benchId)
+    .eq('id', spotId)
 
   if (updateError) {
     await supabase.storage.from('bench-photos').remove([uploadPath])

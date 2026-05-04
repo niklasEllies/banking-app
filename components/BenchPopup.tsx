@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import type { Bench } from '@/components/BenchMap'
 import RarityBadge from '@/components/RarityBadge'
-import { benchDisplayName } from '@/lib/bench-utils'
-import { getBenchStats } from '@/actions/stats'
+import { spotDisplayName } from '@/lib/spot-utils'
+import { getSpotStats } from '@/actions/stats'
 
 interface BenchPopupProps {
   bench: Bench
@@ -23,7 +23,7 @@ export default function BenchPopup({
   const [rarityMedian, setRarityMedian] = useState<number | null>(null)
 
   useEffect(() => {
-    getBenchStats(bench.id).then(({ aggregated }) => {
+    getSpotStats(bench.id).then(({ aggregated }) => {
       setRarityMedian(aggregated?.rarity_median ?? null)
     })
   }, [bench.id])
@@ -63,7 +63,7 @@ export default function BenchPopup({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
         <strong style={{ fontSize: '13px', flex: 1 }}>
-          {benchDisplayName(bench.name, bench.created_at)}
+          {spotDisplayName(bench.name, bench.created_at, bench.type)}
         </strong>
         <RarityBadge median={rarityMedian} size="sm" />
       </div>

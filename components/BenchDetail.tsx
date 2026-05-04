@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { Bench } from '@/components/BenchMap'
-import { getBenchStats, type AggregatedStats, type UserVote } from '@/actions/stats'
+import { getSpotStats, type AggregatedStats, type UserVote } from '@/actions/stats'
 import { conditionLabel, shadowLabel, extrasIcon } from '@/lib/stats-utils'
-import { benchDisplayName } from '@/lib/bench-utils'
+import { spotDisplayName } from '@/lib/spot-utils'
 import RarityBadge from '@/components/RarityBadge'
 import StatsVoteForm from '@/components/StatsVoteForm'
 
@@ -21,7 +21,7 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
 
   useEffect(() => {
     setLoading(true)
-    getBenchStats(bench.id).then(({ aggregated: agg, userVote: vote }) => {
+    getSpotStats(bench.id).then(({ aggregated: agg, userVote: vote }) => {
       setAggregated(agg)
       setUserVote(vote)
       setLoading(false)
@@ -78,7 +78,7 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
             className="text-sm font-bold text-white truncate mr-2"
             style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
           >
-            {benchDisplayName(bench.name, bench.created_at)}
+            {spotDisplayName(bench.name, bench.created_at, bench.type)}
           </span>
           {aggregated && aggregated.rarity_median !== null && (
             <RarityBadge median={aggregated.rarity_median} size="sm" />

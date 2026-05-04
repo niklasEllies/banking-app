@@ -21,7 +21,7 @@ export interface AggregatedStats {
   vote_count: number
 }
 
-export async function getBenchStats(benchId: string): Promise<{
+export async function getSpotStats(spotId: string): Promise<{
   aggregated: AggregatedStats | null
   userVote: UserVote | null
 }> {
@@ -29,12 +29,12 @@ export async function getBenchStats(benchId: string): Promise<{
   const { data: { user } } = await supabase.auth.getUser()
 
   const [{ data: aggData }, { data: voteData }] = await Promise.all([
-    supabase.rpc('get_bench_aggregated_stats', { p_bench_id: benchId }),
+    supabase.rpc('get_spot_aggregated_stats', { p_spot_id: spotId }),
     user
       ? supabase
-          .from('bench_stats_votes')
+          .from('spot_stats_votes')
           .select('comfort, view_rating, condition, shadow, extras, rarity')
-          .eq('bench_id', benchId)
+          .eq('spot_id', spotId)
           .eq('user_id', user.id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
@@ -48,16 +48,16 @@ export async function getBenchStats(benchId: string): Promise<{
   }
 }
 
-export async function upsertStats(benchId: string, vote: UserVote): Promise<{ error?: string }> {
+export async function upsertStats(spotId: string, vote: UserVote): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Nicht eingeloggt' }
 
   const { error } = await supabase
-    .from('bench_stats_votes')
+    .from('spot_stats_votes')
     .upsert(
-      { bench_id: benchId, user_id: user.id, ...vote },
-      { onConflict: 'bench_id,user_id' }
+      { spot_id: spotId, user_id: user.id, ...vote },
+      { onConflict: 'spot_id,user_id' }
     )
 
   if (error) return { error: error.message }

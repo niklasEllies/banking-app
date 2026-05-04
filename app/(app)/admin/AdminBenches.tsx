@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { adminDeleteBench } from '@/actions/admin'
-import { benchDisplayName } from '@/lib/bench-utils'
+import { adminDeleteSpot } from '@/actions/admin'
+import { spotDisplayName } from '@/lib/spot-utils'
+import type { SpotType } from '@/lib/spot-types'
 
 export interface AdminBench {
   id: string
   name: string | null
+  type: SpotType
   created_at: string
   created_by: string | null
   profiles: { username: string | null } | null
@@ -19,7 +21,7 @@ export default function AdminBenches({ benches: initial }: { benches: AdminBench
   const handleDelete = (id: string) => {
     setBenches((prev) => prev.filter((b) => b.id !== id))
     startTransition(async () => {
-      const result = await adminDeleteBench(id)
+      const result = await adminDeleteSpot(id)
       if (result.error) setBenches(initial)
     })
   }
@@ -41,7 +43,7 @@ export default function AdminBenches({ benches: initial }: { benches: AdminBench
             <span className="text-xl shrink-0">🪑</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-800 dark:text-gray-200 truncate">
-                {benchDisplayName(bench.name, bench.created_at)}
+                {spotDisplayName(bench.name, bench.created_at, bench.type)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 @{bench.profiles?.username ?? '—'} ·{' '}

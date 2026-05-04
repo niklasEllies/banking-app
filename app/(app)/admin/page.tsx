@@ -20,12 +20,13 @@ export default async function AdminPage() {
 
   const [{ data: profiles }, { data: rawBenches }] = await Promise.all([
     supabase.from('profiles').select('id, username, is_admin, created_at').order('created_at'),
-    supabase.from('benches').select('id, name, created_at, created_by, profiles(username)').order('created_at', { ascending: false }),
+    supabase.from('spots').select('id, name, type, created_at, created_by, profiles(username)').order('created_at', { ascending: false }),
   ])
 
   const benches: AdminBench[] = (rawBenches ?? []).map((b) => ({
     id: b.id,
     name: b.name,
+    type: b.type,
     created_at: b.created_at,
     created_by: b.created_by,
     profiles: Array.isArray(b.profiles) ? (b.profiles[0] ?? null) : b.profiles,

@@ -3,8 +3,8 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import type { Bench } from '@/components/BenchMap'
-import { deleteBench } from '@/actions/benches'
-import { benchDisplayName, distanceTo } from '@/lib/bench-utils'
+import { deleteSpot } from '@/actions/spots'
+import { spotDisplayName, distanceTo } from '@/lib/spot-utils'
 import BenchDetail from '@/components/BenchDetail'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
@@ -62,7 +62,7 @@ export default function BottomSheet({
   const handleDelete = (id: string) => {
     setBenches(prev => prev.filter(b => b.id !== id))
     startTransition(async () => {
-      const result = await deleteBench(id)
+      const result = await deleteSpot(id)
       if (result.error) setBenches(initialBenches)
     })
   }
@@ -159,7 +159,7 @@ export default function BottomSheet({
                 >
                   <span className="text-xl shrink-0">🪑</span>
                   <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">
-                    {benchDisplayName(bench.name, bench.created_at)}
+                    {spotDisplayName(bench.name, bench.created_at, bench.type)}
                   </span>
                   {userPosition && gpsState === 'available' && (
                     <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 mr-1">

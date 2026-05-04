@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBench } from '@/actions/benches'
+import { createSpot } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
 
 interface AddBenchFormProps {
@@ -12,7 +12,7 @@ interface AddBenchFormProps {
 
 export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormProps) {
   const router = useRouter()
-  const [state, action, pending] = useActionState(createBench, undefined)
+  const [state, action, pending] = useActionState(createSpot, undefined)
   const [lat, setLat] = useState(initialLat)
   const [lng, setLng] = useState(initialLng)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)

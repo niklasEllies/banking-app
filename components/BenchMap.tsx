@@ -6,9 +6,9 @@ import MarkerClusterGroup from 'react-leaflet-cluster'
 import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
-import { deleteBench } from '@/actions/benches'
-import { benchDisplayName } from '@/lib/bench-utils'
+import { deleteSpot } from '@/actions/spots'
 import BenchPopup from '@/components/BenchPopup'
+import type { SpotType } from '@/lib/spot-types'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 const EMOJI_KEY = 'benchmarks_user_emoji'
@@ -56,6 +56,7 @@ const createClusterIcon = (cluster: any) => {
 
 export interface Bench {
   id: string
+  type: SpotType
   lat: number
   lng: number
   name: string | null
@@ -275,7 +276,7 @@ export default function BenchMap({
 
   const handleDelete = useCallback(async (id: string) => {
     setLocalBenches(prev => prev.filter(b => b.id !== id))
-    const result = await deleteBench(id)
+    const result = await deleteSpot(id)
     if (result.error) setLocalBenches(initialBenches)
   }, [initialBenches])
 

@@ -3,7 +3,7 @@
 import { use, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { uploadBenchPhoto } from '@/actions/benches'
+import { uploadSpotPhoto } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
 
 export default function EditPhotoPage({
@@ -11,7 +11,7 @@ export default function EditPhotoPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id: benchId } = use(params)
+  const { id: spotId } = use(params)
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -33,7 +33,7 @@ export default function EditPhotoPage({
         const resized = await resizeImage(photo)
         formData.set('photo', resized)
       }
-      const result = await uploadBenchPhoto(benchId, formData)
+      const result = await uploadSpotPhoto(spotId, formData)
       if (result.error) {
         setError(result.error)
         return

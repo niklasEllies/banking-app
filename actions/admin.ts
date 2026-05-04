@@ -29,12 +29,12 @@ export async function setAdminRole(userId: string, isAdmin: boolean) {
   return {}
 }
 
-export async function adminDeleteBench(id: string) {
+export async function adminDeleteSpot(id: string) {
   const ctx = await requireAdmin()
   if (!ctx) return { error: 'Kein Zugriff' }
 
   const { error } = await ctx.supabase
-    .from('benches')
+    .from('spots')
     .delete()
     .eq('id', id)
 

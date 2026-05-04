@@ -12,7 +12,7 @@ const mockUpsert = vi.fn()
 const mockSupabase = {
   auth: { getUser: vi.fn() },
   from: vi.fn((table: string) => {
-    if (table === 'bench_stats_votes') {
+    if (table === 'spot_stats_votes') {
       return { upsert: mockUpsert }
     }
     return {}
@@ -27,7 +27,7 @@ beforeEach(() => {
 describe('upsertStats', () => {
   it('gibt Fehler zurück wenn nicht eingeloggt', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
-    const result = await upsertStats('bench-1', { comfort: 4 })
+    const result = await upsertStats('spot-1', { comfort: 4 })
     expect(result).toEqual({ error: 'Nicht eingeloggt' })
   })
 
@@ -35,11 +35,11 @@ describe('upsertStats', () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     mockUpsert.mockResolvedValue({ error: null })
 
-    const result = await upsertStats('bench-1', { comfort: 4, rarity: 3 })
+    const result = await upsertStats('spot-1', { comfort: 4, rarity: 3 })
     expect(result).toEqual({})
     expect(mockUpsert).toHaveBeenCalledWith(
-      { bench_id: 'bench-1', user_id: 'user-1', comfort: 4, rarity: 3 },
-      { onConflict: 'bench_id,user_id' }
+      { spot_id: 'spot-1', user_id: 'user-1', comfort: 4, rarity: 3 },
+      { onConflict: 'spot_id,user_id' }
     )
   })
 
@@ -47,7 +47,7 @@ describe('upsertStats', () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     mockUpsert.mockResolvedValue({ error: { message: 'DB error' } })
 
-    const result = await upsertStats('bench-1', { comfort: 4 })
+    const result = await upsertStats('spot-1', { comfort: 4 })
     expect(result).toEqual({ error: 'DB error' })
   })
 })

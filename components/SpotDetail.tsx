@@ -6,27 +6,29 @@ import type { Spot } from '@/components/SpotMap'
 import { getSpotStats, type AggregatedStats, type UserVote } from '@/actions/stats'
 import { conditionLabel, shadowLabel, extrasIcon } from '@/lib/stats-utils'
 import { spotDisplayName } from '@/lib/spot-utils'
+import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import RarityBadge from '@/components/RarityBadge'
 import StatsVoteForm from '@/components/StatsVoteForm'
+import SpotDescriptionFeed from '@/components/SpotDescriptionFeed'
 
-interface BenchDetailProps {
-  bench: Spot
+interface SpotDetailProps {
+  spot: Spot
   userId: string | null
 }
 
-export default function BenchDetail({ bench, userId }: BenchDetailProps) {
+export default function SpotDetail({ spot, userId }: SpotDetailProps) {
   const [aggregated, setAggregated] = useState<AggregatedStats | null>(null)
   const [userVote, setUserVote] = useState<UserVote | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    getSpotStats(bench.id).then(({ aggregated: agg, userVote: vote }) => {
+    getSpotStats(spot.id).then(({ aggregated: agg, userVote: vote }) => {
       setAggregated(agg)
       setUserVote(vote)
       setLoading(false)
     })
-  }, [bench.id])
+  }, [spot.id])
 
   if (loading) {
     return (
@@ -55,9 +57,9 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
     <div>
       {/* Photo header */}
       <div className="relative" style={{ height: '110px' }}>
-        {bench.photo_url ? (
+        {spot.photo_url ? (
           <img
-            src={bench.photo_url}
+            src={spot.photo_url}
             alt="Bank"
             className="w-full h-full object-cover"
           />
@@ -66,7 +68,7 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
             className="w-full h-full flex items-center justify-center text-4xl"
             style={{ background: '#2d3a1e' }}
           >
-            🪑
+            {SPOT_TYPE_MAP[spot.type].emoji}
           </div>
         )}
         {/* Name + rarity overlay */}
@@ -78,12 +80,19 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
             className="text-sm font-bold text-white truncate mr-2"
             style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
           >
-            {spotDisplayName(bench.name, bench.created_at, bench.type)}
+            {spotDisplayName(spot.name, spot.created_at, spot.type)}
           </span>
           {aggregated && aggregated.rarity_median !== null && (
             <RarityBadge median={aggregated.rarity_median} size="sm" />
           )}
         </div>
+      </div>
+
+      {/* Type badge */}
+      <div className="px-5 pt-3 -mb-1">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          {SPOT_TYPE_MAP[spot.type].emoji} {SPOT_TYPE_MAP[spot.type].label}
+        </span>
       </div>
 
       {/* Stats body */}
@@ -136,7 +145,7 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
         <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
           {userId ? (
             <StatsVoteForm
-              benchId={bench.id}
+              benchId={spot.id}
               initialVote={userVote}
               onSaved={(agg, vote) => { setAggregated(agg); setUserVote(vote) }}
             />
@@ -149,6 +158,8 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
             </p>
           )}
         </div>
+
+        <SpotDescriptionFeed spotId={spot.id} userId={userId} />
       </div>
     </div>
   )

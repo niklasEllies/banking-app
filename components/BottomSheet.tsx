@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type { Spot } from '@/components/SpotMap'
 import { deleteSpot } from '@/actions/spots'
 import { spotDisplayName, distanceTo } from '@/lib/spot-utils'
-import BenchDetail from '@/components/BenchDetail'
+import SpotDetail from '@/components/SpotDetail'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
@@ -129,7 +129,7 @@ export default function BottomSheet({
         {...contentProps}
       >
         {selectedBench ? (
-          <BenchDetail bench={selectedBench} userId={userId} />
+          <SpotDetail spot={selectedBench} userId={userId} />
         ) : count === 0 ? (
           <div className="py-12 px-6 text-center">
             <div className="text-5xl mb-3">🪑</div>

@@ -122,7 +122,7 @@ function AdminClickController({ isAdmin }: { isAdmin: boolean }) {
   useMapEvents({
     click(e) {
       if (isAdmin) {
-        router.push(`/benches/new?lat=${e.latlng.lat.toFixed(6)}&lng=${e.latlng.lng.toFixed(6)}`)
+        router.push(`/spots/new?lat=${e.latlng.lat.toFixed(6)}&lng=${e.latlng.lng.toFixed(6)}`)
       }
     },
   })
@@ -298,12 +298,12 @@ export default function SpotMap({
 
   const handleFabClick = () => {
     if (userPosition) {
-      router.push(`/benches/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
+      router.push(`/spots/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
       return
     }
     navigator.geolocation?.getCurrentPosition(
-      (pos) => router.push(`/benches/new?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`),
-      () => router.push('/benches/new?lat=51.1&lng=10.4')
+      (pos) => router.push(`/spots/new?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`),
+      () => router.push('/spots/new?lat=51.1&lng=10.4')
     )
   }
 

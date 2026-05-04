@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import AddBenchForm from '@/components/AddBenchForm'
+import AddSpotForm from '@/components/AddSpotForm'
 
 interface PageProps {
   searchParams: Promise<{ lat?: string; lng?: string }>
 }
 
-export default async function NewBenchPage({ searchParams }: PageProps) {
+export default async function NewSpotPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -26,8 +26,8 @@ export default async function NewBenchPage({ searchParams }: PageProps) {
         >
           ← Zurück zur Karte
         </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Bank eintragen</h1>
-        <AddBenchForm initialLat={lat} initialLng={lng} />
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Neues Plätzchen eintragen</h1>
+        <AddSpotForm initialLat={lat} initialLng={lng} />
       </div>
     </div>
   )

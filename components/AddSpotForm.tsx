@@ -4,17 +4,20 @@ import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createSpot } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
+import SpotTypePicker from '@/components/SpotTypePicker'
+import type { SpotType } from '@/lib/spot-types'
 
-interface AddBenchFormProps {
+interface AddSpotFormProps {
   initialLat: number
   initialLng: number
 }
 
-export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormProps) {
+export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps) {
   const router = useRouter()
   const [state, action, pending] = useActionState(createSpot, undefined)
   const [lat, setLat] = useState(initialLat)
   const [lng, setLng] = useState(initialLng)
+  const [type, setType] = useState<SpotType>('bench')
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const handleUseCurrentLocation = () => {
@@ -51,6 +54,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         </p>
         <input type="hidden" name="lat" value={lat} />
         <input type="hidden" name="lng" value={lng} />
+        <input type="hidden" name="type" value={type} />
         <button
           type="button"
           onClick={handleUseCurrentLocation}
@@ -58,6 +62,11 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
         >
           📍 Meinen Standort verwenden
         </button>
+      </div>
+
+      <div>
+        <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Was ist hier?</p>
+        <SpotTypePicker value={type} onChange={setType} />
       </div>
 
       <div>
@@ -110,7 +119,7 @@ export default function AddBenchForm({ initialLat, initialLng }: AddBenchFormPro
           disabled={pending}
           className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
         >
-          {pending ? 'Speichern...' : 'Bank eintragen'}
+          {pending ? 'Speichern...' : 'Plätzchen eintragen'}
         </button>
       </div>
     </form>

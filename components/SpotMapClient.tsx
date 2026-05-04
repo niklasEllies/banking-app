@@ -1,13 +1,15 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 import type { GpsState } from '@/components/MapLayout'
 
-const BenchMap = dynamic(() => import('@/components/BenchMap'), { ssr: false })
+export type { Spot } from '@/components/SpotMap'
 
-interface BenchMapClientProps {
-  benches: Bench[]
+const SpotMap = dynamic(() => import('@/components/SpotMap'), { ssr: false })
+
+interface SpotMapClientProps {
+  spots: Spot[]
   isAuthenticated: boolean
   userId: string | null
   sheetExpanded: boolean
@@ -20,6 +22,6 @@ interface BenchMapClientProps {
   gpsState?: GpsState
 }
 
-export default function BenchMapClient(props: BenchMapClientProps) {
-  return <BenchMap {...props} />
+export default function SpotMapClient(props: SpotMapClientProps) {
+  return <SpotMap {...props} />
 }

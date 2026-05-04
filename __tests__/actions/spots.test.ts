@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createBench } from '@/actions/benches'
+import { createSpot } from '@/actions/spots'
 import * as supabaseServer from '@/lib/supabase/server'
 
 vi.mock('@/lib/supabase/server')
@@ -29,20 +29,20 @@ const mockSupabase = {
 beforeEach(() => {
   vi.clearAllMocks()
   // Setup the chain: insert().select().single()
-  mockSingle.mockResolvedValue({ data: { id: 'bench-1' }, error: null })
+  mockSingle.mockResolvedValue({ data: { id: 'spot-1' }, error: null })
   mockSelect.mockReturnValue({ single: mockSingle })
   mockInsert.mockReturnValue({ select: mockSelect })
   vi.mocked(supabaseServer.createClient).mockResolvedValue(mockSupabase as any)
 })
 
-describe('createBench', () => {
+describe('createSpot', () => {
   it('gibt Fehler zurück wenn nicht eingeloggt', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
     const fd = new FormData()
     fd.set('lat', '51.5')
     fd.set('lng', '9.9')
 
-    const result = await createBench(undefined, fd)
+    const result = await createSpot(undefined, fd)
     expect(result).toEqual({ error: 'Nicht eingeloggt' })
   })
 
@@ -50,11 +50,22 @@ describe('createBench', () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     const fd = new FormData()
 
-    const result = await createBench(undefined, fd)
+    const result = await createSpot(undefined, fd)
     expect(result).toEqual({ error: 'Koordinaten fehlen' })
   })
 
-  it('legt Bank in Supabase an und redirectet zu /', async () => {
+  it('gibt Fehler zurück wenn type ungültig ist', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const fd = new FormData()
+    fd.set('lat', '51.5074')
+    fd.set('lng', '9.9')
+    fd.set('type', 'garbage-type')
+
+    const result = await createSpot(undefined, fd)
+    expect(result).toEqual({ error: 'Ungültiger Spot-Typ' })
+  })
+
+  it('legt Spot mit Default-Type "bench" an und redirectet zu /', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
     const fd = new FormData()
@@ -62,13 +73,29 @@ describe('createBench', () => {
     fd.set('lng', '9.9')
     fd.set('name', 'Meine Bank')
 
-    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
+    await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockInsert).toHaveBeenCalledWith({
       lat: 51.5074,
       lng: 9.9,
       name: 'Meine Bank',
+      type: 'bench',
       created_by: 'user-1',
     })
+  })
+
+  it('akzeptiert non-default type (viewpoint) und gibt ihn an insert weiter', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+
+    const fd = new FormData()
+    fd.set('lat', '51.5074')
+    fd.set('lng', '9.9')
+    fd.set('name', 'Aussicht über Tal')
+    fd.set('type', 'viewpoint')
+
+    await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'viewpoint', name: 'Aussicht über Tal' })
+    )
   })
 
   it('speichert null wenn Name leer und Nominatim fehlschlägt', async () => {
@@ -79,9 +106,21 @@ describe('createBench', () => {
     fd.set('lat', '51.5074')
     fd.set('lng', '9.9')
 
-    await expect(createBench(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
+    await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({ name: null })
     )
+  })
+
+  it('queries the spots table', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+
+    const fd = new FormData()
+    fd.set('lat', '51.5074')
+    fd.set('lng', '9.9')
+    fd.set('name', 'Test')
+
+    await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
+    expect(mockSupabase.from).toHaveBeenCalledWith('spots')
   })
 })

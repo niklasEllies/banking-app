@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { distanceTo, benchDisplayName } from '@/lib/bench-utils'
+import { distanceTo, spotDisplayName } from '@/lib/spot-utils'
 
 describe('distanceTo', () => {
   it('returns distance in meters for short distances', () => {
@@ -36,11 +36,15 @@ describe('distanceTo', () => {
   })
 })
 
-describe('benchDisplayName', () => {
+describe('spotDisplayName', () => {
   it('returns name when provided', () => {
-    expect(benchDisplayName('Meine Bank', '2024-01-15T10:00:00Z')).toBe('Meine Bank')
+    expect(spotDisplayName('Meine Bank', '2024-01-15T10:00:00Z')).toBe('Meine Bank')
   })
-  it('returns formatted date when name is null', () => {
-    expect(benchDisplayName(null, '2024-01-15T10:00:00Z')).toBe('Bank vom 15. Januar')
+  it('returns formatted date with default type "bench" when name is null', () => {
+    expect(spotDisplayName(null, '2024-01-15T10:00:00Z')).toBe('Bank vom 15. Januar')
+  })
+  it('uses the type label when an explicit type is passed', () => {
+    expect(spotDisplayName(null, '2025-06-15T00:00:00Z', 'viewpoint')).toBe('Aussichtspunkt vom 15. Juni')
+    expect(spotDisplayName(null, '2025-06-15T00:00:00Z', 'water')).toBe('Wasserstelle vom 15. Juni')
   })
 })

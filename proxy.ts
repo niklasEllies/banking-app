@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const protectedRoutes = ['/benches']
+const protectedRoutes = ['/spots']
 
 export default async function proxy(req: NextRequest) {
   const res = NextResponse.next()

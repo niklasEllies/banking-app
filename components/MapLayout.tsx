@@ -1,24 +1,24 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import BenchMapClient from '@/components/BenchMapClient'
+import SpotMapClient from '@/components/SpotMapClient'
 import BottomSheet from '@/components/BottomSheet'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 
 export type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
 
 const GPS_BANNER_DISMISSED_KEY = 'benchmarks-gps-banner-dismissed'
 
 interface MapLayoutProps {
-  benches: Bench[]
+  spots: Spot[]
   isAuthenticated: boolean
   userId: string | null
   isAdmin?: boolean
 }
 
-export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = false }: MapLayoutProps) {
+export default function MapLayout({ spots, isAuthenticated, userId, isAdmin = false }: MapLayoutProps) {
   const [sheetExpanded, setSheetExpanded] = useState(false)
-  const [selectedBenchId, setSelectedBenchId] = useState<string | null>(null)
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null)
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsState, setGpsState] = useState<GpsState>('unknown')
@@ -40,16 +40,16 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
 
   const showBanner = !bannerDismissed && (gpsState === 'denied' || gpsState === 'unavailable')
 
-  const handleBenchSelect = useCallback((benchId: string) => {
-    setSelectedBenchId(benchId)
+  const handleSpotSelect = useCallback((spotId: string) => {
+    setSelectedSpotId(spotId)
   }, [])
 
-  const handleBenchDeselect = useCallback(() => {
-    setSelectedBenchId(null)
+  const handleSpotDeselect = useCallback(() => {
+    setSelectedSpotId(null)
   }, [])
 
-  const handleFlyToBench = useCallback((bench: Bench) => {
-    setFlyTarget({ lat: bench.lat, lng: bench.lng })
+  const handleFlyToSpot = useCallback((spot: Spot) => {
+    setFlyTarget({ lat: spot.lat, lng: spot.lng })
   }, [])
 
   const handlePositionUpdate = useCallback((pos: { lat: number; lng: number }) => {
@@ -62,12 +62,12 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
 
   return (
     <>
-      <BenchMapClient
-        benches={benches}
+      <SpotMapClient
+        spots={spots}
         isAuthenticated={isAuthenticated}
         userId={userId}
         sheetExpanded={sheetExpanded}
-        onBenchSelect={handleBenchSelect}
+        onBenchSelect={handleSpotSelect}
         flyTarget={flyTarget}
         onFlyTargetUsed={() => setFlyTarget(null)}
         isAdmin={isAdmin}
@@ -95,13 +95,13 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
         </div>
       )}
       <BottomSheet
-        benches={benches}
+        spots={spots}
         userId={userId}
         onExpandedChange={setSheetExpanded}
-        selectedBenchId={selectedBenchId}
-        onBenchSelect={handleBenchSelect}
-        onBenchDeselect={handleBenchDeselect}
-        onFlyToBench={handleFlyToBench}
+        selectedSpotId={selectedSpotId}
+        onSpotSelect={handleSpotSelect}
+        onSpotDeselect={handleSpotDeselect}
+        onFlyToSpot={handleFlyToSpot}
         userPosition={userPosition}
         gpsState={gpsState}
       />

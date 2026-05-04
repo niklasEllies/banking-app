@@ -1,12 +1,19 @@
-export function benchDisplayName(name: string | null, createdAt: string): string {
+import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
+
+export function spotDisplayName(
+  name: string | null,
+  createdAt: string,
+  type: SpotType = 'bench',
+): string {
   if (name) return name
   const d = new Date(createdAt)
-  return `Bank vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
+  const typeLabel = SPOT_TYPE_MAP[type].label
+  return `${typeLabel} vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
 }
 
 export function distanceTo(
   from: { lat: number; lng: number },
-  to: { lat: number; lng: number }
+  to: { lat: number; lng: number },
 ): string {
   const R = 6371000
   const φ1 = (from.lat * Math.PI) / 180

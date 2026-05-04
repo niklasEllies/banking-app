@@ -57,17 +57,26 @@
 - [x] Empty State + Onboarding-Hint bei leerer Bench-Liste
 - [x] BenchDetail Loading-Skeleton (statt "Lädt…")
 
-## Phase 4 – Plätzchen Rebrand & Spot-Generalisierung 🔜
+## Phase 4 – Plätzchen Rebrand & Spot-Generalisierung ✅
 
-App breitet sich von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wandern) aus.
+App ist von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wandern) generalisiert.
 
-- [ ] Schema-Migration: `benches` → `spots`, neue `type` Enum-Spalte (default `'bench'`)
-- [ ] 6 Spot-Types: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
-- [ ] Optional: `description` Freitext-Feld
-- [ ] Rename in Code: TypeScript `Bench` → `Spot`, Components, Routes (`/spots/...`), Server Actions
-- [ ] UI-Rebrand: Strings, App-Name, Logo
-- [ ] Vector-Icons je Spot-Type (Map-Marker)
-- [ ] AddSpotForm mit Type-Picker
+- [x] Schema-Migration 006: `benches` → `spots`, `bench_stats_votes` → `spot_stats_votes`, neue `type` Enum-Spalte (default `'bench'` für Bestandsdaten)
+- [x] 6 Spot-Types: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
+- [x] Migration 007: `spot_descriptions` Tabelle mit RLS, UNIQUE(spot, user), 280-char limit, updated_at trigger
+- [x] Postgres-Funktion `get_spot_aggregated_stats` (umbenannt von `get_bench_aggregated_stats`)
+- [x] Code-Rebrand: `Bench` → `Spot` Type, alle Components (BenchMap → SpotMap, BenchPopup → SpotPopup, BenchDetail → SpotDetail, AddBenchForm → AddSpotForm)
+- [x] Server Actions: `actions/benches.ts` → `actions/spots.ts`, `createSpot` validiert `type`
+- [x] Neue Server Action `actions/descriptions.ts` (list/upsert/delete) mit Tests
+- [x] Routen-Move: `/benches/*` → `/spots/*` (hard cutover)
+- [x] UI-Rebrand: "📍 Plätzchen" überall (MapHeader, Auth-Pages, App-Title), strings durchgängig
+- [x] Per-Type Emoji-Marker auf der Karte (cached `L.DivIcon` per Type)
+- [x] AddSpotForm mit `SpotTypePicker` (radiogroup, 6 Optionen)
+- [x] Neuer `SpotDescriptionFeed` im SpotDetail (Community-Tipps, eigener Tipp prominent + andere darunter)
+- [x] Type-Badge im SpotDetail unter Foto-Header
+- [x] Admin-Page: `AdminBenches` → `AdminSpots`, zeigt Spot-Type-Emoji, `bench_count` → `spot_count`
+
+**Bewusst rausgehalten:** Vector-Icons (User designt selbst), Description-Upvotes (Phase 5/6), Type-aware Stats-Visibility (Phase 7+).
 
 ## Phase 5 – Personal Layer 🔜
 
@@ -86,10 +95,11 @@ App breitet sich von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spot
 
 ## Phase 7 – Polish & Tech-Debt 🔜
 
-- [ ] BenchMap-Refactor (Custom Hooks rauslösen)
+- [ ] SpotMap-Refactor (Custom Hooks rauslösen)
 - [ ] Deep-Links zu Spots (shareable URLs)
 - [ ] PWA installable
 - [ ] N+1 in admin/page.tsx
 - [ ] Modal-Focus-Trap im BottomSheet
 - [ ] Kontrast-Tweaks (Drag-Handle, disabled-States)
 - [ ] Service-Role-Key Build-time-Validation
+- [ ] Vector-Icons (User designt) — ersetzen die Emoji-Marker

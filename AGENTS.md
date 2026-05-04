@@ -4,9 +4,11 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Project: BenchMarks (rebranding to "Plätzchen" in Phase 4)
+# Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 3b complete.** Next: Phase 4 (Plätzchen rebrand + spot-type generalization for hiking pause-spots).
+**Current state: Phase 4 complete.** Next: Phase 5 (Personal Layer — favorites, list view modes, spot edit).
+
+Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
 Before writing any code, read these files in order:
 
@@ -17,10 +19,13 @@ Before writing any code, read these files in order:
 
 Key rules derived from these docs:
 - Middleware is `proxy.ts` (not `middleware.ts`) — Next.js 16 breaking change
+- Protected routes: `/spots/*` (changed in Phase 4 from `/benches/*` — old paths removed)
 - Always use `supabase.auth.getUser()`, never `getSession()` in server context
 - Env var is `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (not `ANON_KEY`)
 - Dark mode: always add `dark:` variants with explicit hex values — CSS vars don't work with `@theme inline`
 - Dark mode palette: bg `#141810`, surface `#1e231a`, chips `#2a3124`, border `#2a2f24`, primary `#5e9e3e`
 - `params` is `Promise<{id: string}>` in Next.js 16 pages — use `React.use(params)` in Client Components
+- Use `SPOT_TYPES` / `SPOT_TYPE_MAP` from `lib/spot-types.ts` for any UI showing spot types — never hardcode emojis or labels
+- Storage bucket name `bench-photos` is intentionally kept (internal name from pre-rebrand era)
 - Ask for options + recommendation before implementing non-trivial features
 - Commit after every completed feature slice

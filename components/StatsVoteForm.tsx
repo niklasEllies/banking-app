@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { upsertStats, getBenchStats, type UserVote, type AggregatedStats } from '@/actions/stats'
+import { upsertStats, getSpotStats, type UserVote, type AggregatedStats } from '@/actions/stats'
 import { CONDITION_PRESETS, type ConditionPreset, conditionToPreset, shadowLabel } from '@/lib/stats-utils'
 
 const SHADOW_OPTIONS = [
@@ -61,7 +61,7 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
         setError(result.error)
         return
       }
-      const { aggregated } = await getBenchStats(benchId)
+      const { aggregated } = await getSpotStats(benchId)
       setSaved(true)
       onSaved(aggregated, vote)
     })

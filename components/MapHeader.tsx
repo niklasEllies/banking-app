@@ -8,7 +8,7 @@ export default async function MapHeader() {
 
   return (
     <div className="absolute top-3 left-3 right-3 z-1000 flex items-center justify-between bg-white/95 dark:bg-[#141810]/95 backdrop-blur-sm rounded-2xl px-4 py-2.5 shadow-md">
-      <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">🪑 BenchMarks</span>
+      <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">📍 Plätzchen</span>
       <div className="flex items-center gap-3 mt-0.5">
         <ThemeToggle />
         {user ? (

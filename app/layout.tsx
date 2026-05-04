@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BenchMarks',
-  description: 'Community-App zum Sammeln und Bewerten von Parkbänken',
+  title: 'Plätzchen',
+  description: 'Sammle und teile schöne Pause-Spots beim Wandern',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

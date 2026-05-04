@@ -2,7 +2,7 @@
 
 ## Überblick
 
-BenchMarks ist eine Next.js 16 App Router Anwendung mit Supabase als Backend. Community-App zum Sammeln und Bewerten von Parkbänken.
+Plätzchen ist eine Next.js 16 App Router Anwendung mit Supabase als Backend. Community-App zum Sammeln und Bewerten von netten Pause-Spots beim Wandern (Bänke, Aussichtspunkte, Schutzhütten, Rastplätze, Liegewiesen, Wasserstellen).
 
 ## Tech Stack
 
@@ -15,37 +15,38 @@ BenchMarks ist eine Next.js 16 App Router Anwendung mit Supabase als Backend. Co
 | Supabase | @supabase/ssr 0.10.x | Auth + Datenbank + Storage |
 | react-leaflet | 5.x | Karte |
 | react-leaflet-cluster | 4.x | Marker-Clustering |
-| Vitest | 4.x | Unit-Tests |
+| Vitest | 4.x | Unit-Tests (jsdom für Browser-Code) |
 
 ## Rendering-Strategie
 
 - **Server Components** laden Daten serverseitig via Supabase SSR
-- **Client Components** (`'use client'`) nur wo nötig: Karte, Formulare, BottomSheet, EmojiPicker, BenchDetail, StatsVoteForm
-- **Server Actions** (`'use server'`) für alle Mutationen: Auth, createBench, deleteBench, upsertStats, uploadBenchPhoto
+- **Client Components** (`'use client'`) nur wo nötig: Karte, Formulare, BottomSheet, EmojiPicker, SpotDetail, StatsVoteForm, SpotDescriptionFeed
+- **Server Actions** (`'use server'`) für alle Mutationen: Auth, createSpot, deleteSpot, upsertStats, uploadSpotPhoto, list/upsert/deleteDescription
 
 ## Datenfluss Hauptseite
 
 ```
 app/(app)/page.tsx (Server Component)
-  ├── Supabase: benches + getUser() + is_admin (parallel/sequentiell)
-  ├── MapHeader (Server Component)
+  ├── Supabase: spots (incl. type) + getUser() + is_admin (parallel/sequentiell)
+  ├── MapHeader (Server Component) ← "📍 Plätzchen"
   └── MapLayout (Client Component) ← koordiniert State zwischen Map und Sheet
-      ├── selectedBenchId, flyTarget, userPosition, isAdmin (State)
-      ├── BenchMapClient → BenchMap (dynamic ssr:false)
-      │   ├── LocationController (2-Phase GPS, ruft onPositionUpdate)
+      ├── selectedSpotId, flyTarget, userPosition, gpsState, isAdmin (State)
+      ├── GPS-Banner (denied/unavailable + dismissible)
+      ├── SpotMapClient → SpotMap (dynamic ssr:false)
+      │   ├── LocationController (2-Phase GPS, ruft onPositionUpdate + onGpsStateChange)
       │   ├── FlyController (flyTo bei Listentap)
-      │   ├── CenterController (📍 Button)
-      │   ├── AdminClickController (Map-Click → /benches/new, nur isAdmin)
-      │   ├── MarkerClusterGroup mit BenchPopup (lazy rarity fetch on open)
+      │   ├── CenterController (📍 Button, disabled wenn !available)
+      │   ├── AdminClickController (Map-Click → /spots/new, nur isAdmin)
+      │   ├── MarkerClusterGroup mit per-Type-Emoji-DivIcons (cached) + SpotPopup
       │   └── User-Position-Marker (Emoji aus localStorage)
       └── BottomSheet (Client Component)
-          ├── Liste: Benches mit Distanz + Tap → fly + detail
-          └── Detail: BenchDetail (Foto-Header, Stats, StatsVoteForm)
+          ├── Liste: Spots mit Type-Emoji + Distanz + Tap → fly + detail
+          └── Detail: SpotDetail (Foto-Header, Type-Badge, Stats, VoteForm, DescriptionFeed)
 ```
 
 ## Route-Schutz
 
-`proxy.ts` (Next.js 16 Middleware — **nicht** `middleware.ts`) schützt alle `/benches/*`-Routen.
+`proxy.ts` (Next.js 16 Middleware — **nicht** `middleware.ts`) schützt alle `/spots/*`-Routen.
 Nutzt `getUser()` (JWT-Validierung), nicht `getSession()` (nur Cookie-Lesen).
 
 ## GPS-Strategie (Two-Phase)
@@ -53,22 +54,53 @@ Nutzt `getUser()` (JWT-Validierung), nicht `getSession()` (nur Cookie-Lesen).
 1. **localStorage-Cache**: Karte startet sofort an letzter Position. Marker greyscale bis Phase 1 fertig.
 2. **Phase 1** — `getCurrentPosition({ enableHighAccuracy: false })`: Netzwerk < 1s, ~100-300m.
 3. **Phase 2** — `watchPosition({ enableHighAccuracy: true })`: GPS ~10m, fliegt sanft per `map.flyTo`. Stoppt bei `accuracy < 80m`.
-4. **onPositionUpdate**: BenchMap meldet aktuelle Position an MapLayout → BottomSheet zeigt Distanz.
+4. **onPositionUpdate**: SpotMap meldet Position an MapLayout → BottomSheet zeigt Distanz.
+5. **onGpsStateChange**: SpotMap meldet `'available' | 'denied' | 'unavailable'` an MapLayout — steuert Banner + Sheet-Hint + Center-FAB-Disable.
+
+## Spot-Types
+
+`lib/spot-types.ts` ist Source-of-Truth. 6 Typen mit Emoji + DE-Label. UI-Code zieht aus `SPOT_TYPE_MAP[spot.type]` — keine Hardcodes.
+
+| Type | Emoji | Label |
+|---|---|---|
+| bench | 🪑 | Bank |
+| viewpoint | 🏔️ | Aussichtspunkt |
+| shelter | ⛺ | Schutzhütte |
+| picnic | 🧺 | Rastplatz |
+| meadow | 🌿 | Liegewiese |
+| water | 💧 | Wasserstelle |
+
+Map-Marker via `getSpotIcon(type): L.DivIcon` (cached per Type) in `components/SpotMap.tsx`.
 
 ## Stats-Aggregation
 
-Community-Votes in `bench_stats_votes` (ein Row pro User/Bank). Aggregation per Postgres-Funktion `get_bench_aggregated_stats`:
+Community-Votes in `spot_stats_votes` (ein Row pro User/Spot). Aggregation per Postgres-Funktion `get_spot_aggregated_stats`:
 - Komfort/Aussicht/Zustand/Rarität: `PERCENTILE_CONT(0.5)` (Median)
 - Schatten: `MODE()` (häufigster Wert)
 - Extras: Items die ≥50% der Votes haben
 
-## Bench-Stats State-Flow
+Stats sind alle optional und universal (nicht type-spezifisch). Type-aware Visibility ist Phase 7+.
+
+## Spot-Stats State-Flow
 
 ```
 StatsVoteForm → upsertStats (Server Action)
-             → getBenchStats (Server Action)
+             → getSpotStats (Server Action)
              → onSaved(aggregated, vote) Callback
-             → BenchDetail State Update
+             → SpotDetail State Update
+```
+
+## Description-Feed (Phase 4)
+
+Community-Tipps unter SpotDetail. Ein Tipp pro (spot, user), 280-char Limit. Eigener Tipp prominent oben (Editor-Modus inline), andere darunter chronologisch.
+
+```
+SpotDescriptionFeed (mount)
+  → listDescriptions(spotId) (Server Action via useEffect)
+  → split: own vs others
+  → Editor (logged-in) / Login-CTA (anonym)
+  → upsertDescription / deleteDescription
+  → re-fetch + setState
 ```
 
 ## Dark Mode — Forest Deep
@@ -81,16 +113,17 @@ StatsVoteForm → upsertStats (Server Action)
 
 ## Supabase Storage
 
-Bucket `bench-photos`: public read, authenticated write (owner-only update/delete via `owner_id`).
-Upload-Pfad: `{bench_id}/photo` mit `upsert: true`.
-Photo-URL gespeichert in `benches.photo_url` (öffentliche CDN-URL).
+Bucket `bench-photos` (interner Name beibehalten): public read, authenticated write (owner-only update/delete via `owner_id`).
+Upload-Pfad: `{spot_id}/photo` mit `upsert: true`.
+Photo-URL gespeichert in `spots.photo_url` (öffentliche CDN-URL).
+Resize on Upload via `lib/image-utils.ts` (max 1600px, WebP @0.8, JPG @0.85 Fallback).
 
 ## Admin-Funktionen
 
 - `/admin` Route — nur für `is_admin = true`, sonst redirect `/`
 - `lib/supabase/admin.ts`: Service-Role-Client — NUR für `auth.admin.listUsers()`
-- `actions/admin.ts`: normaler User-Client mit RLS-Policies
-- Admin Click-to-Add: `isAdmin` prop-Kette → `AdminClickController` in BenchMap → Map-Click → `/benches/new?lat=X&lng=Y`
+- `actions/admin.ts`: normaler User-Client mit RLS-Policies (`adminDeleteSpot`)
+- Admin Click-to-Add: `isAdmin` prop-Kette → `AdminClickController` in SpotMap → Map-Click → `/spots/new?lat=X&lng=Y`
 
 ## Lokale Nutzer-Einstellungen (localStorage)
 
@@ -99,49 +132,61 @@ Photo-URL gespeichert in `benches.photo_url` (öffentliche CDN-URL).
 | `benchmarks_last_location` | `[lat, lng]` |
 | `benchmarks_user_emoji` | z.B. `"🧍‍♂️"` |
 | `benchmarks-theme` | `"dark"` oder nicht gesetzt |
+| `benchmarks-gps-banner-dismissed` | `"true"` wenn GPS-Warnung weggeklickt |
+
+(Keys behalten ihren `benchmarks_` Prefix für Backward-Compatibility — User mit Bestandsdaten verlieren sonst Einstellungen.)
 
 ## Wichtige Gotchas
 
 | | |
 |---|---|
 | **Middleware** | `proxy.ts` (nicht `middleware.ts`), `export default function proxy(req)` |
-| **Geschützte Routen** | `protectedRoutes = ['/benches']` mit `startsWith` — deckt alle Sub-Routen ab |
+| **Geschützte Routen** | `protectedRoutes = ['/spots']` mit `startsWith` — deckt alle Sub-Routen ab |
 | **searchParams** | Async in Next.js 16: `await searchParams` |
-| **Leaflet SSR** | Nur Client, via `dynamic(..., { ssr: false })` in BenchMapClient |
+| **Leaflet SSR** | Nur Client, via `dynamic(..., { ssr: false })` in SpotMapClient |
 | **Supabase Key** | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (nicht ANON_KEY) |
 | **Tailwind v4** | Arbitrary values: `z-[1000]` (mit Klammern) |
-| **BenchPopup Hooks** | Hat `'use client'` — Leaflet Popup mountet/unmountet bei Open/Close |
+| **SpotPopup Hooks** | Hat `'use client'` — Leaflet Popup mountet/unmountet bei Open/Close |
 | **params async** | Next.js 16: `params: Promise<{id: string}>` — `use(params)` in Client Components |
+| **Storage Bucket** | `bench-photos` (interner Name beibehalten trotz Rebrand) |
 
 ## Dateistruktur
 
 ```
 app/(auth)/login|signup/page.tsx          ← Auth-Seiten
-app/(app)/page.tsx                        ← Hauptseite (benches + user + isAdmin fetch)
-app/(app)/benches/new/page.tsx            ← Bank eintragen
-app/(app)/benches/[id]/edit-photo/        ← Foto nachträglich hochladen (Owner)
+app/(app)/page.tsx                        ← Hauptseite (spots + user + isAdmin fetch)
+app/(app)/spots/new/page.tsx              ← Spot eintragen
+app/(app)/spots/[id]/edit-photo/          ← Foto nachträglich hochladen (Owner)
 app/(app)/profil/page.tsx                 ← Profil + Emoji + Logout
-app/(app)/admin/page.tsx                  ← Admin (User + Bench Management)
+app/(app)/admin/page.tsx                  ← Admin (User + Spot Management)
+app/(app)/admin/AdminUsers.tsx            ← User-Liste mit Admin-Toggle
+app/(app)/admin/AdminSpots.tsx            ← Spot-Liste mit Type-Emoji
 actions/auth.ts                           ← signUp, login, logout
-actions/benches.ts                        ← createBench, deleteBench, uploadBenchPhoto
-actions/stats.ts                          ← getBenchStats, upsertStats
-actions/admin.ts                          ← setAdminRole, adminDeleteBench
-components/BenchMap.tsx                   ← Leaflet-Karte (Client, enthält Controller)
-components/BenchMapClient.tsx             ← dynamic-import Wrapper
-components/BenchPopup.tsx                 ← Leaflet Popup (lazy rarity fetch)
+actions/spots.ts                          ← createSpot, deleteSpot, uploadSpotPhoto
+actions/stats.ts                          ← getSpotStats, upsertStats
+actions/descriptions.ts                   ← listDescriptions, upsertDescription, deleteDescription
+actions/admin.ts                          ← setAdminRole, adminDeleteSpot
+components/SpotMap.tsx                    ← Leaflet-Karte (Client, enthält Controller, per-Type DivIcons)
+components/SpotMapClient.tsx              ← dynamic-import Wrapper
+components/SpotPopup.tsx                  ← Leaflet Popup (lazy rarity fetch, Type-Label)
 components/BottomSheet.tsx                ← Sheet: Liste/Detail-Modi, Distanz, flyTo+detail
-components/BenchDetail.tsx                ← Detail-Ansicht (Foto-Header, Stats, VoteForm)
+components/SpotDetail.tsx                 ← Detail-Ansicht (Foto-Header, Type-Badge, Stats, VoteForm, DescriptionFeed)
+components/SpotDescriptionFeed.tsx        ← Community-Tipps (own slot + others)
+components/SpotTypePicker.tsx             ← Radiogroup für 6 Spot-Types (im AddSpotForm)
 components/StatsVoteForm.tsx              ← Vote-Formular (Sterne, Condition, etc.)
 components/RarityBadge.tsx                ← Common→Legendary Badge
-components/MapLayout.tsx                  ← State-Koordinator (selectedBench, flyTarget, userPos)
-components/MapHeader.tsx                  ← Header (Theme-Toggle, ThemeToggle)
-components/AddBenchForm.tsx               ← Bank-Formular (inkl. optionales Foto)
+components/MapLayout.tsx                  ← State-Koordinator (selectedSpot, flyTarget, userPos, gpsState)
+components/MapHeader.tsx                  ← Header ("📍 Plätzchen", ThemeToggle)
+components/AddSpotForm.tsx                ← Spot-Formular (Type-Picker, Position, Name, Foto)
 components/ThemeToggle.tsx                ← Dark/Light Toggle
-components/EmojiPicker.tsx                ← Emoji-Auswahl (Client)
+components/EmojiPicker.tsx                ← User-Marker-Emoji-Auswahl
+components/useSheetSwipe.ts               ← Hook: Sheet swipe-vs-scroll split
 lib/supabase/server.ts + client.ts        ← Supabase Clients
 lib/supabase/admin.ts                     ← Service-Role Client (nur für auth.admin)
+lib/spot-types.ts                         ← SpotType, SPOT_TYPES, SPOT_TYPE_MAP
+lib/spot-utils.ts                         ← spotDisplayName (type-aware), distanceTo (Haversine)
 lib/stats-utils.ts                        ← conditionLabel, rarityLabel, shadowLabel, extrasIcon
-lib/bench-utils.ts                        ← benchDisplayName, distanceTo (Haversine)
-proxy.ts                                  ← Route-Schutz (/benches/*)
-supabase/migrations/                      ← SQL Migrations (001–004)
+lib/image-utils.ts                        ← resizeImage (max 1600px, WebP)
+proxy.ts                                  ← Route-Schutz (/spots/*)
+supabase/migrations/                      ← SQL Migrations (001–007)
 ```

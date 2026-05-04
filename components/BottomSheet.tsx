@@ -131,9 +131,15 @@ export default function BottomSheet({
         {selectedBench ? (
           <BenchDetail bench={selectedBench} userId={userId} />
         ) : count === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
-            Noch keine Bänke eingetragen
-          </p>
+          <div className="py-12 px-6 text-center">
+            <div className="text-5xl mb-3">🪑</div>
+            <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+              Noch keine Bänke in der Nähe.
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Tippe auf <strong className="text-primary">+</strong> unten rechts, um deine erste einzutragen.
+            </p>
+          </div>
         ) : (
           <>
             {gpsState !== 'available' && gpsState !== 'unknown' && (

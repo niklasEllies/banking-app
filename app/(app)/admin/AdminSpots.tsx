@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react'
 import { adminDeleteSpot } from '@/actions/admin'
 import { spotDisplayName } from '@/lib/spot-utils'
-import type { SpotType } from '@/lib/spot-types'
+import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
 
-export interface AdminBench {
+export interface AdminSpot {
   id: string
   name: string | null
   type: SpotType
@@ -14,47 +14,47 @@ export interface AdminBench {
   profiles: { username: string | null } | null
 }
 
-export default function AdminBenches({ benches: initial }: { benches: AdminBench[] }) {
-  const [benches, setBenches] = useState(initial)
+export default function AdminSpots({ spots: initial }: { spots: AdminSpot[] }) {
+  const [spots, setSpots] = useState(initial)
   const [isPending, startTransition] = useTransition()
 
   const handleDelete = (id: string) => {
-    setBenches((prev) => prev.filter((b) => b.id !== id))
+    setSpots((prev) => prev.filter((s) => s.id !== id))
     startTransition(async () => {
       const result = await adminDeleteSpot(id)
-      if (result.error) setBenches(initial)
+      if (result.error) setSpots(initial)
     })
   }
 
   return (
     <div>
       <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
-        {benches.length} {benches.length === 1 ? 'Bank' : 'Bänke'}
+        {spots.length} Plätzchen
       </p>
       <div className="space-y-2">
-        {benches.length === 0 && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Keine Bänke</p>
+        {spots.length === 0 && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Keine Plätzchen</p>
         )}
-        {benches.map((bench) => (
+        {spots.map((spot) => (
           <div
-            key={bench.id}
+            key={spot.id}
             className="bg-white dark:bg-[#1e231a] rounded-xl px-3 py-2.5 flex items-center gap-3"
           >
-            <span className="text-xl shrink-0">🪑</span>
+            <span className="text-xl shrink-0">{SPOT_TYPE_MAP[spot.type].emoji}</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-800 dark:text-gray-200 truncate">
-                {spotDisplayName(bench.name, bench.created_at, bench.type)}
+                {spotDisplayName(spot.name, spot.created_at, spot.type)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                @{bench.profiles?.username ?? '—'} ·{' '}
-                {new Date(bench.created_at).toLocaleDateString('de-DE')}
+                @{spot.profiles?.username ?? '—'} ·{' '}
+                {new Date(spot.created_at).toLocaleDateString('de-DE')}
               </p>
             </div>
             <button
-              onClick={() => handleDelete(bench.id)}
+              onClick={() => handleDelete(spot.id)}
               disabled={isPending}
-              className="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-40"
-              aria-label="Bank löschen"
+              className="shrink-0 min-w-11 min-h-11 flex items-center justify-center text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-40"
+              aria-label="Plätzchen löschen"
             >
               🗑
             </button>

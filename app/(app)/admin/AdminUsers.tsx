@@ -9,7 +9,7 @@ export interface AdminUser {
   email: string | null
   is_admin: boolean
   created_at: string
-  bench_count: number
+  spot_count: number
 }
 
 export default function AdminUsers({ users, currentUserId }: { users: AdminUser[]; currentUserId: string }) {
@@ -60,7 +60,7 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
         )}
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-          {user.bench_count} {user.bench_count === 1 ? 'Bank' : 'Bänke'} ·{' '}
+          {user.spot_count} Plätzchen ·{' '}
           {new Date(user.created_at).toLocaleDateString('de-DE')}
         </p>
       </div>

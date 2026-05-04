@@ -141,38 +141,45 @@ export default function BottomSheet({
             Noch keine Bänke eingetragen
           </p>
         ) : (
-          <ul>
-            {benches.map((bench) => (
-              <li
-                key={bench.id}
-                className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1f14] active:bg-gray-100 dark:active:bg-[#161a10]"
-                onClick={() => {
-                  onFlyToBench(bench)
-                  onBenchSelect(bench.id)
-                }}
-              >
-                <span className="text-xl shrink-0">🪑</span>
-                <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">
-                  {benchDisplayName(bench.name, bench.created_at)}
-                </span>
-                {userPosition && (
-                  <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 mr-1">
-                    {distanceTo(userPosition, { lat: bench.lat, lng: bench.lng })}
+          <>
+            {gpsState !== 'available' && gpsState !== 'unknown' && (
+              <div className="px-5 py-2 text-xs italic text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-[#2a2f24]">
+                📍 Standort aus — Distanzen werden nicht angezeigt
+              </div>
+            )}
+            <ul>
+              {benches.map((bench) => (
+                <li
+                  key={bench.id}
+                  className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1f14] active:bg-gray-100 dark:active:bg-[#161a10]"
+                  onClick={() => {
+                    onFlyToBench(bench)
+                    onBenchSelect(bench.id)
+                  }}
+                >
+                  <span className="text-xl shrink-0">🪑</span>
+                  <span className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">
+                    {benchDisplayName(bench.name, bench.created_at)}
                   </span>
-                )}
-                {userId && bench.created_by === userId && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(bench.id) }}
-                    disabled={isPending}
-                    className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
-                    aria-label="Bank löschen"
-                  >
-                    🗑
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+                  {userPosition && gpsState === 'available' && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 mr-1">
+                      {distanceTo(userPosition, { lat: bench.lat, lng: bench.lng })}
+                    </span>
+                  )}
+                  {userId && bench.created_by === userId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(bench.id) }}
+                      disabled={isPending}
+                      className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
+                      aria-label="Bank löschen"
+                    >
+                      🗑
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
     </div>

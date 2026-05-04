@@ -24,22 +24,41 @@
 - [x] Admin-Dashboard /admin (Userliste + Bänke, Admin-Rolle vergeben)
 - [x] Admin RLS-Policies (Bench delete, Profile update)
 
-## Phase 2 – Bank-Details 🔜
+## Phase 2 – Bank-Stats & Fotos ✅
 
-- [ ] Foto-Upload (Supabase Storage)
-- [ ] Rarity-Voting (Community-Median: Common → Legendary)
-- [ ] View-Bewertung (1–5)
-- [ ] Sitzkomfort (1–5)
-- [ ] Zustand (Float 0.0–1.0, CS:GO-Stil)
-- [ ] Schatten (Kein / Ja / Tageszeitabhängig)
-- [ ] Extras (Mülleimer, etc.)
+- [x] Community-Voting: Komfort (1–5), Aussicht (1–5), Rarität (1–5), Zustand (FN/MW/FT/WW/BS), Schatten, Extras
+- [x] Aggregation via Postgres-Funktion `get_bench_aggregated_stats` (Median, Mode, 50%-Threshold)
+- [x] `bench_stats_votes` Tabelle mit UPSERT-Pattern (ein Vote pro User/Bank)
+- [x] Foto-Upload (Supabase Storage Bucket `bench-photos`, owner-only)
+- [x] Foto beim Bank-Eintragen (optional)
+- [x] Nachträgliches Foto-Upload via `/benches/[id]/edit-photo`
+- [x] BenchPopup mit Foto-Thumbnail, Rarität-Badge, Details-Button
+- [x] Bottom Sheet Detail-Modus (BenchDetail mit Aggregat-Stats + StatsVoteForm)
+- [x] RarityBadge Komponente (Common → Legendary, Farbkodiert)
+- [x] Storage RLS-Policies für `bench-photos`
 
-## Phase 3 – Community & Bestätigung 🔜
+## Phase 3a – Detail-QoL & Theme ✅
+
+- [x] Forest Deep Dark Mode (besserer Kontrast: bg `#141810`, surface `#1e231a`, chips `#2a3124`)
+- [x] BenchDetail Foto/Name-Header (full-width 110px, Overlay mit Name + Rarität-Badge)
+- [x] Listentap öffnet direkt Detail + fliegt zur Bank (Sheet bleibt offen)
+- [x] Distanzanzeige in der Bänkeliste (Haversine, nur wenn GPS verfügbar)
+- [x] Lazy Rarity im Popup (fetcht beim Öffnen via useEffect)
+- [x] Admin Click-to-Add (Crosshair-Cursor, Map-Click → /benches/new)
+- [x] ✏️ Foto-Edit-Button im Sheet-Header (nur Owner, Link zu edit-photo)
+
+## Phase 3b – Nearby Bench Deduplication 🔜
+
+- [ ] Proximity-Check beim Eintragen (Radius ~20m)
+- [ ] Soft Prompt: "Meinst du diese Bank?" wenn Duplikat erkannt
+- [ ] Kein Hard-Block — User kann trotzdem eintragen
+
+## Phase 4 – Community & Bestätigung 🔜
 
 - [ ] Bestätigungs-Mechanismus (3 Bestätigungen nötig)
 - [ ] "Existiert nicht mehr"-Meldung
 
-## Phase 4 – Gamification 🔜
+## Phase 5 – Gamification 🔜
 
 - [ ] Punktesystem (Bank eintragen +10, Foto +5, Bestätigen +2, Erste Bestätigung +3)
 - [ ] Badges (Erste Bank, Entdecker, Legendary, etc.)

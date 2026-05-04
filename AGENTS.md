@@ -4,9 +4,9 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Project: BenchMarks
+# Project: BenchMarks (rebranding to "Plätzchen" in Phase 4)
 
-**Current state: Phase 3a complete.** Next: Phase 3b (nearby bench deduplication).
+**Current state: Phase 3b complete.** Next: Phase 4 (Plätzchen rebrand + spot-type generalization for hiking pause-spots).
 
 Before writing any code, read these files in order:
 

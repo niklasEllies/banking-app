@@ -47,19 +47,49 @@
 - [x] Admin Click-to-Add (Crosshair-Cursor, Map-Click → /benches/new)
 - [x] ✏️ Foto-Edit-Button im Sheet-Header (nur Owner, Link zu edit-photo)
 
-## Phase 3b – Nearby Bench Deduplication 🔜
+## Phase 3b – Foundation Fixes ✅
 
-- [ ] Proximity-Check beim Eintragen (Radius ~20m)
-- [ ] Soft Prompt: "Meinst du diese Bank?" wenn Duplikat erkannt
-- [ ] Kein Hard-Block — User kann trotzdem eintragen
+- [x] GPS-Permission-Warnung (Banner + Sheet-Hint + 📍-Button-Disable)
+- [x] BottomSheet Scroll-vs-Swipe (Drag-Handle immer, Content nur bei scrollTop=0)
+- [x] Foto-Resize on Upload (max 1600px, WebP @0.8 mit JPG-Fallback) — ~30× kleiner
+- [x] Backend Safety: DELETE-Policy `bench_stats_votes`, `.maybeSingle()` defensiv, Orphan-Foto-Cleanup
+- [x] A11y Minimums: Touch-Targets ≥44×44, StarPicker/EmojiPicker als Radiogroup, Focus-Rings Auth
+- [x] Empty State + Onboarding-Hint bei leerer Bench-Liste
+- [x] BenchDetail Loading-Skeleton (statt "Lädt…")
 
-## Phase 4 – Community & Bestätigung 🔜
+## Phase 4 – Plätzchen Rebrand & Spot-Generalisierung 🔜
 
-- [ ] Bestätigungs-Mechanismus (3 Bestätigungen nötig)
-- [ ] "Existiert nicht mehr"-Meldung
+App breitet sich von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wandern) aus.
 
-## Phase 5 – Gamification 🔜
+- [ ] Schema-Migration: `benches` → `spots`, neue `type` Enum-Spalte (default `'bench'`)
+- [ ] 6 Spot-Types: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
+- [ ] Optional: `description` Freitext-Feld
+- [ ] Rename in Code: TypeScript `Bench` → `Spot`, Components, Routes (`/spots/...`), Server Actions
+- [ ] UI-Rebrand: Strings, App-Name, Logo
+- [ ] Vector-Icons je Spot-Type (Map-Marker)
+- [ ] AddSpotForm mit Type-Picker
 
-- [ ] Punktesystem (Bank eintragen +10, Foto +5, Bestätigen +2, Erste Bestätigung +3)
-- [ ] Badges (Erste Bank, Entdecker, Legendary, etc.)
-- [ ] Nutzerprofil mit Punktestand und Badge-Übersicht
+## Phase 5 – Personal Layer 🔜
+
+- [ ] `favorites` Tabelle (user_id, spot_id)
+- [ ] BottomSheet View-Modes: Alle / Eigene / Favoriten
+- [ ] Favoriten-Stern in SpotDetail
+- [ ] Spot bearbeiten (Name, Type)
+- [ ] Optional: Search/Filter
+
+## Phase 6 – Privacy & Friends 🔜
+
+- [ ] Friends-System (Request/Accept)
+- [ ] Spot-Visibility: `public` / `friends` / `private`
+- [ ] RLS-Policies anpassen
+- [ ] Privacy-Picker beim Eintragen, Filter im Sheet
+
+## Phase 7 – Polish & Tech-Debt 🔜
+
+- [ ] BenchMap-Refactor (Custom Hooks rauslösen)
+- [ ] Deep-Links zu Spots (shareable URLs)
+- [ ] PWA installable
+- [ ] N+1 in admin/page.tsx
+- [ ] Modal-Focus-Trap im BottomSheet
+- [ ] Kontrast-Tweaks (Drag-Handle, disabled-States)
+- [ ] Service-Role-Key Build-time-Validation

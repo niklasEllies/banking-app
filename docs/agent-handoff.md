@@ -58,14 +58,34 @@ Forest Deep Farbpalette (Dark Mode):
 
 **Neue UI-Elemente immer mit `dark:` Varianten versehen. Explizite Hex-Werte, keine CSS-Vars.**
 
-## Aktuelle Datenbankstruktur (Stand: Phase 3a)
+## Aktuelle Datenbankstruktur (Stand: Phase 3b)
 
 - `profiles`: id, username, is_admin
 - `benches`: id, created_by, lat, lng, name, photo_url, created_at
 - `bench_stats_votes`: id, bench_id, user_id, comfort, view_rating, condition, shadow, extras, rarity
-- Storage Bucket `bench-photos`: public read, owner write
+  - RLS: SELECT (any), INSERT/UPDATE/DELETE (own user_id)
+- Storage Bucket `bench-photos`: public read, owner write/delete
 
 Aggregation via `get_bench_aggregated_stats(p_bench_id uuid)` Postgres-Funktion.
+
+## Phase 3b Patterns (zusätzlich zu Phase 3a)
+
+### GPS-State im MapLayout
+```ts
+type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
+```
+BenchMap meldet via `onGpsStateChange` an MapLayout. State steuert: Banner-Anzeige, Center-FAB-Disable, Sheet-Hint, Distanz-Anzeige.
+
+### Foto-Resize on Upload
+`lib/image-utils.ts` → `resizeImage(file: File): Promise<File>` — wird vor jedem Upload aufgerufen (AddBenchForm + edit-photo). Max 1600px lange Kante, WebP @0.8 mit JPEG @0.85 Fallback.
+
+### Defensive Queries
+`.maybeSingle()` (statt `.single()`) wo Row-Existenz nicht garantiert ist — `?.` chains handhaben null sauber.
+
+### BottomSheet Swipe
+`useSheetSwipe` Hook splittet Touch-Handler:
+- `handleProps` → Drag-Handle: swipe-to-dismiss greift immer
+- `contentProps` → Content-Bereich: nur wenn `scrollTop === 0`
 
 ## Bekannte Muster im Code
 
@@ -104,11 +124,18 @@ await upsertStats(benchId, { comfort: 4, rarity: 3 })
 
 ## Was als nächstes kommt
 
-**Phase 3b — Nearby Bench Deduplication:**
-- Beim Eintragen einer neuen Bank: Server Action prüft ob innerhalb von ~20m bereits eine Bank existiert
-- Soft Prompt: "~15m entfernt liegt bereits eine Bank — meinst du diese?"
-- Kein Hard-Block — User kann trotzdem eintragen
-- Spec: `docs/superpowers/specs/2026-05-03-phase3a-detail-qol-design.md` (Abschnitt "Nicht in Phase 3a")
+**Phase 4 — Plätzchen Rebrand & Spot-Generalisierung** (große Phase):
+
+App wird von "BenchMarks" (nur Bänke) zu **"Plätzchen"** (nette Pause-Spots beim Wandern). Strategische Diskussion: docs/superpowers/specs/ — wird vor Start brainstormed.
+
+Kernpunkte:
+- Schema: `benches` → `spots` Tabelle mit neuer `type` Enum-Spalte. 6 Typen: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`. Default für Bestandsdaten: `'bench'`.
+- Optional: `description` Freitext-Feld pro Spot
+- Rebrand: TypeScript-Typ `Bench` → `Spot`, Components, Routen `/spots/*`, Server Actions, UI-Strings, App-Name "Plätzchen"
+- Vector-Icons pro Spot-Type (Map-Marker)
+- Stats bleiben optional — nicht jeder Type braucht jedes Feld
+
+**Bekannte abgesagte Idee:** Die ursprünglich geplante "Nearby Bench Deduplication" (Soft-Prompt bei <20m) wurde fallen gelassen. Bei broader Spot-Types (Aussichtspunkt vs. Bank an gleicher Stelle = unterschiedliche Spots) ist Duplikat-Erkennung weniger wertvoll.
 
 ## Stil-Guide
 

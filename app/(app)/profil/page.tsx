@@ -14,7 +14,7 @@ export default async function ProfilPage() {
     .from('profiles')
     .select('username, is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">

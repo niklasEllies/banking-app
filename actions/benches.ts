@@ -69,12 +69,13 @@ export async function deleteBench(id: string): Promise<{ error?: string }> {
 
   if (!user) return { error: 'Nicht eingeloggt' }
 
-  const { data: bench } = await supabase
+  const { data: bench, error: benchError } = await supabase
     .from('benches')
     .select('created_by')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
+  if (benchError) return { error: 'Bank konnte nicht geprüft werden' }
   if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
 
   const { error } = await supabase.from('benches').delete().eq('id', id)
@@ -93,11 +94,12 @@ export async function uploadBenchPhoto(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Nicht eingeloggt' }
 
-  const { data: bench } = await supabase
+  const { data: bench, error: benchError } = await supabase
     .from('benches')
     .select('created_by')
     .eq('id', benchId)
-    .single()
+    .maybeSingle()
+  if (benchError) return { error: 'Bank konnte nicht geprüft werden' }
   if (!bench || bench.created_by !== user.id) return { error: 'Keine Berechtigung' }
 
   const file = formData.get('photo') as File

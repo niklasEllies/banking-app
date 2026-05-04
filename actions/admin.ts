@@ -11,7 +11,7 @@ async function requireAdmin() {
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
   return profile?.is_admin ? { user, supabase } : null
 }
 

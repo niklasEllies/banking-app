@@ -17,7 +17,7 @@ export default async function HomePage() {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
     isAdmin = profile?.is_admin ?? false
   }
 

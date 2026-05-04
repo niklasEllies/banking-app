@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useRef, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import type { Bench } from '@/components/BenchMap'
 import { deleteBench } from '@/actions/benches'
 import { benchDisplayName, distanceTo } from '@/lib/bench-utils'
 import BenchDetail from '@/components/BenchDetail'
+import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
 
@@ -33,10 +34,8 @@ export default function BottomSheet({
   gpsState = 'unknown',
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [dragY, setDragY] = useState(0)
   const [benches, setBenches] = useState(initialBenches)
   const [isPending, startTransition] = useTransition()
-  const startYRef = useRef(0)
   const count = benches.length
 
   const selectedBench = benches.find(b => b.id === selectedBenchId) ?? null
@@ -55,26 +54,17 @@ export default function BottomSheet({
     onBenchDeselect()
   }
 
+  const { dragY, handleProps, contentProps } = useSheetSwipe({
+    onDismiss: collapse,
+    enabled: isExpanded,
+  })
+
   const handleDelete = (id: string) => {
     setBenches(prev => prev.filter(b => b.id !== id))
     startTransition(async () => {
       const result = await deleteBench(id)
       if (result.error) setBenches(initialBenches)
     })
-  }
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    startYRef.current = e.touches[0].clientY
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const delta = e.touches[0].clientY - startYRef.current
-    if (isExpanded && delta > 0) setDragY(delta)
-  }
-
-  const handleTouchEnd = () => {
-    if (isExpanded && dragY > 80) collapse()
-    setDragY(0)
   }
 
   if (!isExpanded) {
@@ -96,12 +86,12 @@ export default function BottomSheet({
         transform: `translateY(${dragY}px)`,
         transition: dragY === 0 ? 'transform 0.25s ease' : 'none',
       }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none">
+      {/* Header (drag handle area — always swipes) */}
+      <div
+        className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none"
+        {...handleProps}
+      >
         <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
         {selectedBenchId ? (
           <button onClick={onBenchDeselect} className="text-sm text-primary mt-2">
@@ -132,8 +122,12 @@ export default function BottomSheet({
         </div>
       </div>
 
-      {/* Content */}
-      <div className="overflow-y-auto pb-8" style={{ height: 'calc(55vh - 56px)' }}>
+      {/* Content (scroll-aware: only swipes when scrolled to top) */}
+      <div
+        className="overflow-y-auto pb-8"
+        style={{ height: 'calc(55vh - 56px)' }}
+        {...contentProps}
+      >
         {selectedBench ? (
           <BenchDetail bench={selectedBench} userId={userId} />
         ) : count === 0 ? (

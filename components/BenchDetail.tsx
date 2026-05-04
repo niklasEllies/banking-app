@@ -30,8 +30,19 @@ export default function BenchDetail({ bench, userId }: BenchDetailProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-10">
-        <span className="text-sm text-gray-500 dark:text-gray-400">Lädt…</span>
+      <div>
+        {/* Photo header skeleton (matches 110px height of real header) */}
+        <div className="bg-gray-200 dark:bg-[#2a3124] animate-pulse" style={{ height: '110px' }} />
+        {/* Stats body skeleton */}
+        <div className="px-5 py-3 space-y-3 animate-pulse">
+          <div className="h-4 w-24 bg-gray-200 dark:bg-[#2a3124] rounded" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="h-9 bg-gray-200 dark:bg-[#2a3124] rounded-lg" />
+            <div className="h-9 bg-gray-200 dark:bg-[#2a3124] rounded-lg" />
+            <div className="h-9 bg-gray-200 dark:bg-[#2a3124] rounded-lg" />
+          </div>
+          <div className="h-4 w-1/2 bg-gray-200 dark:bg-[#2a3124] rounded" />
+        </div>
       </div>
     )
   }

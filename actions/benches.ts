@@ -109,22 +109,27 @@ export async function uploadBenchPhoto(
     return { error: 'Ungültiges Format (nur jpg, png, webp)' }
   }
 
+  const uploadPath = `${benchId}/photo`
+
   const { error: uploadError } = await supabase.storage
     .from('bench-photos')
-    .upload(`${benchId}/photo`, file, { contentType: file.type, upsert: true })
+    .upload(uploadPath, file, { contentType: file.type, upsert: true })
 
   if (uploadError) return { error: uploadError.message }
 
   const { data: { publicUrl } } = supabase.storage
     .from('bench-photos')
-    .getPublicUrl(`${benchId}/photo`)
+    .getPublicUrl(uploadPath)
 
   const { error: updateError } = await supabase
     .from('benches')
     .update({ photo_url: publicUrl })
     .eq('id', benchId)
 
-  if (updateError) return { error: updateError.message }
+  if (updateError) {
+    await supabase.storage.from('bench-photos').remove([uploadPath])
+    return { error: updateError.message }
+  }
 
   revalidatePath('/')
   return { url: publicUrl }

@@ -106,7 +106,7 @@ export default function BottomSheet({
           {selectedBench && userId === selectedBench.created_by && (
             <Link
               href={`/benches/${selectedBench.id}/edit-photo`}
-              className="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              className="min-w-11 min-h-11 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               aria-label="Foto bearbeiten"
             >
               ✏️
@@ -114,7 +114,7 @@ export default function BottomSheet({
           )}
           <button
             onClick={collapse}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none"
+            className="min-w-11 min-h-11 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none"
             aria-label="Schließen"
           >
             ✕
@@ -170,7 +170,7 @@ export default function BottomSheet({
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(bench.id) }}
                       disabled={isPending}
-                      className="shrink-0 text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
+                      className="shrink-0 min-w-11 min-h-11 flex items-center justify-center text-red-400 hover:text-red-600 transition-colors text-base disabled:opacity-40"
                       aria-label="Bank löschen"
                     >
                       🗑

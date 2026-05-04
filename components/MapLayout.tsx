@@ -5,6 +5,8 @@ import BenchMapClient from '@/components/BenchMapClient'
 import BottomSheet from '@/components/BottomSheet'
 import type { Bench } from '@/components/BenchMap'
 
+export type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
+
 interface MapLayoutProps {
   benches: Bench[]
   isAuthenticated: boolean
@@ -17,6 +19,7 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
   const [selectedBenchId, setSelectedBenchId] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null)
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsState, setGpsState] = useState<GpsState>('unknown')
 
   const handleBenchSelect = useCallback((benchId: string) => {
     setSelectedBenchId(benchId)
@@ -34,6 +37,10 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
     setUserPosition(pos)
   }, [])
 
+  const handleGpsStateChange = useCallback((state: GpsState) => {
+    setGpsState(state)
+  }, [])
+
   return (
     <>
       <BenchMapClient
@@ -46,6 +53,8 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
         onFlyTargetUsed={() => setFlyTarget(null)}
         isAdmin={isAdmin}
         onPositionUpdate={handlePositionUpdate}
+        onGpsStateChange={handleGpsStateChange}
+        gpsState={gpsState}
       />
       <BottomSheet
         benches={benches}
@@ -56,6 +65,7 @@ export default function MapLayout({ benches, isAuthenticated, userId, isAdmin = 
         onBenchDeselect={handleBenchDeselect}
         onFlyToBench={handleFlyToBench}
         userPosition={userPosition}
+        gpsState={gpsState}
       />
     </>
   )

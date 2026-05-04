@@ -7,6 +7,8 @@ import { deleteBench } from '@/actions/benches'
 import { benchDisplayName, distanceTo } from '@/lib/bench-utils'
 import BenchDetail from '@/components/BenchDetail'
 
+type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
+
 interface BottomSheetProps {
   benches: Bench[]
   userId: string | null
@@ -16,6 +18,7 @@ interface BottomSheetProps {
   onBenchDeselect: () => void
   onFlyToBench: (bench: Bench) => void
   userPosition: { lat: number; lng: number } | null
+  gpsState?: GpsState
 }
 
 export default function BottomSheet({
@@ -27,6 +30,7 @@ export default function BottomSheet({
   onBenchDeselect,
   onFlyToBench,
   userPosition,
+  gpsState = 'unknown',
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [dragY, setDragY] = useState(0)

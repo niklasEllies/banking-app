@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { deleteSpot } from '@/actions/spots'
-import BenchPopup from '@/components/BenchPopup'
-import type { SpotType } from '@/lib/spot-types'
+import SpotPopup from '@/components/SpotPopup'
+import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 const EMOJI_KEY = 'benchmarks_user_emoji'
@@ -29,6 +29,22 @@ const makeUserIcon = (emoji: string, grayscale: boolean) =>
     iconSize: [30, 41],
     iconAnchor: [15, 41],
   })
+
+const ICON_CACHE = new Map<SpotType, L.DivIcon>()
+
+function getSpotIcon(type: SpotType): L.DivIcon {
+  const cached = ICON_CACHE.get(type)
+  if (cached) return cached
+  const icon = new L.DivIcon({
+    html: `<span style="font-size:30px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.7))">${SPOT_TYPE_MAP[type].emoji}</span>`,
+    className: '',
+    iconSize: [30, 41],
+    iconAnchor: [15, 41],
+    popupAnchor: [0, -36],
+  })
+  ICON_CACHE.set(type, icon)
+  return icon
+}
 
 const createClusterIcon = (cluster: any) => {
   const count = cluster.getChildCount()
@@ -54,7 +70,7 @@ const createClusterIcon = (cluster: any) => {
   })
 }
 
-export interface Bench {
+export interface Spot {
   id: string
   type: SpotType
   lat: number
@@ -67,8 +83,8 @@ export interface Bench {
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
 
-interface BenchMapProps {
-  benches: Bench[]
+interface SpotMapProps {
+  spots: Spot[]
   isAuthenticated: boolean
   userId: string | null
   sheetExpanded: boolean
@@ -232,8 +248,8 @@ function LocationController({
   return null
 }
 
-export default function BenchMap({
-  benches: initialBenches,
+export default function SpotMap({
+  spots: initialSpots,
   isAuthenticated,
   userId,
   sheetExpanded,
@@ -244,9 +260,9 @@ export default function BenchMap({
   onPositionUpdate,
   onGpsStateChange,
   gpsState = 'unknown',
-}: BenchMapProps) {
+}: SpotMapProps) {
   const router = useRouter()
-  const [localBenches, setLocalBenches] = useState(initialBenches)
+  const [localSpots, setLocalSpots] = useState(initialSpots)
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [hasLivePosition, setHasLivePosition] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
@@ -275,10 +291,10 @@ export default function BenchMap({
   const handleLocating = useCallback((v: boolean) => setIsLocating(v), [])
 
   const handleDelete = useCallback(async (id: string) => {
-    setLocalBenches(prev => prev.filter(b => b.id !== id))
+    setLocalSpots(prev => prev.filter(s => s.id !== id))
     const result = await deleteSpot(id)
-    if (result.error) setLocalBenches(initialBenches)
-  }, [initialBenches])
+    if (result.error) setLocalSpots(initialSpots)
+  }, [initialSpots])
 
   const handleFabClick = () => {
     if (userPosition) {
@@ -315,14 +331,14 @@ export default function BenchMap({
         />
 
         <MarkerClusterGroup chunkedLoading maxClusterRadius={60} iconCreateFunction={createClusterIcon}>
-          {localBenches.map((bench) => (
-            <Marker key={bench.id} position={[bench.lat, bench.lng]}>
+          {localSpots.map((spot) => (
+            <Marker key={spot.id} position={[spot.lat, spot.lng]} icon={getSpotIcon(spot.type)}>
               <Popup>
-                <BenchPopup
-                  bench={bench}
+                <SpotPopup
+                  spot={spot}
                   userId={userId}
-                  onDetails={() => onBenchSelect?.(bench.id)}
-                  onDelete={() => handleDelete(bench.id)}
+                  onDetails={() => onBenchSelect?.(spot.id)}
+                  onDelete={() => handleDelete(spot.id)}
                 />
               </Popup>
             </Marker>

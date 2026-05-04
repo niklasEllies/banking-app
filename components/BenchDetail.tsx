@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 import { getSpotStats, type AggregatedStats, type UserVote } from '@/actions/stats'
 import { conditionLabel, shadowLabel, extrasIcon } from '@/lib/stats-utils'
 import { spotDisplayName } from '@/lib/spot-utils'
@@ -10,7 +10,7 @@ import RarityBadge from '@/components/RarityBadge'
 import StatsVoteForm from '@/components/StatsVoteForm'
 
 interface BenchDetailProps {
-  bench: Bench
+  bench: Spot
   userId: string | null
 }
 

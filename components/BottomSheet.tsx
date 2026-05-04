@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 import { deleteSpot } from '@/actions/spots'
 import { spotDisplayName, distanceTo } from '@/lib/spot-utils'
 import BenchDetail from '@/components/BenchDetail'
@@ -11,25 +11,25 @@ import { useSheetSwipe } from '@/components/useSheetSwipe'
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
 
 interface BottomSheetProps {
-  benches: Bench[]
+  spots: Spot[]
   userId: string | null
   onExpandedChange: (expanded: boolean) => void
-  selectedBenchId: string | null
-  onBenchSelect: (benchId: string) => void
-  onBenchDeselect: () => void
-  onFlyToBench: (bench: Bench) => void
+  selectedSpotId: string | null
+  onSpotSelect: (spotId: string) => void
+  onSpotDeselect: () => void
+  onFlyToSpot: (spot: Spot) => void
   userPosition: { lat: number; lng: number } | null
   gpsState?: GpsState
 }
 
 export default function BottomSheet({
-  benches: initialBenches,
+  spots: initialBenches,
   userId,
   onExpandedChange,
-  selectedBenchId,
-  onBenchSelect,
-  onBenchDeselect,
-  onFlyToBench,
+  selectedSpotId,
+  onSpotSelect,
+  onSpotDeselect,
+  onFlyToSpot,
   userPosition,
   gpsState = 'unknown',
 }: BottomSheetProps) {
@@ -38,20 +38,20 @@ export default function BottomSheet({
   const [isPending, startTransition] = useTransition()
   const count = benches.length
 
-  const selectedBench = benches.find(b => b.id === selectedBenchId) ?? null
+  const selectedBench = benches.find(b => b.id === selectedSpotId) ?? null
 
   useEffect(() => {
-    if (selectedBenchId) {
+    if (selectedSpotId) {
       setIsExpanded(true)
       onExpandedChange(true)
     }
-  }, [selectedBenchId, onExpandedChange])
+  }, [selectedSpotId, onExpandedChange])
 
   const expand = () => { setIsExpanded(true); onExpandedChange(true) }
   const collapse = () => {
     setIsExpanded(false)
     onExpandedChange(false)
-    onBenchDeselect()
+    onSpotDeselect()
   }
 
   const { dragY, handleProps, contentProps } = useSheetSwipe({
@@ -93,8 +93,8 @@ export default function BottomSheet({
         {...handleProps}
       >
         <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
-        {selectedBenchId ? (
-          <button onClick={onBenchDeselect} className="text-sm text-primary mt-2">
+        {selectedSpotId ? (
+          <button onClick={onSpotDeselect} className="text-sm text-primary mt-2">
             ← Alle Bänke
           </button>
         ) : (
@@ -153,8 +153,8 @@ export default function BottomSheet({
                   key={bench.id}
                   className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1f14] active:bg-gray-100 dark:active:bg-[#161a10]"
                   onClick={() => {
-                    onFlyToBench(bench)
-                    onBenchSelect(bench.id)
+                    onFlyToSpot(bench)
+                    onSpotSelect(bench.id)
                   }}
                 >
                   <span className="text-xl shrink-0">🪑</span>

@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import MapHeader from '@/components/MapHeader'
 import MapLayout from '@/components/MapLayout'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const [{ data: benches }, { data: { user } }] = await Promise.all([
+  const [{ data: spots }, { data: { user } }] = await Promise.all([
     supabase.from('spots').select('id, type, lat, lng, name, created_by, created_at, photo_url'),
     supabase.auth.getUser(),
   ])
@@ -21,13 +21,13 @@ export default async function HomePage() {
     isAdmin = profile?.is_admin ?? false
   }
 
-  const benchList: Bench[] = benches ?? []
+  const spotList: Spot[] = spots ?? []
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <MapHeader />
       <MapLayout
-        benches={benchList}
+        spots={spotList}
         isAuthenticated={!!user}
         userId={user?.id ?? null}
         isAdmin={isAdmin}

@@ -1,38 +1,39 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Bench } from '@/components/BenchMap'
+import type { Spot } from '@/components/SpotMap'
 import RarityBadge from '@/components/RarityBadge'
 import { spotDisplayName } from '@/lib/spot-utils'
 import { getSpotStats } from '@/actions/stats'
+import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 
-interface BenchPopupProps {
-  bench: Bench
+interface SpotPopupProps {
+  spot: Spot
   userId: string | null
   onDetails: () => void
   onDelete: () => void
 }
 
-export default function BenchPopup({
-  bench,
+export default function SpotPopup({
+  spot,
   userId,
   onDetails,
   onDelete,
-}: BenchPopupProps) {
-  const isOwner = userId && bench.created_by === userId
+}: SpotPopupProps) {
+  const isOwner = userId && spot.created_by === userId
   const [rarityMedian, setRarityMedian] = useState<number | null>(null)
 
   useEffect(() => {
-    getSpotStats(bench.id).then(({ aggregated }) => {
+    getSpotStats(spot.id).then(({ aggregated }) => {
       setRarityMedian(aggregated?.rarity_median ?? null)
     })
-  }, [bench.id])
+  }, [spot.id])
 
   return (
     <div style={{ minWidth: '160px', fontFamily: 'system-ui' }}>
-      {bench.photo_url ? (
+      {spot.photo_url ? (
         <img
-          src={bench.photo_url}
+          src={spot.photo_url}
           alt="Bank"
           style={{
             width: '100%',
@@ -57,16 +58,19 @@ export default function BenchPopup({
             fontSize: '28px',
           }}
         >
-          🪑
+          {SPOT_TYPE_MAP[spot.type].emoji}
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
         <strong style={{ fontSize: '13px', flex: 1 }}>
-          {spotDisplayName(bench.name, bench.created_at, bench.type)}
+          {spotDisplayName(spot.name, spot.created_at, spot.type)}
         </strong>
         <RarityBadge median={rarityMedian} size="sm" />
       </div>
+      <small style={{ display: 'block', marginTop: '2px', marginBottom: '8px', color: '#888', fontSize: '11px' }}>
+        {SPOT_TYPE_MAP[spot.type].emoji} {SPOT_TYPE_MAP[spot.type].label}
+      </small>
 
       <div style={{ display: 'flex', gap: '6px' }}>
         <button

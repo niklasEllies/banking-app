@@ -14,15 +14,23 @@ interface MapLayoutProps {
   isAuthenticated: boolean
   userId: string | null
   isAdmin?: boolean
+  initialFavoriteIds?: string[]
 }
 
-export default function MapLayout({ spots, isAuthenticated, userId, isAdmin = false }: MapLayoutProps) {
+export default function MapLayout({
+  spots,
+  isAuthenticated,
+  userId,
+  isAdmin = false,
+  initialFavoriteIds = [],
+}: MapLayoutProps) {
   const [sheetExpanded, setSheetExpanded] = useState(false)
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null)
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsState, setGpsState] = useState<GpsState>('unknown')
   const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set(initialFavoriteIds))
 
   // Hydrate dismiss flag from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
@@ -58,6 +66,15 @@ export default function MapLayout({ spots, isAuthenticated, userId, isAdmin = fa
 
   const handleGpsStateChange = useCallback((state: GpsState) => {
     setGpsState(state)
+  }, [])
+
+  const handleFavoriteChange = useCallback((spotId: string, isFav: boolean) => {
+    setFavoriteIds((prev) => {
+      const next = new Set(prev)
+      if (isFav) next.add(spotId)
+      else next.delete(spotId)
+      return next
+    })
   }, [])
 
   return (
@@ -104,6 +121,8 @@ export default function MapLayout({ spots, isAuthenticated, userId, isAdmin = fa
         onFlyToSpot={handleFlyToSpot}
         userPosition={userPosition}
         gpsState={gpsState}
+        favoriteIds={favoriteIds}
+        onFavoriteChange={handleFavoriteChange}
       />
     </>
   )

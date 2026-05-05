@@ -21,6 +21,8 @@ interface BottomSheetProps {
   onFlyToSpot: (spot: Spot) => void
   userPosition: { lat: number; lng: number } | null
   gpsState?: GpsState
+  favoriteIds?: Set<string>
+  onFavoriteChange?: (spotId: string, isFav: boolean) => void
 }
 
 export default function BottomSheet({
@@ -33,6 +35,8 @@ export default function BottomSheet({
   onFlyToSpot,
   userPosition,
   gpsState = 'unknown',
+  favoriteIds: _favoriteIds,
+  onFavoriteChange: _onFavoriteChange,
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [spots, setSpots] = useState(initialSpots)

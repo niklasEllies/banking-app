@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import MapHeader from '@/components/MapHeader'
 import MapLayout from '@/components/MapLayout'
 import type { Spot } from '@/components/SpotMap'
+import { listFavoriteSpotIds } from '@/actions/favorites'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -12,13 +13,18 @@ export default async function HomePage() {
   ])
 
   let isAdmin = false
+  let favoriteIds: string[] = []
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .maybeSingle()
-    isAdmin = profile?.is_admin ?? false
+    const [profileResult, favIds] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle(),
+      listFavoriteSpotIds(),
+    ])
+    isAdmin = profileResult.data?.is_admin ?? false
+    favoriteIds = favIds
   }
 
   const spotList: Spot[] = spots ?? []
@@ -31,6 +37,7 @@ export default async function HomePage() {
         isAuthenticated={!!user}
         userId={user?.id ?? null}
         isAdmin={isAdmin}
+        initialFavoriteIds={favoriteIds}
       />
     </div>
   )

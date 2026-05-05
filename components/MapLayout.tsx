@@ -15,6 +15,7 @@ interface MapLayoutProps {
   userId: string | null
   isAdmin?: boolean
   initialFavoriteIds?: string[]
+  initialFriendIds?: string[]
 }
 
 export default function MapLayout({
@@ -23,6 +24,7 @@ export default function MapLayout({
   userId,
   isAdmin = false,
   initialFavoriteIds = [],
+  initialFriendIds = [],
 }: MapLayoutProps) {
   const [sheetExpanded, setSheetExpanded] = useState(false)
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
@@ -31,6 +33,7 @@ export default function MapLayout({
   const [gpsState, setGpsState] = useState<GpsState>('unknown')
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => new Set(initialFavoriteIds))
+  const [friendIds] = useState<Set<string>>(() => new Set(initialFriendIds))
 
   // Hydrate dismiss flag from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
@@ -125,6 +128,7 @@ export default function MapLayout({
         gpsState={gpsState}
         favoriteIds={favoriteIds}
         onFavoriteChange={handleFavoriteChange}
+        friendIds={friendIds}
       />
     </>
   )

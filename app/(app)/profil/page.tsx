@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import EmojiPicker from '@/components/EmojiPicker'
 import { logout } from '@/actions/auth'
+import { countIncomingRequests } from '@/actions/friends'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -10,11 +11,14 @@ export default async function ProfilPage() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('username, is_admin')
-    .eq('id', user.id)
-    .maybeSingle()
+  const [{ data: profile }, incomingCount] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('username, is_admin')
+      .eq('id', user.id)
+      .maybeSingle(),
+    countIncomingRequests(),
+  ])
 
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
@@ -69,8 +73,18 @@ export default async function ProfilPage() {
         </div>
 
         <Link
+          href="/friends"
+          className="mt-10 flex items-center justify-between gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 px-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
+        >
+          <span>👥 Freunde</span>
+          {incomingCount > 0 && (
+            <span className="bg-primary text-white text-xs px-2 py-0.5 rounded-full">{incomingCount}</span>
+          )}
+        </Link>
+
+        <Link
           href="/changelog"
-          className="mt-10 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
+          className="mt-3 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
         >
           🆕 Was ist neu
         </Link>

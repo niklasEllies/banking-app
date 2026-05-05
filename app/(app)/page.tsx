@@ -7,7 +7,12 @@ import { listFavoriteSpotIds } from '@/actions/favorites'
 import { listFriends } from '@/actions/friends'
 import { loadChangelog } from '@/lib/changelog-server'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ spot?: string }>
+}) {
+  const { spot: initialSpotId } = await searchParams
   const supabase = await createClient()
 
   const [{ data: spots }, { data: { user } }, changelog] = await Promise.all([
@@ -47,6 +52,7 @@ export default async function HomePage() {
         isAdmin={isAdmin}
         initialFavoriteIds={favoriteIds}
         initialFriendIds={friendIds}
+        initialSpotId={initialSpotId ?? null}
       />
       {latestEntry && <ChangelogModal latest={latestEntry} />}
     </div>

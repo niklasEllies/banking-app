@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import SpotMapClient from '@/components/SpotMapClient'
 import BottomSheet from '@/components/BottomSheet'
 import type { Spot } from '@/components/SpotMap'
@@ -16,6 +17,7 @@ interface MapLayoutProps {
   isAdmin?: boolean
   initialFavoriteIds?: string[]
   initialFriendIds?: string[]
+  initialSpotId?: string | null
 }
 
 export default function MapLayout({
@@ -25,9 +27,11 @@ export default function MapLayout({
   isAdmin = false,
   initialFavoriteIds = [],
   initialFriendIds = [],
+  initialSpotId = null,
 }: MapLayoutProps) {
+  const router = useRouter()
   const [sheetExpanded, setSheetExpanded] = useState(false)
-  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(initialSpotId)
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null)
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsState, setGpsState] = useState<GpsState>('unknown')
@@ -40,6 +44,15 @@ export default function MapLayout({
     if (typeof window !== 'undefined' && localStorage.getItem(GPS_BANNER_DISMISSED_KEY) === 'true') {
       setBannerDismissed(true)
     }
+  }, [])
+
+  // Deep-link: if landed with ?spot=<id>, fly to it on mount.
+  // Empty deps — initialSpotId is server-injected once, not reactive.
+  useEffect(() => {
+    if (!initialSpotId) return
+    const target = spots.find((s) => s.id === initialSpotId)
+    if (target) setFlyTarget({ lat: target.lat, lng: target.lng })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleDismissBanner = useCallback(() => {
@@ -57,7 +70,11 @@ export default function MapLayout({
 
   const handleSpotDeselect = useCallback(() => {
     setSelectedSpotId(null)
-  }, [])
+    // Clear deep-link query param if present
+    if (typeof window !== 'undefined' && window.location.search.includes('spot=')) {
+      router.replace('/', { scroll: false })
+    }
+  }, [router])
 
   const handleFlyToSpot = useCallback((spot: Spot) => {
     setFlyTarget({ lat: spot.lat, lng: spot.lng })

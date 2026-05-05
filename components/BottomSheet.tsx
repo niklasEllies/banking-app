@@ -9,6 +9,7 @@ import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import SpotDetail from '@/components/SpotDetail'
 import FavoriteToggle from '@/components/FavoriteToggle'
 import SpotActionMenu from '@/components/SpotActionMenu'
+import SpotShareButton from '@/components/SpotShareButton'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
@@ -147,6 +148,7 @@ export default function BottomSheet({
           </p>
         )}
         <div className="flex items-center gap-3 mt-2">
+          {selectedSpot && <SpotShareButton spotId={selectedSpot.id} />}
           {userId && selectedSpot && (
             <FavoriteToggle
               spotId={selectedSpot.id}

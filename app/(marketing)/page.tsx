@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import TopoBackground from './_components/TopoBackground'
 import HeroSection from './_components/HeroSection'
+import SpotTypesShowcase from './_components/SpotTypesShowcase'
 
 export default async function LandingPage({
   searchParams,
@@ -17,6 +18,7 @@ export default async function LandingPage({
       <TopoBackground />
       <main className="relative">
         <HeroSection />
+        <SpotTypesShowcase />
       </main>
     </>
   )

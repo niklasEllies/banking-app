@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 7 (Beta-Polish subset) complete.** Next: pick from remaining Phase-7 items (SpotMap-Refactor, PWA install, Vector Icons, Block-Mechanik) or Phase 8 (Social Polish — Notifications, Public Profile, Activity Feed).
+**Current state: Phase 7 + 7.5 Security-Patch complete (v0.7.1).** Next: Landing Page (brainstorm-prep liegt unter `docs/superpowers/specs/2026-05-05-phase8-landing-page-brainstorm-prep.md`), Phase 7+ remaining items (SpotMap-Refactor, PWA, Vector Icons, Block), oder Phase 8 Social Polish.
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
@@ -29,6 +29,8 @@ Key rules derived from these docs:
 - Use `SPOT_VISIBILITIES` / `SPOT_VISIBILITY_MAP` from `lib/spot-visibility.ts` for any UI showing visibility levels (public/friends/private)
 - Spots have a `visibility` field — RLS enforces who sees what via `can_see_spot()` helper. Cascades automatically to descriptions, votes, favorites.
 - Friendships are directed: `actions/friends.ts` exposes the lifecycle. `are_friends(a, b)` is the SQL helper used in RLS.
-- Storage bucket name `bench-photos` is intentionally kept (internal name from pre-rebrand era)
+- Storage bucket name `bench-photos` is intentionally kept (internal name from pre-rebrand era). Public read happens via direct CDN URL — there is intentionally NO `SELECT` policy on `storage.objects` for this bucket (Phase 7.5 security)
+- All `SECURITY DEFINER` Postgres functions have `SET search_path = public, pg_catalog` (Phase 7.5)
+- `next.config.ts` ships X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy headers (Phase 7.5)
 - Ask for options + recommendation before implementing non-trivial features
 - Commit after every completed feature slice

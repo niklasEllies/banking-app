@@ -225,7 +225,7 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 
 | Operation | Rolle | Bedingung |
 |---|---|---|
-| SELECT | public | `bucket_id = 'bench-photos'` |
+| ~~SELECT~~ | — | **Phase 7.5 entfernt:** Public-URL-Zugriff via CDN funktioniert ohne SELECT-Policy. Die Policy hatte nur Listing erlaubt — unerwünschte Datenstruktur-Leakage. |
 | INSERT | authenticated | `bucket_id = 'bench-photos'` AND folder exists |
 | UPDATE | authenticated | `bucket_id = 'bench-photos'` AND `owner_id = auth.uid()::text` |
 | DELETE | authenticated | `bucket_id = 'bench-photos'` AND `owner_id = auth.uid()::text` |
@@ -244,3 +244,4 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 | `008_phase5_favorites.sql` | `favorites` Tabelle (composite PK, private RLS) |
 | `009_phase6_friendships.sql` | `friendships` Tabelle (directed model) + `are_friends()` Helper |
 | `010_phase6_visibility.sql` | `spots.visibility` Enum + `can_see_spot()` Helper + RLS-Cascade auf descriptions/votes/favorites |
+| `011_phase7-5_security_hardening.sql` | search_path lock auf allen SECURITY DEFINER-Funktionen, REVOKE handle_new_user RPC, get_spot_aggregated_stats → SECURITY INVOKER, bench-photos Listing-Policy entfernt |

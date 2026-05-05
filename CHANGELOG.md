@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.1 — Sicherheits-Patch
+*5. Mai 2026*
+
+- 🛡️ Datenbank-Funktionen gegen Schema-Injection abgesichert (search_path)
+- 🔒 Interne Trigger-Funktion ist nicht mehr direkt von außen aufrufbar
+- 🌐 Sicherheits-Header für die App: kein Iframing, kein MIME-Sniffing, gezielte Permissions
+- 📦 Foto-Bucket: keine Listing-Möglichkeit mehr (Foto-URLs funktionieren weiter wie gewohnt)
+
 ## 0.7.0 — Beta-Polish
 *5. Mai 2026*
 

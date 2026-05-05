@@ -120,6 +120,21 @@ Erstes Drittel der ursprünglich geplanten Phase-7-Liste umgesetzt:
 - [x] Service-Role-Key Build-time-Warning (`console.warn` bei Production wenn fehlt)
 - [x] Friend-Spot-Filter im BottomSheet (4. Tab "Freunde", filtert nach `created_by ∈ friendIds`)
 
+## Phase 7.5 – Security-Patch ✅
+
+Auf Basis Supabase-Advisor + npm audit + Manual-Review:
+
+- [x] Migration 011: `SET search_path = public, pg_catalog` auf allen 5 SECURITY-DEFINER-Funktionen (verhindert Schema-Injection)
+- [x] `handle_new_user()` REVOKE EXECUTE FROM anon, authenticated, public (war direkt per RPC aufrufbar — sollte nur als Auth-Trigger laufen)
+- [x] `get_spot_aggregated_stats` zu SECURITY INVOKER (nutzt jetzt RLS-Cascade aus Phase 6 — keine direct-RPC-Leak-Möglichkeit mehr)
+- [x] `bench-photos: public read` Policy entfernt (Listing-Block — direkte URL-Access funktioniert weiter via CDN)
+- [x] Security-Headers in `next.config.ts`: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy (geolocation=self, kamera/mic=off)
+
+**Verbleibende Advisor-Findings (akzeptiert):**
+- `are_friends`/`can_see_spot` direct-RPC: bool-only mit opaken UUIDs, low risk (REVOKE würde RLS-Eval brechen)
+- Leaked-Password-Protection: Supabase Dashboard-Toggle, kein MCP-Setting
+- postcss < 8.5.10: transitive vuln über Next.js, nur build-time, akzeptabel
+
 ## Phase 7+ – Verbleibende Tech-Debt 🔜
 
 - [ ] SpotMap-Refactor (Custom Hooks rauslösen — z.B. useGpsState, useFlyController)

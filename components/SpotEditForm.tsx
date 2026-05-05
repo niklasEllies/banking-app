@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { updateSpot } from '@/actions/spots'
 import SpotTypePicker from '@/components/SpotTypePicker'
+import VisibilityPicker from '@/components/VisibilityPicker'
 import type { SpotType } from '@/lib/spot-types'
 import type { SpotVisibility } from '@/lib/spot-visibility'
 
@@ -48,6 +49,11 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
           <div>
             <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Was ist hier?</p>
             <SpotTypePicker value={type} onChange={setType} />
+          </div>
+
+          <div>
+            <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Wer kann den Spot sehen?</p>
+            <VisibilityPicker value={visibility} onChange={setVisibility} />
           </div>
 
           <div>

@@ -72,12 +72,14 @@ export async function createSpot(state: FormState, formData: FormData): Promise<
     const photoResult = await uploadSpotPhoto(spot.id, formData)
     if (photoResult.error) {
       revalidatePath('/')
+      revalidatePath('/map')
       redirect(`/spots/${spot.id}/edit-photo`)
     }
   }
 
   revalidatePath('/')
-  redirect('/')
+  revalidatePath('/map')
+  redirect('/map')
 }
 
 export async function deleteSpot(id: string): Promise<{ error?: string }> {
@@ -100,6 +102,7 @@ export async function deleteSpot(id: string): Promise<{ error?: string }> {
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -137,6 +140,7 @@ export async function updateSpot(
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -186,5 +190,6 @@ export async function uploadSpotPhoto(
   }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return { url: publicUrl }
 }

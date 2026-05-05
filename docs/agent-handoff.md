@@ -287,11 +287,24 @@ Wenn BottomSheet expanded ist, bekommt der Wrapper-Div um `<SpotMapClient>` das 
 
 SpotMap-Refactor (große Datei, ~350 LOC mit Controllern → eigene Hooks), PWA installable (Manifest + SW + Offline), Vector-Icons (User designt selbst), Block-Mechanik auf friendships.
 
-**Phase 8 — Social Polish:**
+**Phase 8.1 — SEO/OG-Tags + Sitemap:**
+
+OG-Tags für Landing + Spot-Deep-Links, `sitemap.xml` für öffentliche Spots, strukturierte Daten (JSON-LD).
+
+**Phase 9 — Social Polish:**
 
 Notifications, Email-Alerts, Public Profile Page (`/u/:username`), Friend-Activity-Feed, Web Push.
 
-Vorm Start: priorisieren — Polish-Reste vs Social Polish.
+Vorm Start: priorisieren — Phase 7+ Reste, SEO/OG-Tags, oder Social Polish.
+
+## Phase 8 patterns (durable)
+
+- Marketing route group (`app/(marketing)/`) has its own minimal `layout.tsx` (no app chrome) — keep landing pages out of `(app)` so they don't inherit map shell
+- `RevealSection` wrapper pattern: client-component motion-wrapper that fades server-rendered children in on scroll, gated by `useReducedMotion()`. Reusable for any future scroll-revealed content.
+- Living-stat pattern: server fetches initial count, client subscribes to Supabase Realtime channel with random suffix per mount. Client falls back gracefully if RLS blocks events for anon (data correct on next page load).
+- Anon-aware page pattern: existing `isAuthenticated` prop is the gate; new components don't need their own `readonly` prop. Verify via call-site rather than at component boundary.
+- Server-action mutations now `revalidatePath('/map')` plus `revalidatePath('/')` — keep both for any new mutation that affects spots, favorites, friendships.
+- `lib/activity-utils.ts` is the client-safe helper module; `lib/marketing-stats.ts` re-exports the pure helpers and adds server-only ones. Don't import `marketing-stats` from a Client Component (it pulls `next/headers` transitively).
 
 ## Stil-Guide
 

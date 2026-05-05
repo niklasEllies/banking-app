@@ -32,6 +32,7 @@ export async function addFavorite(spotId: string): Promise<{ error?: string }> {
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -49,5 +50,6 @@ export async function removeFavorite(spotId: string): Promise<{ error?: string }
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }

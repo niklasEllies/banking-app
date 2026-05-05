@@ -66,6 +66,7 @@ export async function upsertDescription(
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -83,5 +84,6 @@ export async function deleteDescription(spotId: string): Promise<{ error?: strin
   if (error) return { error: error.message }
 
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }

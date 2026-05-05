@@ -90,6 +90,7 @@ export async function sendFriendRequest(
   revalidatePath('/friends')
   revalidatePath('/profil')
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -114,6 +115,7 @@ export async function acceptFriendRequest(
   revalidatePath('/friends')
   revalidatePath('/profil')
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 
@@ -183,6 +185,7 @@ export async function removeFriend(
   revalidatePath('/friends')
   revalidatePath('/profil')
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }
 

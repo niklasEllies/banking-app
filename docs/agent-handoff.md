@@ -104,6 +104,25 @@ export type SpotType = 'bench' | 'viewpoint' | 'shelter' | 'picnic' | 'meadow' |
 
 Map-Marker: `getSpotIcon(type)` in `components/SpotMap.tsx` cached `L.DivIcon` per Type. Vector-Icons (User designt) ersetzen die Emoji-Marker irgendwann (Phase 7+).
 
+## Changelog (post-Phase-5 Mini-Feature)
+
+User-facing changelog page at `/changelog`. Source-of-truth: `CHANGELOG.md` in repo root with semver headings.
+
+**Files:** `lib/changelog.ts` (pure parser + compareVersions, safe in client components), `lib/changelog-server.ts` (`'server-only'`, fs read), `components/ChangelogModal.tsx` (auto-popup on update, localStorage `plaetzchen-last-seen-version`).
+
+**Adding entries:** edit `CHANGELOG.md`, add new entry at the top with bumped version. Format:
+```
+## 0.6.0 — Title
+*Date string*
+
+- bullet
+- bullet
+```
+
+After deploy, returning users see a one-time modal with the new bullets. First-time visitors don't see the modal (would feel like an upgrade nag they didn't earn).
+
+**Important:** Don't import from `lib/changelog-server.ts` in any Client Component. Use `lib/changelog.ts` for shared types + pure functions; the server file uses `node:fs` and is `'server-only'` enforced.
+
 ## Phase 5 Patterns (zusätzlich zu Phase 4)
 
 ### favoriteIds Set Propagation

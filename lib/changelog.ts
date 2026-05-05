@@ -1,6 +1,3 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-
 export interface ChangelogEntry {
   version: string
   title: string
@@ -9,23 +6,18 @@ export interface ChangelogEntry {
 }
 
 /**
- * Reads CHANGELOG.md from the project root and parses it into structured
- * entries. Format expected per entry:
+ * Parses CHANGELOG.md content into structured entries. Format expected:
  *
  *   ## 0.5.0 — Personal Layer
  *   *5. Mai 2026*
  *
  *   - bullet
  *   - bullet
+ *
+ * Pure function — safe to import in client components.
  */
-export async function loadChangelog(): Promise<ChangelogEntry[]> {
-  const md = await fs.readFile(path.join(process.cwd(), 'CHANGELOG.md'), 'utf-8')
-  return parseChangelog(md)
-}
-
 export function parseChangelog(md: string): ChangelogEntry[] {
   const entries: ChangelogEntry[] = []
-  // Split on section headings; first chunk before any '## ' is the file title.
   const sections = md.split(/^## /m).slice(1)
 
   for (const section of sections) {
@@ -40,12 +32,10 @@ export function parseChangelog(md: string): ChangelogEntry[] {
     for (const raw of lines.slice(1)) {
       const line = raw.trimEnd()
       if (!line) continue
-      // Italic date line: *DD. Monat YYYY* or *Monat YYYY*
       if (!date && /^\*.+\*$/.test(line)) {
         date = line.slice(1, -1).trim()
         continue
       }
-      // Bullet
       const bulletMatch = line.match(/^-\s+(.+)$/)
       if (bulletMatch) bullets.push(bulletMatch[1])
     }

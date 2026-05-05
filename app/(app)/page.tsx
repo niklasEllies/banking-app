@@ -1,15 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import MapHeader from '@/components/MapHeader'
 import MapLayout from '@/components/MapLayout'
+import ChangelogModal from '@/components/ChangelogModal'
 import type { Spot } from '@/components/SpotMap'
 import { listFavoriteSpotIds } from '@/actions/favorites'
+import { loadChangelog } from '@/lib/changelog-server'
 
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const [{ data: spots }, { data: { user } }] = await Promise.all([
+  const [{ data: spots }, { data: { user } }, changelog] = await Promise.all([
     supabase.from('spots').select('id, type, lat, lng, name, created_by, created_at, photo_url'),
     supabase.auth.getUser(),
+    loadChangelog(),
   ])
 
   let isAdmin = false
@@ -28,6 +31,7 @@ export default async function HomePage() {
   }
 
   const spotList: Spot[] = spots ?? []
+  const latestEntry = changelog[0]
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
@@ -39,6 +43,7 @@ export default async function HomePage() {
         isAdmin={isAdmin}
         initialFavoriteIds={favoriteIds}
       />
+      {latestEntry && <ChangelogModal latest={latestEntry} />}
     </div>
   )
 }

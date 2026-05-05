@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { loadChangelog } from '@/lib/changelog'
+import { loadChangelog } from '@/lib/changelog-server'
 
 export const metadata = {
   title: 'Was ist neu — Plätzchen',

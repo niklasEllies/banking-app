@@ -118,6 +118,9 @@ export default function BottomSheet({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={selectedSpotId ? 'Plätzchen-Details' : 'Plätzchen-Liste'}
       className="absolute bottom-0 left-0 right-0 z-1000 bg-white dark:bg-[#1e231a] rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
         height: '55vh',

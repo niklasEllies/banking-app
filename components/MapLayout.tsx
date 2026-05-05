@@ -79,19 +79,21 @@ export default function MapLayout({
 
   return (
     <>
-      <SpotMapClient
-        spots={spots}
-        isAuthenticated={isAuthenticated}
-        userId={userId}
-        sheetExpanded={sheetExpanded}
-        onBenchSelect={handleSpotSelect}
-        flyTarget={flyTarget}
-        onFlyTargetUsed={() => setFlyTarget(null)}
-        isAdmin={isAdmin}
-        onPositionUpdate={handlePositionUpdate}
-        onGpsStateChange={handleGpsStateChange}
-        gpsState={gpsState}
-      />
+      <div className="contents" {...(sheetExpanded ? { inert: true } : {})}>
+        <SpotMapClient
+          spots={spots}
+          isAuthenticated={isAuthenticated}
+          userId={userId}
+          sheetExpanded={sheetExpanded}
+          onBenchSelect={handleSpotSelect}
+          flyTarget={flyTarget}
+          onFlyTargetUsed={() => setFlyTarget(null)}
+          isAdmin={isAdmin}
+          onPositionUpdate={handlePositionUpdate}
+          onGpsStateChange={handleGpsStateChange}
+          gpsState={gpsState}
+        />
+      </div>
       {showBanner && (
         <div
           role="status"

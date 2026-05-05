@@ -93,12 +93,21 @@ App ist von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wa
 
 **Bewusst rausgehalten:** Search/Filter (zu früh — Bestand klein), Description-Upvotes (Phase 6+), Position-Edit (lat/lng — UX-Risk), Public/Friend-visible Favoriten (Phase 6 ändert RLS).
 
-## Phase 6 – Privacy & Friends 🔜
+## Phase 6 – Privacy & Friends ✅
 
-- [ ] Friends-System (Request/Accept)
-- [ ] Spot-Visibility: `public` / `friends` / `private`
-- [ ] RLS-Policies anpassen
-- [ ] Privacy-Picker beim Eintragen, Filter im Sheet
+- [x] Migration 009: `friendships` Tabelle (directed model, composite PK requester+addressee, status pending/accepted)
+- [x] `are_friends(a, b)` Postgres-Helper für RLS
+- [x] Migration 010: `spots.visibility` Enum (`public` / `friends` / `private`) + `can_see_spot()` Helper + RLS-Cascade auf spots, descriptions, votes, favorites
+- [x] `actions/friends.ts` mit 10 Funktionen (search, request/accept/decline/cancel/remove, listFriends, listIncoming/Outgoing, countIncoming) + 23 Tests
+- [x] `createSpot`/`updateSpot` erweitert um `visibility` mit Validierung
+- [x] `lib/spot-visibility.ts` (SpotVisibility, SPOT_VISIBILITIES, SPOT_VISIBILITY_MAP)
+- [x] `VisibilityPicker` Component (Mirror von SpotTypePicker)
+- [x] `VisibilityPicker` Integration in AddSpotForm + SpotEditForm
+- [x] SpotDetail zeigt Visibility-Badge wenn nicht public
+- [x] `/friends` Route mit 3 Tabs (Freunde / Anfragen / Suchen) — Username-exact-match Search
+- [x] Profil-Page: 👥 Freunde Link mit Pending-Counter
+
+**Bewusst rausgehalten:** Block-Mechanik (Phase 7), Friend-Spot-Filter im BottomSheet (Phase 7), Notifications/Activity-Feed (Phase 8), Public Profile Page (Phase 8).
 
 ## Phase 7 – Polish & Tech-Debt 🔜
 
@@ -110,3 +119,13 @@ App ist von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wa
 - [ ] Kontrast-Tweaks (Drag-Handle, disabled-States)
 - [ ] Service-Role-Key Build-time-Validation
 - [ ] Vector-Icons (User designt) — ersetzen die Emoji-Marker
+- [ ] Friend-Spot-Filter im BottomSheet (z.B. "nur Spots von Freunden anzeigen")
+- [ ] Block-Mechanik (`status='blocked'` Extension auf friendships)
+
+## Phase 8 – Social Polish 🔜
+
+- [ ] In-App Notifications (eingehende Anfragen, Friend-Activity)
+- [ ] Email-Alerts bei neuen Anfragen (über Supabase)
+- [ ] Public Profile Page (`/u/:username` mit eigener Spot-Liste)
+- [ ] Friend-Activity-Feed (was Freunde zuletzt eingetragen/favorisiert haben)
+- [ ] Web Push Notifications

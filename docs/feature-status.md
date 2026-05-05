@@ -142,7 +142,20 @@ Auf Basis Supabase-Advisor + npm audit + Manual-Review:
 - [ ] Vector-Icons (User designt selbst) — ersetzen die Emoji-Marker
 - [ ] Block-Mechanik (`status='blocked'` Extension auf friendships, Button im FriendsClient)
 
-## Phase 8 – Social Polish 🔜
+## Phase 8 — Landing Page ✅
+
+Abgeschlossen: 2026-05-05 · v0.8.0
+
+- Öffentliche Landing-Page auf `/` mit 5 Sektionen (Hero, 6-Typen, Living Numbers, Wie's funktioniert, Beta-CTA) im Forest-Deep + Topo-Aesthetic
+- Hero mit Live-Karte (5-7 echte public Spots, pulsierende Marker via CSS-Keyframes)
+- Living Numbers Section mit Supabase Realtime (`spots`/`profiles` INSERT-Subscriptions) + animiertem Tick-Up + 3-Item Activity-Ticker
+- Karte umgezogen: `/` → `/map` (Server-Component, anon-aware via existing `isAuthenticated` Prop)
+- Anon-Modus auf `/map`: nur public Spots sichtbar (RLS via `can_see_spot()`), Action-UI ausgeblendet, Guest-Banner top-center
+- Scroll-Reveal-Animationen via `motion/react` mit `useReducedMotion()`-Gating; Topo-Background hat Parallax-Shift
+- Neue Dependency: `motion` v12, neue Font: Fraunces (italic accents über `--font-display` Tailwind-Theme-Var)
+- Deep-Link-Compat: `/?spot=<id>` redirected zu `/map?spot=<id>` (Phase 7 Bookmarks bleiben funktional)
+
+## Phase 9 — Social Polish 🔜
 
 - [ ] In-App Notifications (eingehende Anfragen, Friend-Activity)
 - [ ] Email-Alerts bei neuen Anfragen (über Supabase)

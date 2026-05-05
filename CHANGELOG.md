@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 — Landing Page
+*5. Mai 2026*
+
+- 🌿 Neue Startseite auf `/` — erklärt was Plätzchen ist, mit Live-Karte und Live-Zähler
+- 🗺️ Die Karte ist jetzt unter `/map` (Bestandsuser-Bookmarks zeigen jetzt die Landing — ein Klick weiter zur Karte)
+- 👀 Die Karte funktioniert auch ohne Login (nur öffentliche Plätzchen, kein Eintragen/Bewerten)
+- ⚡ Live-Zähler: neue Plätzchen erscheinen ohne Refresh
+- ♿ Animationen respektieren "Reduzierte Bewegung" in den Systemeinstellungen
+
 ## 0.7.1 — Sicherheits-Patch
 *5. Mai 2026*
 

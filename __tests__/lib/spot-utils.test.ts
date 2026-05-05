@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { distanceTo, spotDisplayName } from '@/lib/spot-utils'
+import { distanceTo, spotDisplayName, distMeters } from '@/lib/spot-utils'
 
 describe('distanceTo', () => {
   it('returns distance in meters for short distances', () => {
@@ -33,6 +33,24 @@ describe('distanceTo', () => {
       { lat: 52.520, lng: 13.405 }
     )
     expect(result).toBe('~0 m')
+  })
+})
+
+describe('distMeters', () => {
+  it('returns 0 for identical coords', () => {
+    expect(distMeters({ lat: 52.520, lng: 13.405 }, { lat: 52.520, lng: 13.405 })).toBe(0)
+  })
+
+  it('returns ~111 m for 0.001° latitude difference', () => {
+    const m = distMeters({ lat: 52.520, lng: 13.405 }, { lat: 52.521, lng: 13.405 })
+    expect(m).toBeGreaterThan(105)
+    expect(m).toBeLessThan(115)
+  })
+
+  it('returns symmetric distance', () => {
+    const a = { lat: 52.5, lng: 13.4 }
+    const b = { lat: 52.6, lng: 13.5 }
+    expect(distMeters(a, b)).toBeCloseTo(distMeters(b, a), 1)
   })
 })
 

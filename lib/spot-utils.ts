@@ -11,10 +11,13 @@ export function spotDisplayName(
   return `${typeLabel} vom ${d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
 }
 
-export function distanceTo(
+/**
+ * Raw great-circle distance in meters between two coords. Used for sorting.
+ */
+export function distMeters(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
-): string {
+): number {
   const R = 6371000
   const φ1 = (from.lat * Math.PI) / 180
   const φ2 = (to.lat * Math.PI) / 180
@@ -23,8 +26,17 @@ export function distanceTo(
   const a =
     Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
     Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
-  const meters = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
+/**
+ * Human-friendly distance: ~{N} m (10m-rounded) or {N.N} km.
+ */
+export function distanceTo(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number },
+): string {
+  const meters = distMeters(from, to)
   if (meters >= 1000) {
     return `${(meters / 1000).toFixed(1)} km`
   }

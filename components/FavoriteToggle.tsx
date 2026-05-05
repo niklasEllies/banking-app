@@ -1,0 +1,43 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { addFavorite, removeFavorite } from '@/actions/favorites'
+
+interface FavoriteToggleProps {
+  spotId: string
+  isFavorite: boolean
+  onChange: (spotId: string, isFav: boolean) => void
+}
+
+export default function FavoriteToggle({ spotId, isFavorite, onChange }: FavoriteToggleProps) {
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState(false)
+
+  const toggle = () => {
+    const next = !isFavorite
+    onChange(spotId, next) // optimistic
+    setError(false)
+    startTransition(async () => {
+      const result = next ? await addFavorite(spotId) : await removeFavorite(spotId)
+      if (result.error) {
+        onChange(spotId, !next) // revert
+        setError(true)
+      }
+    })
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={pending}
+      aria-pressed={isFavorite}
+      aria-label={isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+      className={`min-w-11 min-h-11 flex items-center justify-center text-lg leading-none transition-opacity ${
+        error ? 'text-red-500' : ''
+      } disabled:opacity-50`}
+    >
+      {isFavorite ? '❤️' : '🤍'}
+    </button>
+  )
+}

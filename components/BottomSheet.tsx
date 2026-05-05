@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import Link from 'next/link'
 import type { Spot } from '@/components/SpotMap'
 import { deleteSpot } from '@/actions/spots'
 import { spotDisplayName, distanceTo } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import SpotDetail from '@/components/SpotDetail'
+import FavoriteToggle from '@/components/FavoriteToggle'
+import SpotActionMenu from '@/components/SpotActionMenu'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
@@ -35,8 +36,8 @@ export default function BottomSheet({
   onFlyToSpot,
   userPosition,
   gpsState = 'unknown',
-  favoriteIds: _favoriteIds,
-  onFavoriteChange: _onFavoriteChange,
+  favoriteIds = new Set<string>(),
+  onFavoriteChange = () => {},
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [spots, setSpots] = useState(initialSpots)
@@ -108,14 +109,20 @@ export default function BottomSheet({
           </p>
         )}
         <div className="flex items-center gap-3 mt-2">
+          {userId && selectedSpot && (
+            <FavoriteToggle
+              spotId={selectedSpot.id}
+              isFavorite={favoriteIds.has(selectedSpot.id)}
+              onChange={onFavoriteChange}
+            />
+          )}
           {selectedSpot && userId === selectedSpot.created_by && (
-            <Link
-              href={`/spots/${selectedSpot.id}/edit-photo`}
-              className="min-w-11 min-h-11 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label="Foto bearbeiten"
-            >
-              ✏️
-            </Link>
+            <SpotActionMenu
+              items={[
+                { emoji: '📷', label: 'Foto bearbeiten', href: `/spots/${selectedSpot.id}/edit-photo` },
+                { emoji: '📝', label: 'Spot bearbeiten', href: `/spots/${selectedSpot.id}/edit` },
+              ]}
+            />
           )}
           <button
             onClick={collapse}

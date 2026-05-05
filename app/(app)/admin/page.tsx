@@ -41,10 +41,17 @@ export default async function AdminPage() {
     emailMap = Object.fromEntries((authData?.users ?? []).map((u) => [u.id, u.email ?? '—']))
   }
 
+  const spotCountByUser = new Map<string, number>()
+  for (const s of spots) {
+    if (s.created_by) {
+      spotCountByUser.set(s.created_by, (spotCountByUser.get(s.created_by) ?? 0) + 1)
+    }
+  }
+
   const users: AdminUser[] = (profiles ?? []).map((p) => ({
     ...p,
     email: emailMap[p.id] ?? null,
-    spot_count: (spots ?? []).filter((s) => s.created_by === p.id).length,
+    spot_count: spotCountByUser.get(p.id) ?? 0,
   }))
 
   return (

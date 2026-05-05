@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, useInView } from 'motion/react'
+import { motion, useInView, useReducedMotion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import type { LivingNumbers } from '@/lib/marketing-stats'
 
@@ -13,7 +13,7 @@ export default function LivingNumbersClient({ initial }: { initial: LivingNumber
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel('living-numbers')
+      .channel(`living-numbers-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'spots' }, (payload) => {
         if ((payload.new as { visibility?: string }).visibility !== 'public') return
         setNumbers((n) => ({ ...n, total: n.total + 1, thisWeek: n.thisWeek + 1 }))
@@ -53,9 +53,14 @@ function Stat({ value, label, size, prefix = '', inView }: { value: number; labe
 }
 
 function TickUp({ value, active }: { value: number; active: boolean }) {
+  const reduce = useReducedMotion()
   const [display, setDisplay] = useState(0)
   useEffect(() => {
     if (!active) return
+    if (reduce) {
+      setDisplay(value)
+      return
+    }
     const start = performance.now()
     const duration = 1200
     let raf = 0
@@ -67,6 +72,6 @@ function TickUp({ value, active }: { value: number; active: boolean }) {
     }
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [value, active])
+  }, [value, active, reduce])
   return <>{display.toLocaleString('de-DE')}</>
 }

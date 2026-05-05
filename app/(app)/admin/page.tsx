@@ -16,7 +16,7 @@ export default async function AdminPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!self?.is_admin) redirect('/')
+  if (!self?.is_admin) redirect('/map')
 
   const [{ data: profiles }, { data: rawSpots }] = await Promise.all([
     supabase.from('profiles').select('id, username, is_admin, created_at').order('created_at'),

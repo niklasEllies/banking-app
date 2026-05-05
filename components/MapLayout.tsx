@@ -115,7 +115,7 @@ export default function MapLayout({
         />
       </div>
       {!isAuthenticated && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-9999 bg-[#1d2218]/95 backdrop-blur-sm border border-[#5e9e3e]/40 rounded-full px-4 py-2 text-sm text-[#c8c8c0] flex items-center gap-3 shadow-lg pointer-events-auto whitespace-nowrap">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[9999] bg-[#1d2218]/95 backdrop-blur-sm border border-[#5e9e3e]/40 rounded-full px-4 py-2 text-sm text-[#c8c8c0] flex items-center gap-3 shadow-lg pointer-events-auto whitespace-nowrap">
           <span>Du erkundest als Gast</span>
           <a href="/signup" className="text-[#5e9e3e] font-semibold hover:underline">Beta beitreten →</a>
         </div>

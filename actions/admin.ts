@@ -41,5 +41,6 @@ export async function adminDeleteSpot(id: string) {
   if (error) return { error: error.message }
   revalidatePath('/admin')
   revalidatePath('/')
+  revalidatePath('/map')
   return {}
 }

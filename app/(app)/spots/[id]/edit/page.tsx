@@ -18,8 +18,8 @@ export default async function EditSpotPage({
     .eq('id', id)
     .maybeSingle()
 
-  if (!spot) redirect('/')
-  if (spot.created_by !== user.id) redirect('/')
+  if (!spot) redirect('/map')
+  if (spot.created_by !== user.id) redirect('/map')
 
   return <SpotEditForm spot={spot} />
 }

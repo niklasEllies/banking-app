@@ -4,12 +4,16 @@ import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import type { Spot } from '@/components/SpotMap'
 import { deleteSpot } from '@/actions/spots'
-import { spotDisplayName, distanceTo } from '@/lib/spot-utils'
+import { spotDisplayName, distanceTo, distMeters } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import SpotDetail from '@/components/SpotDetail'
+import FavoriteToggle from '@/components/FavoriteToggle'
+import SpotActionMenu from '@/components/SpotActionMenu'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
+type ViewMode = 'all' | 'mine' | 'favorites'
+const VIEW_MODE_KEY = 'plaetzchen-view-mode'
 
 interface BottomSheetProps {
   spots: Spot[]
@@ -21,6 +25,8 @@ interface BottomSheetProps {
   onFlyToSpot: (spot: Spot) => void
   userPosition: { lat: number; lng: number } | null
   gpsState?: GpsState
+  favoriteIds?: Set<string>
+  onFavoriteChange?: (spotId: string, isFav: boolean) => void
 }
 
 export default function BottomSheet({
@@ -33,10 +39,13 @@ export default function BottomSheet({
   onFlyToSpot,
   userPosition,
   gpsState = 'unknown',
+  favoriteIds = new Set<string>(),
+  onFavoriteChange = () => {},
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [spots, setSpots] = useState(initialSpots)
   const [isPending, startTransition] = useTransition()
+  const [viewMode, setViewMode] = useState<ViewMode>('all')
   const count = spots.length
 
   const selectedSpot = spots.find((s) => s.id === selectedSpotId) ?? null
@@ -47,6 +56,34 @@ export default function BottomSheet({
       onExpandedChange(true)
     }
   }, [selectedSpotId, onExpandedChange])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem(VIEW_MODE_KEY)
+    if (stored === 'all' || stored === 'mine' || stored === 'favorites') {
+      setViewMode(stored)
+    }
+  }, [])
+
+  const handleViewModeChange = (m: ViewMode) => {
+    setViewMode(m)
+    if (typeof window !== 'undefined') localStorage.setItem(VIEW_MODE_KEY, m)
+  }
+
+  const filtered = spots.filter((s) => {
+    if (viewMode === 'all') return true
+    if (viewMode === 'mine') return s.created_by === userId
+    return favoriteIds.has(s.id)
+  })
+
+  const sorted =
+    userPosition && gpsState === 'available'
+      ? [...filtered].sort(
+          (a, b) =>
+            distMeters(userPosition, { lat: a.lat, lng: a.lng }) -
+            distMeters(userPosition, { lat: b.lat, lng: b.lng }),
+        )
+      : [...filtered].sort((a, b) => b.created_at.localeCompare(a.created_at))
 
   const expand = () => { setIsExpanded(true); onExpandedChange(true) }
   const collapse = () => {
@@ -100,18 +137,24 @@ export default function BottomSheet({
           </button>
         ) : (
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
-            {count} Plätzchen
+            {sorted.length} Plätzchen
           </p>
         )}
         <div className="flex items-center gap-3 mt-2">
+          {userId && selectedSpot && (
+            <FavoriteToggle
+              spotId={selectedSpot.id}
+              isFavorite={favoriteIds.has(selectedSpot.id)}
+              onChange={onFavoriteChange}
+            />
+          )}
           {selectedSpot && userId === selectedSpot.created_by && (
-            <Link
-              href={`/spots/${selectedSpot.id}/edit-photo`}
-              className="min-w-11 min-h-11 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label="Foto bearbeiten"
-            >
-              ✏️
-            </Link>
+            <SpotActionMenu
+              items={[
+                { emoji: '📷', label: 'Foto bearbeiten', href: `/spots/${selectedSpot.id}/edit-photo` },
+                { emoji: '📝', label: 'Spot bearbeiten', href: `/spots/${selectedSpot.id}/edit` },
+              ]}
+            />
           )}
           <button
             onClick={collapse}
@@ -123,24 +166,77 @@ export default function BottomSheet({
         </div>
       </div>
 
+      {/* Tab bar (list view only) */}
+      {!selectedSpotId && (
+        <div className="flex border-b border-gray-100 dark:border-[#2a2f24]">
+          {(['all', 'mine', 'favorites'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => handleViewModeChange(m)}
+              role="tab"
+              aria-selected={viewMode === m}
+              className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
+                viewMode === m
+                  ? 'text-primary border-primary'
+                  : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              {m === 'all' ? 'Alle' : m === 'mine' ? 'Eigene' : 'Favoriten'}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Content (scroll-aware: only swipes when scrolled to top) */}
       <div
         className="overflow-y-auto pb-8"
-        style={{ height: 'calc(55vh - 56px)' }}
+        style={{ height: !selectedSpotId ? 'calc(55vh - 56px - 36px)' : 'calc(55vh - 56px)' }}
         {...contentProps}
       >
         {selectedSpot ? (
           <SpotDetail spot={selectedSpot} userId={userId} />
-        ) : count === 0 ? (
+        ) : (viewMode === 'mine' || viewMode === 'favorites') && !userId ? (
           <div className="py-12 px-6 text-center">
-            <div className="text-5xl mb-3">📍</div>
-            <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              Noch keine Plätzchen in der Nähe.
+            <p className="text-base text-gray-700 dark:text-gray-300 mb-2">
+              Logge dich ein, um {viewMode === 'mine' ? 'deine eigenen Plätzchen' : 'deine Favoriten'} zu sehen.
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
-            </p>
+            <Link href="/login" className="text-primary font-medium hover:underline">
+              Login
+            </Link>
           </div>
+        ) : sorted.length === 0 ? (
+          viewMode === 'mine' ? (
+            <div className="py-12 px-6 text-center">
+              <div className="text-5xl mb-3">📍</div>
+              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                Du hast noch keine Plätzchen eingetragen.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
+              </p>
+            </div>
+          ) : viewMode === 'favorites' ? (
+            <div className="py-12 px-6 text-center">
+              <div className="text-5xl mb-3">❤️</div>
+              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                Noch keine Favoriten.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Markiere einen Spot mit ❤️ um ihn hier zu speichern.
+              </p>
+            </div>
+          ) : (
+            <div className="py-12 px-6 text-center">
+              <div className="text-5xl mb-3">📍</div>
+              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                Noch keine Plätzchen in der Nähe.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
+              </p>
+            </div>
+          )
         ) : (
           <>
             {gpsState !== 'available' && gpsState !== 'unknown' && (
@@ -149,7 +245,7 @@ export default function BottomSheet({
               </div>
             )}
             <ul>
-              {spots.map((spot) => (
+              {sorted.map((spot) => (
                 <li
                   key={spot.id}
                   className="flex items-center gap-3 px-5 py-3 border-t border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1f14] active:bg-gray-100 dark:active:bg-[#161a10]"

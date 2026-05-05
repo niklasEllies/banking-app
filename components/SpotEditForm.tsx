@@ -1,0 +1,86 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { updateSpot } from '@/actions/spots'
+import SpotTypePicker from '@/components/SpotTypePicker'
+import type { SpotType } from '@/lib/spot-types'
+
+interface SpotEditFormProps {
+  spot: { id: string; name: string | null; type: SpotType; created_by: string }
+}
+
+export default function SpotEditForm({ spot }: SpotEditFormProps) {
+  const router = useRouter()
+  const [name, setName] = useState(spot.name ?? '')
+  const [type, setType] = useState<SpotType>(spot.type)
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    startTransition(async () => {
+      const result = await updateSpot(spot.id, { name: name || null, type })
+      if (result.error) {
+        setError(result.error)
+        return
+      }
+      router.push('/')
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-surface dark:bg-[#141810]">
+      <div className="max-w-sm mx-auto px-4 py-8">
+        <Link
+          href="/"
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
+        >
+          ← Zurück zur Karte
+        </Link>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Spot bearbeiten</h1>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Was ist hier?</p>
+            <SpotTypePicker value={type} onChange={setType} />
+          </div>
+
+          <div>
+            <label htmlFor="name" className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-1">
+              Name <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border border-gray-400 dark:border-gray-600 dark:bg-[#1a1f14] dark:text-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-surface"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
+            >
+              {isPending ? 'Speichern…' : 'Änderungen speichern'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}

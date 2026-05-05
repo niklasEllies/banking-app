@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 4 complete.** Next: Phase 5 (Personal Layer — favorites, list view modes, spot edit).
+**Current state: Phase 5 complete.** Next: Phase 6 (Privacy & Friends — friends-system, spot visibility public/friends/private).
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 

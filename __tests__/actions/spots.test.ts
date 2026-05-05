@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createSpot } from '@/actions/spots'
+import { createSpot, updateSpot } from '@/actions/spots'
 import * as supabaseServer from '@/lib/supabase/server'
 
 vi.mock('@/lib/supabase/server')
@@ -122,5 +122,90 @@ describe('createSpot', () => {
 
     await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
     expect(mockSupabase.from).toHaveBeenCalledWith('spots')
+  })
+})
+
+describe('updateSpot', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('gibt Fehler zurück wenn nicht eingeloggt', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    expect(result).toEqual({ error: 'Nicht eingeloggt' })
+  })
+
+  it('gibt Fehler zurück bei ungültigem Type', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'garbage' as never })
+    expect(result).toEqual({ error: 'Ungültiger Spot-Typ' })
+  })
+
+  it('gibt Fehler zurück wenn nicht Owner', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { created_by: 'user-2' }, error: null })
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq })
+    mockSupabase.from.mockReturnValue({ select: mockSelectCheck } as never)
+
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    expect(result).toEqual({ error: 'Keine Berechtigung' })
+  })
+
+  it('gibt Fehler zurück wenn Spot nicht gefunden', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq })
+    mockSupabase.from.mockReturnValue({ select: mockSelectCheck } as never)
+
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    expect(result).toEqual({ error: 'Spot nicht gefunden' })
+  })
+
+  it('updated Spot wenn Owner — name wird getrimmt, type übergeben', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { created_by: 'user-1' }, error: null })
+    const mockEqSelect = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEqSelect })
+
+    const mockEqUpdate = vi.fn().mockResolvedValue({ error: null })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEqUpdate })
+
+    let callCount = 0
+    mockSupabase.from.mockImplementation(() => {
+      callCount++
+      if (callCount === 1) return { select: mockSelectCheck } as never
+      return { update: mockUpdate } as never
+    })
+
+    const result = await updateSpot('spot-1', { name: '  Neuer Name  ', type: 'viewpoint' })
+    expect(result).toEqual({})
+    expect(mockUpdate).toHaveBeenCalledWith({ name: 'Neuer Name', type: 'viewpoint' })
+    expect(mockEqUpdate).toHaveBeenCalledWith('id', 'spot-1')
+  })
+
+  it('speichert null bei leerem Namen', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { created_by: 'user-1' }, error: null })
+    const mockEqSelect = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEqSelect })
+
+    const mockEqUpdate = vi.fn().mockResolvedValue({ error: null })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEqUpdate })
+
+    let callCount = 0
+    mockSupabase.from.mockImplementation(() => {
+      callCount++
+      if (callCount === 1) return { select: mockSelectCheck } as never
+      return { update: mockUpdate } as never
+    })
+
+    const result = await updateSpot('spot-1', { name: '   ', type: 'bench' })
+    expect(result).toEqual({})
+    expect(mockUpdate).toHaveBeenCalledWith({ name: null, type: 'bench' })
   })
 })

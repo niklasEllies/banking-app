@@ -9,10 +9,11 @@ import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import SpotDetail from '@/components/SpotDetail'
 import FavoriteToggle from '@/components/FavoriteToggle'
 import SpotActionMenu from '@/components/SpotActionMenu'
+import SpotShareButton from '@/components/SpotShareButton'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
-type ViewMode = 'all' | 'mine' | 'favorites'
+type ViewMode = 'all' | 'mine' | 'friends' | 'favorites'
 const VIEW_MODE_KEY = 'plaetzchen-view-mode'
 
 interface BottomSheetProps {
@@ -27,6 +28,7 @@ interface BottomSheetProps {
   gpsState?: GpsState
   favoriteIds?: Set<string>
   onFavoriteChange?: (spotId: string, isFav: boolean) => void
+  friendIds?: Set<string>
 }
 
 export default function BottomSheet({
@@ -41,6 +43,7 @@ export default function BottomSheet({
   gpsState = 'unknown',
   favoriteIds = new Set<string>(),
   onFavoriteChange = () => {},
+  friendIds = new Set<string>(),
 }: BottomSheetProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [spots, setSpots] = useState(initialSpots)
@@ -60,7 +63,7 @@ export default function BottomSheet({
   useEffect(() => {
     if (typeof window === 'undefined') return
     const stored = localStorage.getItem(VIEW_MODE_KEY)
-    if (stored === 'all' || stored === 'mine' || stored === 'favorites') {
+    if (stored === 'all' || stored === 'mine' || stored === 'friends' || stored === 'favorites') {
       setViewMode(stored)
     }
   }, [])
@@ -73,6 +76,7 @@ export default function BottomSheet({
   const filtered = spots.filter((s) => {
     if (viewMode === 'all') return true
     if (viewMode === 'mine') return s.created_by === userId
+    if (viewMode === 'friends') return s.created_by !== null && friendIds.has(s.created_by)
     return favoriteIds.has(s.id)
   })
 
@@ -118,6 +122,9 @@ export default function BottomSheet({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={selectedSpotId ? 'Plätzchen-Details' : 'Plätzchen-Liste'}
       className="absolute bottom-0 left-0 right-0 z-1000 bg-white dark:bg-[#1e231a] rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] overflow-hidden"
       style={{
         height: '55vh',
@@ -130,7 +137,7 @@ export default function BottomSheet({
         className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none"
         {...handleProps}
       >
-        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-400 dark:bg-gray-500 rounded-full" />
         {selectedSpotId ? (
           <button onClick={onSpotDeselect} className="text-sm text-primary mt-2">
             ← Alle Plätzchen
@@ -141,6 +148,7 @@ export default function BottomSheet({
           </p>
         )}
         <div className="flex items-center gap-3 mt-2">
+          {selectedSpot && <SpotShareButton spotId={selectedSpot.id} />}
           {userId && selectedSpot && (
             <FavoriteToggle
               spotId={selectedSpot.id}
@@ -169,7 +177,7 @@ export default function BottomSheet({
       {/* Tab bar (list view only) */}
       {!selectedSpotId && (
         <div className="flex border-b border-gray-100 dark:border-[#2a2f24]">
-          {(['all', 'mine', 'favorites'] as const).map((m) => (
+          {(['all', 'mine', 'friends', 'favorites'] as const).map((m) => (
             <button
               key={m}
               type="button"
@@ -182,7 +190,7 @@ export default function BottomSheet({
                   : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200'
               }`}
             >
-              {m === 'all' ? 'Alle' : m === 'mine' ? 'Eigene' : 'Favoriten'}
+              {m === 'all' ? 'Alle' : m === 'mine' ? 'Eigene' : m === 'friends' ? 'Freunde' : 'Favoriten'}
             </button>
           ))}
         </div>
@@ -196,10 +204,10 @@ export default function BottomSheet({
       >
         {selectedSpot ? (
           <SpotDetail spot={selectedSpot} userId={userId} />
-        ) : (viewMode === 'mine' || viewMode === 'favorites') && !userId ? (
+        ) : (viewMode === 'mine' || viewMode === 'friends' || viewMode === 'favorites') && !userId ? (
           <div className="py-12 px-6 text-center">
             <p className="text-base text-gray-700 dark:text-gray-300 mb-2">
-              Logge dich ein, um {viewMode === 'mine' ? 'deine eigenen Plätzchen' : 'deine Favoriten'} zu sehen.
+              Logge dich ein, um {viewMode === 'mine' ? 'deine eigenen Plätzchen' : viewMode === 'friends' ? 'Plätzchen von Freunden' : 'deine Favoriten'} zu sehen.
             </p>
             <Link href="/login" className="text-primary font-medium hover:underline">
               Login
@@ -214,6 +222,16 @@ export default function BottomSheet({
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
+              </p>
+            </div>
+          ) : viewMode === 'friends' ? (
+            <div className="py-12 px-6 text-center">
+              <div className="text-5xl mb-3">👥</div>
+              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                Keine Plätzchen von Freunden in der Nähe.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Füge Freunde hinzu auf <Link href="/friends" className="text-primary font-medium hover:underline">der Freunde-Seite</Link>.
               </p>
             </div>
           ) : viewMode === 'favorites' ? (

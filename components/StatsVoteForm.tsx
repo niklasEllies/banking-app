@@ -156,7 +156,7 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
       <button
         onClick={handleSave}
         disabled={isPending}
-        className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50 transition-colors"
+        className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
       >
         {isPending ? 'Speichern…' : 'Bewertung speichern'}
       </button>

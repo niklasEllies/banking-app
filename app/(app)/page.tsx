@@ -4,9 +4,15 @@ import MapLayout from '@/components/MapLayout'
 import ChangelogModal from '@/components/ChangelogModal'
 import type { Spot } from '@/components/SpotMap'
 import { listFavoriteSpotIds } from '@/actions/favorites'
+import { listFriends } from '@/actions/friends'
 import { loadChangelog } from '@/lib/changelog-server'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ spot?: string }>
+}) {
+  const { spot: initialSpotId } = await searchParams
   const supabase = await createClient()
 
   const [{ data: spots }, { data: { user } }, changelog] = await Promise.all([
@@ -17,17 +23,20 @@ export default async function HomePage() {
 
   let isAdmin = false
   let favoriteIds: string[] = []
+  let friendIds: string[] = []
   if (user) {
-    const [profileResult, favIds] = await Promise.all([
+    const [profileResult, favIds, friends] = await Promise.all([
       supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', user.id)
         .maybeSingle(),
       listFavoriteSpotIds(),
+      listFriends(),
     ])
     isAdmin = profileResult.data?.is_admin ?? false
     favoriteIds = favIds
+    friendIds = friends.map((f) => f.id)
   }
 
   const spotList: Spot[] = spots ?? []
@@ -42,6 +51,8 @@ export default async function HomePage() {
         userId={user?.id ?? null}
         isAdmin={isAdmin}
         initialFavoriteIds={favoriteIds}
+        initialFriendIds={friendIds}
+        initialSpotId={initialSpotId ?? null}
       />
       {latestEntry && <ChangelogModal latest={latestEntry} />}
     </div>

@@ -265,19 +265,33 @@ import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 <span>{SPOT_TYPE_MAP[spot.type].emoji} {SPOT_TYPE_MAP[spot.type].label}</span>
 ```
 
+## Phase 7 Patterns (Beta-Polish)
+
+### Deep-Links via Query-Param
+`/?spot=<id>` — Server Component liest `searchParams.spot` und reicht als `initialSpotId` an MapLayout. MapLayout setzt damit den initialen `selectedSpotId` (BottomSheet öffnet Detail) und feuert in einem mount-only useEffect ein `setFlyTarget` (Map zoomt). Beim Schließen des Sheets wird der Param via `router.replace('/', { scroll: false })` entfernt — nicht push (kein History-Spam).
+
+Wenn der Spot aufgrund von RLS unsichtbar ist: er taucht nicht in `spots` auf, MapLayout's useEffect findet ihn nicht, kein Fly. Privacy-safe (leakt nicht "spot existiert aber du darfst nicht").
+
+### Web Share API mit Clipboard-Fallback
+`SpotShareButton` versucht erst `navigator.share` (mobile native), fällt dann auf `clipboard.writeText` mit "Link kopiert"-Toast (2s). Sichtbar für jeden, der den Spot offen hat (auch anonym).
+
+### inert-Background Focus-Trap
+Wenn BottomSheet expanded ist, bekommt der Wrapper-Div um `<SpotMapClient>` das HTML5 `inert={true}`-Attribut. React 19 hat native Support. Map-Buttons (FAB, 📍) sind nicht mehr Tab-erreichbar. Sheet selbst hat `role="dialog"` + `aria-modal="true"` mit dynamischem `aria-label` (Liste vs. Details).
+
+### friendIds Set (parallel zu favoriteIds)
+`app/(app)/page.tsx` fetcht `listFriends()` parallel zu favorites/profile. `MapLayout` hält `friendIds: Set<string>` als initial-only State (kein Setter — Friend-Mutationen revalidaten `/`). BottomSheet nutzt es für den 4. View-Mode-Tab "Freunde".
+
 ## Was als nächstes kommt
 
-**Phase 7 — Polish & Tech-Debt:**
+**Phase 7+ — Verbleibende Tech-Debt:**
 
-Wachstumsphase: SpotMap-Refactor (Custom Hooks), Deep-Links zu Spots, PWA installable, N+1 in Admin, Modal-Focus-Trap im BottomSheet, Vector-Icons (User designt).
-
-Phase-6 Erweiterungen: Friend-Spot-Filter im BottomSheet (z.B. "nur Spots von Freunden"), Block-Mechanik (`status='blocked'` auf friendships).
+SpotMap-Refactor (große Datei, ~350 LOC mit Controllern → eigene Hooks), PWA installable (Manifest + SW + Offline), Vector-Icons (User designt selbst), Block-Mechanik auf friendships.
 
 **Phase 8 — Social Polish:**
 
 Notifications, Email-Alerts, Public Profile Page (`/u/:username`), Friend-Activity-Feed, Web Push.
 
-Vorm Start: Phase 7 vs Phase 8 priorisieren — Polish hilft Beta-Tests, Social Polish bringt Nutzungs-Schwung.
+Vorm Start: priorisieren — Polish-Reste vs Social Polish.
 
 ## Stil-Guide
 

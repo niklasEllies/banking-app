@@ -90,7 +90,7 @@ export default function EditPhotoPage({
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
+            className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
           >
             {isPending ? 'Hochladen…' : 'Foto speichern'}
           </button>

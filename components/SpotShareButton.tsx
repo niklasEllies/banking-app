@@ -10,7 +10,7 @@ export default function SpotShareButton({ spotId }: SpotShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/?spot=${spotId}`
+    const url = `${window.location.origin}/map?spot=${spotId}`
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ url, title: 'Schau dir dieses Plätzchen an' })

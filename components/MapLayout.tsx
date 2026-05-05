@@ -72,7 +72,7 @@ export default function MapLayout({
     setSelectedSpotId(null)
     // Clear deep-link query param if present
     if (typeof window !== 'undefined' && window.location.search.includes('spot=')) {
-      router.replace('/', { scroll: false })
+      router.replace('/map', { scroll: false })
     }
   }, [router])
 

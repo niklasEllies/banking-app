@@ -20,13 +20,14 @@ export default async function AdminPage() {
 
   const [{ data: profiles }, { data: rawSpots }] = await Promise.all([
     supabase.from('profiles').select('id, username, is_admin, created_at').order('created_at'),
-    supabase.from('spots').select('id, name, type, created_at, created_by, profiles(username)').order('created_at', { ascending: false }),
+    supabase.from('spots').select('id, name, type, visibility, created_at, created_by, profiles(username)').order('created_at', { ascending: false }),
   ])
 
   const spots: AdminSpot[] = (rawSpots ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     type: s.type,
+    visibility: s.visibility,
     created_at: s.created_at,
     created_by: s.created_by,
     profiles: Array.isArray(s.profiles) ? (s.profiles[0] ?? null) : s.profiles,

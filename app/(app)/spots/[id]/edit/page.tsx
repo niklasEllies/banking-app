@@ -14,7 +14,7 @@ export default async function EditSpotPage({
 
   const { data: spot } = await supabase
     .from('spots')
-    .select('id, name, type, created_by')
+    .select('id, name, type, visibility, created_by')
     .eq('id', id)
     .maybeSingle()
 

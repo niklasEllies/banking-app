@@ -9,6 +9,7 @@ import L from 'leaflet'
 import { deleteSpot } from '@/actions/spots'
 import SpotPopup from '@/components/SpotPopup'
 import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
+import type { SpotVisibility } from '@/lib/spot-visibility'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 const EMOJI_KEY = 'benchmarks_user_emoji'
@@ -73,6 +74,7 @@ const createClusterIcon = (cluster: any) => {
 export interface Spot {
   id: string
   type: SpotType
+  visibility: SpotVisibility
   lat: number
   lng: number
   name: string | null

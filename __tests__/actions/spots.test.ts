@@ -79,8 +79,34 @@ describe('createSpot', () => {
       lng: 9.9,
       name: 'Meine Bank',
       type: 'bench',
+      visibility: 'public',
       created_by: 'user-1',
     })
+  })
+
+  it('gibt Fehler bei ungültiger visibility', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const fd = new FormData()
+    fd.set('lat', '51.5074')
+    fd.set('lng', '9.9')
+    fd.set('visibility', 'garbage')
+
+    const result = await createSpot(undefined, fd)
+    expect(result).toEqual({ error: 'Ungültige Sichtbarkeit' })
+  })
+
+  it('akzeptiert visibility=friends und gibt sie an insert weiter', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const fd = new FormData()
+    fd.set('lat', '51.5074')
+    fd.set('lng', '9.9')
+    fd.set('name', 'Geheimspot')
+    fd.set('visibility', 'friends')
+
+    await expect(createSpot(undefined, fd)).rejects.toMatchObject({ digest: expect.stringContaining('NEXT_REDIRECT') })
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ visibility: 'friends' })
+    )
   })
 
   it('akzeptiert non-default type (viewpoint) und gibt ihn an insert weiter', async () => {
@@ -132,14 +158,20 @@ describe('updateSpot', () => {
 
   it('gibt Fehler zurück wenn nicht eingeloggt', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
-    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench', visibility: 'public' })
     expect(result).toEqual({ error: 'Nicht eingeloggt' })
   })
 
   it('gibt Fehler zurück bei ungültigem Type', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    const result = await updateSpot('spot-1', { name: 'X', type: 'garbage' as never })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'garbage' as never, visibility: 'public' })
     expect(result).toEqual({ error: 'Ungültiger Spot-Typ' })
+  })
+
+  it('gibt Fehler bei ungültiger visibility', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench', visibility: 'garbage' as never })
+    expect(result).toEqual({ error: 'Ungültige Sichtbarkeit' })
   })
 
   it('gibt Fehler zurück wenn nicht Owner', async () => {
@@ -149,7 +181,7 @@ describe('updateSpot', () => {
     const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq })
     mockSupabase.from.mockReturnValue({ select: mockSelectCheck } as never)
 
-    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench', visibility: 'public' })
     expect(result).toEqual({ error: 'Keine Berechtigung' })
   })
 
@@ -160,7 +192,7 @@ describe('updateSpot', () => {
     const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq })
     mockSupabase.from.mockReturnValue({ select: mockSelectCheck } as never)
 
-    const result = await updateSpot('spot-1', { name: 'X', type: 'bench' })
+    const result = await updateSpot('spot-1', { name: 'X', type: 'bench', visibility: 'public' })
     expect(result).toEqual({ error: 'Spot nicht gefunden' })
   })
 
@@ -181,9 +213,9 @@ describe('updateSpot', () => {
       return { update: mockUpdate } as never
     })
 
-    const result = await updateSpot('spot-1', { name: '  Neuer Name  ', type: 'viewpoint' })
+    const result = await updateSpot('spot-1', { name: '  Neuer Name  ', type: 'viewpoint', visibility: 'friends' })
     expect(result).toEqual({})
-    expect(mockUpdate).toHaveBeenCalledWith({ name: 'Neuer Name', type: 'viewpoint' })
+    expect(mockUpdate).toHaveBeenCalledWith({ name: 'Neuer Name', type: 'viewpoint', visibility: 'friends' })
     expect(mockEqUpdate).toHaveBeenCalledWith('id', 'spot-1')
   })
 
@@ -204,8 +236,8 @@ describe('updateSpot', () => {
       return { update: mockUpdate } as never
     })
 
-    const result = await updateSpot('spot-1', { name: '   ', type: 'bench' })
+    const result = await updateSpot('spot-1', { name: '   ', type: 'bench', visibility: 'public' })
     expect(result).toEqual({})
-    expect(mockUpdate).toHaveBeenCalledWith({ name: null, type: 'bench' })
+    expect(mockUpdate).toHaveBeenCalledWith({ name: null, type: 'bench', visibility: 'public' })
   })
 })

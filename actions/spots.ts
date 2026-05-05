@@ -4,10 +4,12 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { SpotType } from '@/lib/spot-types'
+import type { SpotVisibility } from '@/lib/spot-visibility'
 
 type FormState = { error: string } | undefined
 
 const VALID_TYPES: SpotType[] = ['bench', 'viewpoint', 'shelter', 'picnic', 'meadow', 'water']
+const VALID_VISIBILITIES: SpotVisibility[] = ['public', 'friends', 'private']
 
 async function getLocationName(lat: number, lng: number): Promise<string | null> {
   try {
@@ -48,12 +50,18 @@ export async function createSpot(state: FormState, formData: FormData): Promise<
   }
   const type = typeRaw as SpotType
 
+  const visibilityRaw = (formData.get('visibility') as string | null) ?? 'public'
+  if (!VALID_VISIBILITIES.includes(visibilityRaw as SpotVisibility)) {
+    return { error: 'Ungültige Sichtbarkeit' }
+  }
+  const visibility = visibilityRaw as SpotVisibility
+
   const nameRaw = formData.get('name') as string
   const name = nameRaw?.trim() || await getLocationName(lat, lng)
 
   const { data: spot, error } = await supabase
     .from('spots')
-    .insert({ lat, lng, name, type, created_by: user.id })
+    .insert({ lat, lng, name, type, visibility, created_by: user.id })
     .select('id')
     .single()
 
@@ -97,7 +105,7 @@ export async function deleteSpot(id: string): Promise<{ error?: string }> {
 
 export async function updateSpot(
   spotId: string,
-  fields: { name: string | null; type: SpotType },
+  fields: { name: string | null; type: SpotType; visibility: SpotVisibility },
 ): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -105,6 +113,9 @@ export async function updateSpot(
 
   if (!VALID_TYPES.includes(fields.type)) {
     return { error: 'Ungültiger Spot-Typ' }
+  }
+  if (!VALID_VISIBILITIES.includes(fields.visibility)) {
+    return { error: 'Ungültige Sichtbarkeit' }
   }
 
   const { data: spot, error: spotError } = await supabase
@@ -120,7 +131,7 @@ export async function updateSpot(
   const cleanedName = fields.name?.trim() || null
   const { error } = await supabase
     .from('spots')
-    .update({ name: cleanedName, type: fields.type })
+    .update({ name: cleanedName, type: fields.type, visibility: fields.visibility })
     .eq('id', spotId)
 
   if (error) return { error: error.message }

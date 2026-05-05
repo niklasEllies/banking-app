@@ -68,7 +68,7 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
         <button
           onClick={toggle}
           disabled={isPending}
-          className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 ${
+          className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-60 ${
             isAdmin
               ? 'border-primary text-primary hover:bg-primary-light dark:hover:bg-[#2a3f1e]'
               : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary'

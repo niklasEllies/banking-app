@@ -82,7 +82,7 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
+              className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
             >
               {isPending ? 'Speichern…' : 'Änderungen speichern'}
             </button>

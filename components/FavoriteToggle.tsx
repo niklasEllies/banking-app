@@ -35,7 +35,7 @@ export default function FavoriteToggle({ spotId, isFavorite, onChange }: Favorit
       aria-label={isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
       className={`min-w-11 min-h-11 flex items-center justify-center text-lg leading-none transition-opacity ${
         error ? 'text-red-500' : ''
-      } disabled:opacity-50`}
+      } disabled:opacity-60`}
     >
       {isFavorite ? '❤️' : '🤍'}
     </button>

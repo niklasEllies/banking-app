@@ -130,7 +130,7 @@ export default function BottomSheet({
         className="flex items-center justify-between px-5 pt-3 pb-2 cursor-grab select-none"
         {...handleProps}
       >
-        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-400 dark:bg-gray-500 rounded-full" />
         {selectedSpotId ? (
           <button onClick={onSpotDeselect} className="text-sm text-primary mt-2">
             ← Alle Plätzchen

@@ -191,7 +191,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                     type="button"
                     onClick={() => handleRemove(f.id, f.username)}
                     disabled={isPending}
-                    className="shrink-0 text-sm font-medium text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50"
+                    className="shrink-0 text-sm font-medium text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-60"
                   >
                     Entfernen
                   </button>
@@ -226,7 +226,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                           type="button"
                           onClick={() => handleAccept(r.id)}
                           disabled={isPending}
-                          className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                          className="text-sm font-medium text-primary hover:underline disabled:opacity-60"
                         >
                           Annehmen
                         </button>
@@ -234,7 +234,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                           type="button"
                           onClick={() => handleDecline(r.id)}
                           disabled={isPending}
-                          className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-50"
+                          className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-60"
                         >
                           Ablehnen
                         </button>
@@ -267,7 +267,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                         type="button"
                         onClick={() => handleCancel(r.id)}
                         disabled={isPending}
-                        className="shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-50"
+                        className="shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-60"
                       >
                         Anfrage zurückziehen
                       </button>
@@ -301,7 +301,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
               <button
                 type="submit"
                 disabled={searchPending || !searchInput.trim()}
-                className="shrink-0 text-sm font-medium px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
+                className="shrink-0 text-sm font-medium px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-60"
               >
                 Suchen
               </button>
@@ -344,7 +344,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                         type="button"
                         onClick={() => handleAcceptFromSearch(id)}
                         disabled={isPending}
-                        className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                        className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
                       >
                         Anfrage annehmen
                       </button>
@@ -355,7 +355,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                       type="button"
                       onClick={() => handleSend(id)}
                       disabled={isPending}
-                      className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                      className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
                     >
                       Anfrage senden
                     </button>

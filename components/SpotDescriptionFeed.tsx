@@ -111,7 +111,7 @@ export default function SpotDescriptionFeed({ spotId, userId }: SpotDescriptionF
               <button
                 onClick={save}
                 disabled={isPending || draft.trim().length === 0}
-                className="px-3 py-1.5 bg-primary text-white rounded disabled:opacity-50 hover:bg-primary-dark"
+                className="px-3 py-1.5 bg-primary text-white rounded disabled:opacity-60 hover:bg-primary-dark"
               >
                 {isPending ? 'Speichern…' : 'Speichern'}
               </button>
@@ -135,7 +135,7 @@ export default function SpotDescriptionFeed({ spotId, userId }: SpotDescriptionF
             <button
               onClick={remove}
               disabled={isPending}
-              className="text-red-500 hover:text-red-700 disabled:opacity-50"
+              className="text-red-500 hover:text-red-700 disabled:opacity-60"
             >
               Löschen
             </button>

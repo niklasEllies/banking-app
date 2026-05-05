@@ -126,7 +126,7 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
+          className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
         >
           {pending ? 'Speichern...' : 'Plätzchen eintragen'}
         </button>

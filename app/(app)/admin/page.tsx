@@ -58,7 +58,7 @@ export default async function AdminPage() {
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-lg mx-auto px-4 py-8">
         <Link
-          href="/"
+          href="/map"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
           ← Zurück zur Karte

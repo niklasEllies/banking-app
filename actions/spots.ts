@@ -95,6 +95,40 @@ export async function deleteSpot(id: string): Promise<{ error?: string }> {
   return {}
 }
 
+export async function updateSpot(
+  spotId: string,
+  fields: { name: string | null; type: SpotType },
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Nicht eingeloggt' }
+
+  if (!VALID_TYPES.includes(fields.type)) {
+    return { error: 'Ungültiger Spot-Typ' }
+  }
+
+  const { data: spot, error: spotError } = await supabase
+    .from('spots')
+    .select('created_by')
+    .eq('id', spotId)
+    .maybeSingle()
+
+  if (spotError) return { error: 'Spot konnte nicht geprüft werden' }
+  if (!spot) return { error: 'Spot nicht gefunden' }
+  if (spot.created_by !== user.id) return { error: 'Keine Berechtigung' }
+
+  const cleanedName = fields.name?.trim() || null
+  const { error } = await supabase
+    .from('spots')
+    .update({ name: cleanedName, type: fields.type })
+    .eq('id', spotId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/')
+  return {}
+}
+
 export async function uploadSpotPhoto(
   spotId: string,
   formData: FormData

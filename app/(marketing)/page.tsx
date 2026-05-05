@@ -3,6 +3,9 @@ import TopoBackground from './_components/TopoBackground'
 import HeroSection from './_components/HeroSection'
 import SpotTypesShowcase from './_components/SpotTypesShowcase'
 import LivingNumbersSection from './_components/LivingNumbersSection'
+import HowItWorks from './_components/HowItWorks'
+import BetaCtaSection from './_components/BetaCtaSection'
+import MarketingFooter from './_components/MarketingFooter'
 
 export default async function LandingPage({
   searchParams,
@@ -21,7 +24,10 @@ export default async function LandingPage({
         <HeroSection />
         <SpotTypesShowcase />
         <LivingNumbersSection />
+        <HowItWorks />
+        <BetaCtaSection />
       </main>
+      <MarketingFooter />
     </>
   )
 }

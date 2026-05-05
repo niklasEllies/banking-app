@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const protectedRoutes = ['/spots']
+// /spots/[id] is public (RLS filters on visibility); /spots/[id]/edit checks auth at page-level
+const protectedRoutes = ['/admin', '/friends']
 
 export default async function proxy(req: NextRequest) {
   const res = NextResponse.next()

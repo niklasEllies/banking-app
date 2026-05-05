@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — Beta-Polish
+*5. Mai 2026*
+
+- 🔗 Teile einen Spot per Link: Tippe auf 📤 in der Detail-Ansicht
+- 👥 Neuer Tab "Freunde" in der Spot-Liste — sieh, was deine Freunde eingetragen haben
+- ♿ Bessere Tastatur-Navigation: Tab bleibt im Sheet, wenn es offen ist
+- 🌓 Etwas mehr Kontrast bei Drag-Handle und deaktivierten Buttons
+- ⚡ Schnellere Admin-Übersicht (kein N+1 mehr)
+
 ## 0.6.0 — Privacy & Friends
 *5. Mai 2026*
 

@@ -182,6 +182,7 @@ components/VisibilityPicker.tsx           ← Radiogroup für 3 Visibility-Level
 components/SpotEditForm.tsx               ← Edit-Form (Name + Type + Visibility)
 components/SpotActionMenu.tsx             ← Owner-Dropdown (Foto/Spot bearbeiten)
 components/FavoriteToggle.tsx             ← Heart-Toggle 🤍↔❤️ (optimistic)
+components/SpotShareButton.tsx            ← Web-Share-API + Clipboard-Fallback für Deep-Links (Phase 7)
 components/FriendsClient.tsx              ← /friends 3-Tab UI (Phase 6)
 components/StatsVoteForm.tsx              ← Vote-Formular (Sterne, Condition, etc.)
 components/RarityBadge.tsx                ← Common→Legendary Badge

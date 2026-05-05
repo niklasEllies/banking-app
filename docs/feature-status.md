@@ -109,18 +109,23 @@ App ist von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wa
 
 **Bewusst rausgehalten:** Block-Mechanik (Phase 7), Friend-Spot-Filter im BottomSheet (Phase 7), Notifications/Activity-Feed (Phase 8), Public Profile Page (Phase 8).
 
-## Phase 7 – Polish & Tech-Debt 🔜
+## Phase 7 – Polish & Tech-Debt (Subset "Beta-Polish") ✅
 
-- [ ] SpotMap-Refactor (Custom Hooks rauslösen)
-- [ ] Deep-Links zu Spots (shareable URLs)
-- [ ] PWA installable
-- [ ] N+1 in admin/page.tsx
-- [ ] Modal-Focus-Trap im BottomSheet
-- [ ] Kontrast-Tweaks (Drag-Handle, disabled-States)
-- [ ] Service-Role-Key Build-time-Validation
-- [ ] Vector-Icons (User designt) — ersetzen die Emoji-Marker
-- [ ] Friend-Spot-Filter im BottomSheet (z.B. "nur Spots von Freunden anzeigen")
-- [ ] Block-Mechanik (`status='blocked'` Extension auf friendships)
+Erstes Drittel der ursprünglich geplanten Phase-7-Liste umgesetzt:
+
+- [x] Deep-Links zu Spots (`/?spot=<id>` query-param + Web-Share-API + Clipboard-Fallback)
+- [x] N+1 in admin/page.tsx (`Map<userId, count>` einmal aus existing spots)
+- [x] Modal-Focus-Trap im BottomSheet (HTML5 `inert` Attribut auf Map-Background, `role="dialog"` auf Sheet)
+- [x] Kontrast-Tweaks (Drag-Handle gray-300/600 → 400/500; disabled-Buttons opacity-50 → 60)
+- [x] Service-Role-Key Build-time-Warning (`console.warn` bei Production wenn fehlt)
+- [x] Friend-Spot-Filter im BottomSheet (4. Tab "Freunde", filtert nach `created_by ∈ friendIds`)
+
+## Phase 7+ – Verbleibende Tech-Debt 🔜
+
+- [ ] SpotMap-Refactor (Custom Hooks rauslösen — z.B. useGpsState, useFlyController)
+- [ ] PWA installable (Manifest + Service Worker + Offline-Strategie)
+- [ ] Vector-Icons (User designt selbst) — ersetzen die Emoji-Marker
+- [ ] Block-Mechanik (`status='blocked'` Extension auf friendships, Button im FriendsClient)
 
 ## Phase 8 – Social Polish 🔜
 

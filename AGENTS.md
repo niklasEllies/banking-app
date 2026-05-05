@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 6 complete.** Next: Phase 7 (Polish & Tech-Debt — Friend-Spot-Filter, Block-Mechanik) or Phase 8 (Social Polish — Notifications, Public Profile, Activity Feed).
+**Current state: Phase 7 (Beta-Polish subset) complete.** Next: pick from remaining Phase-7 items (SpotMap-Refactor, PWA install, Vector Icons, Block-Mechanik) or Phase 8 (Social Polish — Notifications, Public Profile, Activity Feed).
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 

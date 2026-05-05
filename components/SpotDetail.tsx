@@ -7,6 +7,7 @@ import { getSpotStats, type AggregatedStats, type UserVote } from '@/actions/sta
 import { conditionLabel, shadowLabel, extrasIcon } from '@/lib/stats-utils'
 import { spotDisplayName } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
+import { SPOT_VISIBILITY_MAP } from '@/lib/spot-visibility'
 import RarityBadge from '@/components/RarityBadge'
 import StatsVoteForm from '@/components/StatsVoteForm'
 import SpotDescriptionFeed from '@/components/SpotDescriptionFeed'
@@ -93,6 +94,11 @@ export default function SpotDetail({ spot, userId }: SpotDetailProps) {
         <span className="text-xs text-gray-500 dark:text-gray-400">
           {SPOT_TYPE_MAP[spot.type].emoji} {SPOT_TYPE_MAP[spot.type].label}
         </span>
+        {spot.visibility !== 'public' && (
+          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+            {SPOT_VISIBILITY_MAP[spot.visibility].emoji} {SPOT_VISIBILITY_MAP[spot.visibility].label}
+          </span>
+        )}
       </div>
 
       {/* Stats body */}

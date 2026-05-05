@@ -4,11 +4,13 @@ import { useState, useTransition } from 'react'
 import { adminDeleteSpot } from '@/actions/admin'
 import { spotDisplayName } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
+import type { SpotVisibility } from '@/lib/spot-visibility'
 
 export interface AdminSpot {
   id: string
   name: string | null
   type: SpotType
+  visibility: SpotVisibility
   created_at: string
   created_by: string | null
   profiles: { username: string | null } | null

@@ -5,16 +5,19 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { updateSpot } from '@/actions/spots'
 import SpotTypePicker from '@/components/SpotTypePicker'
+import VisibilityPicker from '@/components/VisibilityPicker'
 import type { SpotType } from '@/lib/spot-types'
+import type { SpotVisibility } from '@/lib/spot-visibility'
 
 interface SpotEditFormProps {
-  spot: { id: string; name: string | null; type: SpotType; created_by: string }
+  spot: { id: string; name: string | null; type: SpotType; visibility: SpotVisibility; created_by: string }
 }
 
 export default function SpotEditForm({ spot }: SpotEditFormProps) {
   const router = useRouter()
   const [name, setName] = useState(spot.name ?? '')
   const [type, setType] = useState<SpotType>(spot.type)
+  const [visibility, setVisibility] = useState<SpotVisibility>(spot.visibility)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -22,7 +25,7 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
     e.preventDefault()
     setError(null)
     startTransition(async () => {
-      const result = await updateSpot(spot.id, { name: name || null, type })
+      const result = await updateSpot(spot.id, { name: name || null, type, visibility })
       if (result.error) {
         setError(result.error)
         return
@@ -46,6 +49,11 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
           <div>
             <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Was ist hier?</p>
             <SpotTypePicker value={type} onChange={setType} />
+          </div>
+
+          <div>
+            <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Wer kann den Spot sehen?</p>
+            <VisibilityPicker value={visibility} onChange={setVisibility} />
           </div>
 
           <div>

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 — Privacy & Friends
+*5. Mai 2026*
+
+- 👥 Freundschaften: such jemanden per Username, sende und empfange Anfragen
+- 🔒 Drei Sichtbarkeits-Stufen pro Spot: Öffentlich, Nur Freunde, Privat
+- 🌍 Bestehende Spots bleiben öffentlich — du kannst sie jederzeit umstellen
+- 📬 Counter im Profil zeigt offene Freundschaftsanfragen
+- 🛡️ Datenbank-seitige Privatsphäre: Privat-Spots sind für andere nicht sichtbar (auch Stats und Tipps)
+
 ## 0.5.0 — Personal Layer
 *5. Mai 2026*
 

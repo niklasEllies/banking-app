@@ -62,25 +62,34 @@ Forest Deep Farbpalette (Dark Mode):
 
 **Neue UI-Elemente immer mit `dark:` Varianten versehen. Explizite Hex-Werte, keine CSS-Vars.**
 
-## Aktuelle Datenbankstruktur (Stand: Phase 5)
+## Aktuelle Datenbankstruktur (Stand: Phase 6)
 
 - `profiles`: id, username, is_admin
-- `spots`: id, created_by, lat, lng, name, photo_url, **type** (`spot_type` enum), created_at
+- `spots`: id, created_by, lat, lng, name, photo_url, **type** (`spot_type` enum), **visibility** (`spot_visibility` enum, Phase 6), created_at
   - `type` enum values: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
-  - Bestandsdaten haben `type='bench'` (Migration 006 default)
-  - UPDATE-Policy erlaubt Owner Edit von name+type (Phase 5)
+  - `visibility` enum values: `public`, `friends`, `private` — default `public`
+  - SELECT-Policy gated auf `can_see_spot()` Helper (visibility + Friends-Check)
+  - UPDATE-Policy erlaubt Owner Edit von name+type+visibility
 - `spot_stats_votes`: id, **spot_id**, user_id, comfort, view_rating, condition, shadow, extras, rarity
-  - RLS: SELECT (any), INSERT/UPDATE/DELETE (own user_id)
-- `spot_descriptions` (Phase 4): id, spot_id, user_id, text (≤280 chars), created_at, updated_at
+  - RLS: SELECT/INSERT cascaded via `can_see_spot()`; UPDATE/DELETE eigene
+- `spot_descriptions`: id, spot_id, user_id, text (≤280 chars), created_at, updated_at
   - UNIQUE(spot_id, user_id) — ein Tipp pro User pro Spot
-  - RLS: SELECT (any), INSERT/UPDATE/DELETE (own user_id)
+  - RLS: SELECT/INSERT cascaded via `can_see_spot()`; UPDATE/DELETE eigene
   - updated_at trigger via `set_updated_at()`
-- `favorites` (Phase 5): user_id, spot_id, created_at
+- `favorites`: user_id, spot_id, created_at
   - PRIMARY KEY (user_id, spot_id) — composite, ein Favorit pro Pair
-  - **PRIVATE** RLS: SELECT/INSERT/DELETE alle gated auf `auth.uid() = user_id` (Phase 6 lockert ggf. SELECT für Friends)
+  - **PRIVATE** RLS: SELECT/DELETE eigene; INSERT cascaded via `can_see_spot()`
+- `friendships` (Phase 6): requester_id, addressee_id, status, created_at, updated_at
+  - PRIMARY KEY (requester_id, addressee_id), CHECK requester ≠ addressee
+  - status: `'pending'` | `'accepted'`
+  - RLS: SELECT eigene Pair-Rows, INSERT als requester, UPDATE als addressee (accept), DELETE beide Seiten
 - Storage Bucket `bench-photos`: public read, owner write/delete (interner Name beibehalten)
 
-Aggregation via `get_spot_aggregated_stats(p_spot_id uuid)` Postgres-Funktion.
+Aggregation via `get_spot_aggregated_stats(p_spot_id uuid)` Postgres-Funktion (`SECURITY DEFINER` — bypassed RLS, uuid-opak).
+
+**Helpers:**
+- `are_friends(user_a, user_b) → boolean` — accepted-friendship check (für RLS)
+- `can_see_spot(p_spot_id) → boolean` — visibility-aware spot-access check (von descriptions/votes/favorites RLS aufgerufen)
 
 ## Spot-Types
 
@@ -122,6 +131,30 @@ User-facing changelog page at `/changelog`. Source-of-truth: `CHANGELOG.md` in r
 After deploy, returning users see a one-time modal with the new bullets. First-time visitors don't see the modal (would feel like an upgrade nag they didn't earn).
 
 **Important:** Don't import from `lib/changelog-server.ts` in any Client Component. Use `lib/changelog.ts` for shared types + pure functions; the server file uses `node:fs` and is `'server-only'` enforced.
+
+## Phase 6 Patterns (zusätzlich zu Phase 5)
+
+### Visibility Enum + Helper-Cascade
+`spots.visibility` ist Source of Truth pro Spot. RLS auf `spots`, `spot_descriptions`, `spot_stats_votes`, `favorites` nutzen dieselbe Logik via `can_see_spot()` Helper. Wenn ein User den Spot nicht sehen darf, sieht er auch nicht: Beschreibungen, Votes, kann nicht voten/favorisieren/beschreiben.
+
+`SPOT_VISIBILITIES` / `SPOT_VISIBILITY_MAP` aus `lib/spot-visibility.ts` für UI. Nie Visibility-Labels hardcoden.
+
+### Directed Friendships
+`friendships` ist directed (requester → addressee). Acceptance flippt den Status auf derselben Row. Cancel/Decline/Remove sind alle DELETEs.
+
+`actions/friends.ts` ist die einzige public API. Jede Mutation revalidiert `/friends`, `/profil` und `/`.
+
+`are_friends(a, b)` ist symmetrisch — egal ob a oder b die Anfrage gestellt hat.
+
+### Pending-Counter im Profil
+`countIncomingRequests()` läuft parallel zur profile-Query in `/profil`. Counter-Badge erscheint nur wenn `> 0`.
+
+### /friends 3-Tab UI
+Server Component fetcht `listFriends`, `listIncomingRequests`, `listOutgoingRequests` parallel; Client Component rendert Tabs. Default-Tab = `'requests'` wenn incoming-pending > 0, sonst `'friends'`.
+
+Search-Tab handhabt alle Beziehungs-Stati (already-friends / outgoing-pending / incoming-pending → "Annehmen"-Button) statt blind "Anfrage senden" zu zeigen.
+
+`router.refresh()` nach jeder Mutation — keine manuelle Cache-Verwaltung.
 
 ## Phase 5 Patterns (zusätzlich zu Phase 4)
 
@@ -234,15 +267,17 @@ import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 
 ## Was als nächstes kommt
 
-**Phase 6 — Privacy & Friends:**
+**Phase 7 — Polish & Tech-Debt:**
 
-- Friends-System (Tabelle `friendships`: requester, addressee, status `pending`/`accepted`)
-- Spot-Visibility: `public` / `friends` / `private` (Spalte `visibility` auf `spots`)
-- RLS-Policies für `spots` & `favorites` & `spot_descriptions` müssen ggf. friend-aware werden (oder sub-query auf accepted friendships)
-- UI: Privacy-Picker beim Eintragen + im SpotEditForm
-- Filter/View: optional Friend-Spots im BottomSheet sichtbar machen
+Wachstumsphase: SpotMap-Refactor (Custom Hooks), Deep-Links zu Spots, PWA installable, N+1 in Admin, Modal-Focus-Trap im BottomSheet, Vector-Icons (User designt).
 
-Stoff für Brainstorming: Wie viele privacy-Levels? Friend-Request UX (Push-Notif später)? Macht "Friends-Favoriten anschauen"-Feature schon Sinn oder erst Phase 7?
+Phase-6 Erweiterungen: Friend-Spot-Filter im BottomSheet (z.B. "nur Spots von Freunden"), Block-Mechanik (`status='blocked'` auf friendships).
+
+**Phase 8 — Social Polish:**
+
+Notifications, Email-Alerts, Public Profile Page (`/u/:username`), Friend-Activity-Feed, Web Push.
+
+Vorm Start: Phase 7 vs Phase 8 priorisieren — Polish hilft Beta-Tests, Social Polish bringt Nutzungs-Schwung.
 
 ## Stil-Guide
 

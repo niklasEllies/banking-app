@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 5 complete.** Next: Phase 6 (Privacy & Friends — friends-system, spot visibility public/friends/private).
+**Current state: Phase 6 complete.** Next: Phase 7 (Polish & Tech-Debt — Friend-Spot-Filter, Block-Mechanik) or Phase 8 (Social Polish — Notifications, Public Profile, Activity Feed).
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
@@ -26,6 +26,9 @@ Key rules derived from these docs:
 - Dark mode palette: bg `#141810`, surface `#1e231a`, chips `#2a3124`, border `#2a2f24`, primary `#5e9e3e`
 - `params` is `Promise<{id: string}>` in Next.js 16 pages — use `React.use(params)` in Client Components
 - Use `SPOT_TYPES` / `SPOT_TYPE_MAP` from `lib/spot-types.ts` for any UI showing spot types — never hardcode emojis or labels
+- Use `SPOT_VISIBILITIES` / `SPOT_VISIBILITY_MAP` from `lib/spot-visibility.ts` for any UI showing visibility levels (public/friends/private)
+- Spots have a `visibility` field — RLS enforces who sees what via `can_see_spot()` helper. Cascades automatically to descriptions, votes, favorites.
+- Friendships are directed: `actions/friends.ts` exposes the lifecycle. `are_friends(a, b)` is the SQL helper used in RLS.
 - Storage bucket name `bench-photos` is intentionally kept (internal name from pre-rebrand era)
 - Ask for options + recommendation before implementing non-trivial features
 - Commit after every completed feature slice

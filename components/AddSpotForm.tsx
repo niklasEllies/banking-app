@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import { createSpot } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
 import SpotTypePicker from '@/components/SpotTypePicker'
+import VisibilityPicker from '@/components/VisibilityPicker'
 import type { SpotType } from '@/lib/spot-types'
+import type { SpotVisibility } from '@/lib/spot-visibility'
 
 interface AddSpotFormProps {
   initialLat: number
@@ -18,6 +20,7 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
   const [lat, setLat] = useState(initialLat)
   const [lng, setLng] = useState(initialLng)
   const [type, setType] = useState<SpotType>('bench')
+  const [visibility, setVisibility] = useState<SpotVisibility>('public')
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const handleUseCurrentLocation = () => {
@@ -55,6 +58,7 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
         <input type="hidden" name="lat" value={lat} />
         <input type="hidden" name="lng" value={lng} />
         <input type="hidden" name="type" value={type} />
+        <input type="hidden" name="visibility" value={visibility} />
         <button
           type="button"
           onClick={handleUseCurrentLocation}
@@ -67,6 +71,11 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
       <div>
         <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Was ist hier?</p>
         <SpotTypePicker value={type} onChange={setType} />
+      </div>
+
+      <div>
+        <p className="block text-sm text-gray-800 dark:text-gray-200 font-medium mb-2">Wer kann den Spot sehen?</p>
+        <VisibilityPicker value={visibility} onChange={setVisibility} />
       </div>
 
       <div>

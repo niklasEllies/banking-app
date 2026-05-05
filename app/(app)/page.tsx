@@ -10,7 +10,7 @@ export default async function HomePage() {
   const supabase = await createClient()
 
   const [{ data: spots }, { data: { user } }, changelog] = await Promise.all([
-    supabase.from('spots').select('id, type, lat, lng, name, created_by, created_at, photo_url'),
+    supabase.from('spots').select('id, type, visibility, lat, lng, name, created_by, created_at, photo_url'),
     supabase.auth.getUser(),
     loadChangelog(),
   ])

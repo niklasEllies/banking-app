@@ -1,6 +1,6 @@
 # Datenbankschema
 
-> **Phase 4 Stand:** `benches` → `spots`, `bench_stats_votes` → `spot_stats_votes`, neuer `spot_type` Enum + neue `spot_descriptions` Tabelle.
+> **Phase 6 Stand:** `friendships` Tabelle + `spots.visibility` Enum + RLS-Cascade via `can_see_spot()` und `are_friends()` Helpers.
 
 ## profiles
 
@@ -29,6 +29,7 @@ Hauptobjekt seit Phase 4. Vorher `benches`. Bestandsdaten haben `type='bench'`.
 | `name` | `text` | Nullable — Nominatim-Name oder manuell |
 | `photo_url` | `text` | Nullable — öffentliche URL aus Storage |
 | `type` | `spot_type` | NOT NULL, Default `'bench'` |
+| `visibility` | `spot_visibility` | NOT NULL, Default `'public'` (Phase 6) |
 | `created_at` | `timestamptz` | Auto: `now()` |
 
 ### Enum `spot_type`
@@ -47,6 +48,20 @@ CREATE TYPE spot_type AS ENUM ('bench', 'viewpoint', 'shelter', 'picnic', 'meado
 | water | 💧 | Wasserstelle |
 
 UI-Mapping in `lib/spot-types.ts` (`SPOT_TYPE_MAP`).
+
+### Enum `spot_visibility` (Phase 6)
+
+```sql
+CREATE TYPE spot_visibility AS ENUM ('public', 'friends', 'private');
+```
+
+| Key | Emoji | Label |
+|---|---|---|
+| public | 🌍 | Öffentlich |
+| friends | 👥 | Nur Freunde |
+| private | 🔒 | Privat |
+
+UI-Mapping in `lib/spot-visibility.ts` (`SPOT_VISIBILITY_MAP`).
 
 ## spot_stats_votes
 
@@ -98,7 +113,23 @@ Persönliche Favoriten. **Privat** — nur Owner kann eigene Favoriten lesen.
 **PRIMARY KEY:** `(user_id, spot_id)` — composite, ein Favorit pro User-Spot-Pair.
 **Index:** `idx_favorites_user_id` auf `(user_id, created_at DESC)`.
 
-Phase 6 (Friends) lockert die SELECT-Policy ggf. auf "user OR friend".
+In Phase 6 wurde die INSERT-Policy zusätzlich an `can_see_spot()` gehängt — keine Favoriten auf nicht-sichtbare Spots.
+
+## friendships (Phase 6)
+
+Directed Friendship-Modell. Ein Row pro (requester, addressee). Acceptance flippt `status` auf derselben Row; cancel/decline/remove sind DELETEs.
+
+| Spalte | Typ | Beschreibung |
+|---|---|---|
+| `requester_id` | `uuid` | FK → `profiles.id` ON DELETE CASCADE |
+| `addressee_id` | `uuid` | FK → `profiles.id` ON DELETE CASCADE |
+| `status` | `text` | CHECK IN (`'pending'`, `'accepted'`) |
+| `created_at` | `timestamptz` | Auto: `now()` |
+| `updated_at` | `timestamptz` | Trigger `set_updated_at()` |
+
+**PRIMARY KEY:** `(requester_id, addressee_id)`.
+**CHECK:** `requester_id <> addressee_id` (kein Self-Friendship).
+**Indexes:** `idx_friendships_addressee(addressee_id, status)`, `idx_friendships_requester(requester_id, status)`.
 
 ## Aggregations-Funktion
 
@@ -107,6 +138,20 @@ get_spot_aggregated_stats(p_spot_id uuid)
 ```
 
 Gibt zurück: `comfort_median`, `view_median`, `condition_median`, `rarity_median` (PERCENTILE_CONT 0.5), `shadow_mode` (MODE()), `extras_threshold` (Items mit ≥50% Votes), `vote_count`.
+
+## RLS Helpers (Phase 6)
+
+```sql
+are_friends(user_a uuid, user_b uuid) RETURNS boolean
+```
+Symmetrischer Check: gibt es eine Row in `friendships` mit `status='accepted'` zwischen `a` und `b` (in beide Richtungen)?
+
+```sql
+can_see_spot(p_spot_id uuid) RETURNS boolean
+```
+Aufgerufen von descriptions/votes/favorites RLS — prüft `visibility='public'` ODER `auth.uid()=created_by` ODER (`visibility='friends'` AND `are_friends(auth.uid(), created_by)`).
+
+Beide sind `STABLE SECURITY DEFINER`.
 
 ## Supabase Storage
 
@@ -126,7 +171,7 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 
 | Operation | Bedingung |
 |---|---|
-| SELECT | Alle (auch anonym) |
+| SELECT | `visibility='public'` ODER `auth.uid() = created_by` ODER (`visibility='friends'` AND `are_friends(auth.uid(), created_by)`) |
 | INSERT | `auth.uid() IS NOT NULL` |
 | UPDATE | `auth.uid() = created_by` |
 | DELETE | `auth.uid() = created_by` ODER `is_admin = true` |
@@ -135,8 +180,8 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 
 | Operation | Bedingung |
 |---|---|
-| SELECT | Alle |
-| INSERT | `auth.uid() = user_id` |
+| SELECT | `can_see_spot(spot_id)` |
+| INSERT | `auth.uid() = user_id` AND `can_see_spot(spot_id)` |
 | UPDATE | `auth.uid() = user_id` |
 | DELETE | `auth.uid() = user_id` |
 
@@ -144,20 +189,29 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 
 | Operation | Bedingung |
 |---|---|
-| SELECT | Alle |
-| INSERT | `auth.uid() = user_id` |
+| SELECT | `can_see_spot(spot_id)` |
+| INSERT | `auth.uid() = user_id` AND `can_see_spot(spot_id)` |
 | UPDATE | `auth.uid() = user_id` |
 | DELETE | `auth.uid() = user_id` |
 
 ### favorites
 
-**Private** — nur eigene Favoriten sichtbar.
+**Private** — nur eigene Favoriten sichtbar. INSERT zusätzlich visibility-aware (kein Favorit auf unsichtbare Spots).
 
 | Operation | Bedingung |
 |---|---|
 | SELECT | `auth.uid() = user_id` (authenticated only) |
-| INSERT | `auth.uid() = user_id` |
+| INSERT | `auth.uid() = user_id` AND `can_see_spot(spot_id)` |
 | DELETE | `auth.uid() = user_id` |
+
+### friendships
+
+| Operation | Bedingung |
+|---|---|
+| SELECT | `auth.uid() IN (requester_id, addressee_id)` |
+| INSERT | `auth.uid() = requester_id` AND `status = 'pending'` |
+| UPDATE | `auth.uid() = addressee_id` (für accept) |
+| DELETE | `auth.uid() IN (requester_id, addressee_id)` |
 
 ### profiles
 
@@ -188,3 +242,5 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 | `006_phase4_rename_to_spots.sql` | `benches` → `spots`, `spot_type` Enum, `bench_stats_votes` → `spot_stats_votes`, RPC umbenannt |
 | `007_phase4_descriptions.sql` | `spot_descriptions` Tabelle + RLS + updated_at Trigger |
 | `008_phase5_favorites.sql` | `favorites` Tabelle (composite PK, private RLS) |
+| `009_phase6_friendships.sql` | `friendships` Tabelle (directed model) + `are_friends()` Helper |
+| `010_phase6_visibility.sql` | `spots.visibility` Enum + `can_see_spot()` Helper + RLS-Cascade auf descriptions/votes/favorites |

@@ -133,8 +133,9 @@ Resize on Upload via `lib/image-utils.ts` (max 1600px, WebP @0.8, JPG @0.85 Fall
 | `benchmarks_user_emoji` | z.B. `"🧍‍♂️"` |
 | `benchmarks-theme` | `"dark"` oder nicht gesetzt |
 | `benchmarks-gps-banner-dismissed` | `"true"` wenn GPS-Warnung weggeklickt |
+| `plaetzchen-view-mode` | `"all" \| "mine" \| "favorites"` (BottomSheet-Tab, Phase 5) |
 
-(Keys behalten ihren `benchmarks_` Prefix für Backward-Compatibility — User mit Bestandsdaten verlieren sonst Einstellungen.)
+(Alte Keys behalten ihren `benchmarks_` Prefix für Backward-Compatibility — User mit Bestandsdaten verlieren sonst Einstellungen. Neue Keys ab Phase 5 nutzen `plaetzchen-` Prefix.)
 
 ## Wichtige Gotchas
 
@@ -157,25 +158,30 @@ app/(auth)/login|signup/page.tsx          ← Auth-Seiten
 app/(app)/page.tsx                        ← Hauptseite (spots + user + isAdmin fetch)
 app/(app)/spots/new/page.tsx              ← Spot eintragen
 app/(app)/spots/[id]/edit-photo/          ← Foto nachträglich hochladen (Owner)
+app/(app)/spots/[id]/edit/page.tsx        ← Spot bearbeiten: Name + Type (Owner, Phase 5)
 app/(app)/profil/page.tsx                 ← Profil + Emoji + Logout
 app/(app)/admin/page.tsx                  ← Admin (User + Spot Management)
 app/(app)/admin/AdminUsers.tsx            ← User-Liste mit Admin-Toggle
 app/(app)/admin/AdminSpots.tsx            ← Spot-Liste mit Type-Emoji
 actions/auth.ts                           ← signUp, login, logout
-actions/spots.ts                          ← createSpot, deleteSpot, uploadSpotPhoto
+actions/spots.ts                          ← createSpot, deleteSpot, uploadSpotPhoto, updateSpot
 actions/stats.ts                          ← getSpotStats, upsertStats
 actions/descriptions.ts                   ← listDescriptions, upsertDescription, deleteDescription
+actions/favorites.ts                      ← listFavoriteSpotIds, addFavorite, removeFavorite (Phase 5)
 actions/admin.ts                          ← setAdminRole, adminDeleteSpot
 components/SpotMap.tsx                    ← Leaflet-Karte (Client, enthält Controller, per-Type DivIcons)
 components/SpotMapClient.tsx              ← dynamic-import Wrapper
 components/SpotPopup.tsx                  ← Leaflet Popup (lazy rarity fetch, Type-Label)
-components/BottomSheet.tsx                ← Sheet: Liste/Detail-Modi, Distanz, flyTo+detail
+components/BottomSheet.tsx                ← Sheet: Tabs (Alle/Eigene/Favoriten), distance-sort, flyTo+detail
 components/SpotDetail.tsx                 ← Detail-Ansicht (Foto-Header, Type-Badge, Stats, VoteForm, DescriptionFeed)
 components/SpotDescriptionFeed.tsx        ← Community-Tipps (own slot + others)
-components/SpotTypePicker.tsx             ← Radiogroup für 6 Spot-Types (im AddSpotForm)
+components/SpotTypePicker.tsx             ← Radiogroup für 6 Spot-Types (im AddSpotForm + SpotEditForm)
+components/SpotEditForm.tsx               ← Edit-Form (Name + Type, Phase 5)
+components/SpotActionMenu.tsx             ← Owner-Dropdown (Foto/Spot bearbeiten, Phase 5)
+components/FavoriteToggle.tsx             ← Heart-Toggle 🤍↔❤️ (optimistic, Phase 5)
 components/StatsVoteForm.tsx              ← Vote-Formular (Sterne, Condition, etc.)
 components/RarityBadge.tsx                ← Common→Legendary Badge
-components/MapLayout.tsx                  ← State-Koordinator (selectedSpot, flyTarget, userPos, gpsState)
+components/MapLayout.tsx                  ← State-Koordinator (selectedSpot, flyTarget, userPos, gpsState, favoriteIds)
 components/MapHeader.tsx                  ← Header ("📍 Plätzchen", ThemeToggle)
 components/AddSpotForm.tsx                ← Spot-Formular (Type-Picker, Position, Name, Foto)
 components/ThemeToggle.tsx                ← Dark/Light Toggle
@@ -184,9 +190,9 @@ components/useSheetSwipe.ts               ← Hook: Sheet swipe-vs-scroll split
 lib/supabase/server.ts + client.ts        ← Supabase Clients
 lib/supabase/admin.ts                     ← Service-Role Client (nur für auth.admin)
 lib/spot-types.ts                         ← SpotType, SPOT_TYPES, SPOT_TYPE_MAP
-lib/spot-utils.ts                         ← spotDisplayName (type-aware), distanceTo (Haversine)
+lib/spot-utils.ts                         ← spotDisplayName (type-aware), distanceTo, distMeters
 lib/stats-utils.ts                        ← conditionLabel, rarityLabel, shadowLabel, extrasIcon
 lib/image-utils.ts                        ← resizeImage (max 1600px, WebP)
 proxy.ts                                  ← Route-Schutz (/spots/*)
-supabase/migrations/                      ← SQL Migrations (001–007)
+supabase/migrations/                      ← SQL Migrations (001–008)
 ```

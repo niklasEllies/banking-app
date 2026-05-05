@@ -62,18 +62,22 @@ Forest Deep Farbpalette (Dark Mode):
 
 **Neue UI-Elemente immer mit `dark:` Varianten versehen. Explizite Hex-Werte, keine CSS-Vars.**
 
-## Aktuelle Datenbankstruktur (Stand: Phase 4)
+## Aktuelle Datenbankstruktur (Stand: Phase 5)
 
 - `profiles`: id, username, is_admin
 - `spots`: id, created_by, lat, lng, name, photo_url, **type** (`spot_type` enum), created_at
   - `type` enum values: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
   - Bestandsdaten haben `type='bench'` (Migration 006 default)
+  - UPDATE-Policy erlaubt Owner Edit von name+type (Phase 5)
 - `spot_stats_votes`: id, **spot_id**, user_id, comfort, view_rating, condition, shadow, extras, rarity
   - RLS: SELECT (any), INSERT/UPDATE/DELETE (own user_id)
 - `spot_descriptions` (Phase 4): id, spot_id, user_id, text (≤280 chars), created_at, updated_at
   - UNIQUE(spot_id, user_id) — ein Tipp pro User pro Spot
   - RLS: SELECT (any), INSERT/UPDATE/DELETE (own user_id)
   - updated_at trigger via `set_updated_at()`
+- `favorites` (Phase 5): user_id, spot_id, created_at
+  - PRIMARY KEY (user_id, spot_id) — composite, ein Favorit pro Pair
+  - **PRIVATE** RLS: SELECT/INSERT/DELETE alle gated auf `auth.uid() = user_id` (Phase 6 lockert ggf. SELECT für Friends)
 - Storage Bucket `bench-photos`: public read, owner write/delete (interner Name beibehalten)
 
 Aggregation via `get_spot_aggregated_stats(p_spot_id uuid)` Postgres-Funktion.
@@ -99,6 +103,33 @@ export type SpotType = 'bench' | 'viewpoint' | 'shelter' | 'picnic' | 'meadow' |
 **Regel:** Niemals Emojis oder Labels hardcoden — immer `SPOT_TYPE_MAP[spot.type].emoji` und `.label`.
 
 Map-Marker: `getSpotIcon(type)` in `components/SpotMap.tsx` cached `L.DivIcon` per Type. Vector-Icons (User designt) ersetzen die Emoji-Marker irgendwann (Phase 7+).
+
+## Phase 5 Patterns (zusätzlich zu Phase 4)
+
+### favoriteIds Set Propagation
+Server Component (`app/(app)/page.tsx`) ruft `listFavoriteSpotIds()` parallel zur Profile-Query. Liste wird an `MapLayout` als `initialFavoriteIds` weitergegeben. MapLayout hält ein `Set<string>` als State + `handleFavoriteChange(spotId, isFav)` Callback. Set + Callback wandern an `BottomSheet`, das beim Detail-Modus `<FavoriteToggle>` rendert.
+
+### FavoriteToggle Optimistic UI
+- Toggle ruft `onChange` SOFORT (UI flip)
+- `addFavorite`/`removeFavorite` läuft in `useTransition`
+- Bei Server-Error: revertet via `onChange(spotId, !next)` und färbt rot
+
+### View-Mode Tabs (BottomSheet)
+- 3 Tabs: `'all' | 'mine' | 'favorites'`. localStorage Key `plaetzchen-view-mode`.
+- Default `'all'`. Hydratet nach mount via `useEffect` (vermeidet SSR mismatch).
+- Filter+Sort innerhalb des aktiven Tabs:
+  - sort by `distMeters` wenn GPS available, sonst by `created_at` DESC
+- Anonym + (mine|favorites) → Login-CTA Block statt Liste
+
+### SpotActionMenu (Owner)
+- ✏️-Trigger öffnet Dropdown mit `{label, href, emoji}` Items
+- Closes on outside click + Escape
+- Im SpotDetail-Header: zwei Items "Foto bearbeiten" / "Spot bearbeiten"
+
+### Spot Edit
+- Route: `/spots/[id]/edit` (Server Component validiert Ownership, redirectet bei Fail)
+- `SpotEditForm` (Client) bindet `SpotTypePicker` + Name-Input
+- `updateSpot(spotId, { name, type })` Server Action
 
 ## Phase 4 Patterns (zusätzlich zu Phase 3b)
 
@@ -184,15 +215,15 @@ import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 
 ## Was als nächstes kommt
 
-**Phase 5 — Personal Layer:**
+**Phase 6 — Privacy & Friends:**
 
-- `favorites` Tabelle (user_id, spot_id, UNIQUE)
-- BottomSheet View-Modes: Alle / Eigene / Favoriten (Tab-Switcher im Header)
-- Favoriten-Stern in SpotDetail (Toggle)
-- Spot bearbeiten (Name, Type) — derzeit kann nur gelöscht werden
-- Optional: Search-Bar im Sheet (filter by name/type)
+- Friends-System (Tabelle `friendships`: requester, addressee, status `pending`/`accepted`)
+- Spot-Visibility: `public` / `friends` / `private` (Spalte `visibility` auf `spots`)
+- RLS-Policies für `spots` & `favorites` & `spot_descriptions` müssen ggf. friend-aware werden (oder sub-query auf accepted friendships)
+- UI: Privacy-Picker beim Eintragen + im SpotEditForm
+- Filter/View: optional Friend-Spots im BottomSheet sichtbar machen
 
-Stoff für Brainstorming: ist Favoriten-Sortierung manuell oder by-date? Soll Edit nur Owner können oder auch Admin?
+Stoff für Brainstorming: Wie viele privacy-Levels? Friend-Request UX (Push-Notif später)? Macht "Friends-Favoriten anschauen"-Feature schon Sinn oder erst Phase 7?
 
 ## Stil-Guide
 

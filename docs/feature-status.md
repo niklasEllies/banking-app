@@ -78,13 +78,20 @@ App ist von "BenchMarks" (nur Bänke) zu "Plätzchen" (nette Pause-Spots beim Wa
 
 **Bewusst rausgehalten:** Vector-Icons (User designt selbst), Description-Upvotes (Phase 5/6), Type-aware Stats-Visibility (Phase 7+).
 
-## Phase 5 – Personal Layer 🔜
+## Phase 5 – Personal Layer ✅
 
-- [ ] `favorites` Tabelle (user_id, spot_id)
-- [ ] BottomSheet View-Modes: Alle / Eigene / Favoriten
-- [ ] Favoriten-Stern in SpotDetail
-- [ ] Spot bearbeiten (Name, Type)
-- [ ] Optional: Search/Filter
+- [x] Migration 008: `favorites` Tabelle (composite PK user_id+spot_id, private RLS)
+- [x] `actions/favorites.ts` (list/add/remove) mit Tests
+- [x] BottomSheet View-Mode-Tabs: Alle / Eigene / Favoriten (localStorage-Persistence, Login-CTAs für anonym)
+- [x] Distance-basierte Sortierung (sort by distance wenn GPS, sonst by created_at DESC)
+- [x] `distMeters` raw Helper für Sort-Logik (refaktoriert distanceTo)
+- [x] FavoriteToggle (🤍 ↔ ❤️) im Sheet-Header für eingeloggte User mit optimistic UI
+- [x] SpotActionMenu (Dropdown ✏️) für Owner mit "Foto bearbeiten" + "Spot bearbeiten"
+- [x] `updateSpot` Server Action (Owner-only, validiert Type)
+- [x] `/spots/[id]/edit` Route + SpotEditForm (Name + Type)
+- [x] Tab-spezifische Empty States (in der Nähe / eingetragen / Favoriten)
+
+**Bewusst rausgehalten:** Search/Filter (zu früh — Bestand klein), Description-Upvotes (Phase 6+), Position-Edit (lat/lng — UX-Risk), Public/Friend-visible Favoriten (Phase 6 ändert RLS).
 
 ## Phase 6 – Privacy & Friends 🔜
 

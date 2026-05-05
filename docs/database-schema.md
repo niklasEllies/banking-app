@@ -85,6 +85,21 @@ Community-Tipps. Ein Tipp pro (spot_id, user_id), editierbar.
 **Index:** `idx_spot_descriptions_spot_id` auf `(spot_id, created_at DESC)` für Feed-Performance.
 **Trigger:** `set_updated_at()` setzt `updated_at = now()` bei UPDATE.
 
+## favorites (Phase 5)
+
+Persönliche Favoriten. **Privat** — nur Owner kann eigene Favoriten lesen.
+
+| Spalte | Typ | Beschreibung |
+|---|---|---|
+| `user_id` | `uuid` | FK → `profiles.id` ON DELETE CASCADE |
+| `spot_id` | `uuid` | FK → `spots.id` ON DELETE CASCADE |
+| `created_at` | `timestamptz` | Auto: `now()` |
+
+**PRIMARY KEY:** `(user_id, spot_id)` — composite, ein Favorit pro User-Spot-Pair.
+**Index:** `idx_favorites_user_id` auf `(user_id, created_at DESC)`.
+
+Phase 6 (Friends) lockert die SELECT-Policy ggf. auf "user OR friend".
+
 ## Aggregations-Funktion
 
 ```sql
@@ -134,6 +149,16 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 | UPDATE | `auth.uid() = user_id` |
 | DELETE | `auth.uid() = user_id` |
 
+### favorites
+
+**Private** — nur eigene Favoriten sichtbar.
+
+| Operation | Bedingung |
+|---|---|
+| SELECT | `auth.uid() = user_id` (authenticated only) |
+| INSERT | `auth.uid() = user_id` |
+| DELETE | `auth.uid() = user_id` |
+
 ### profiles
 
 | Operation | Bedingung |
@@ -162,3 +187,4 @@ Resize on Upload: `lib/image-utils.ts` skaliert auf max 1600px lange Kante, WebP
 | `005_phase3b_backend_fixes.sql` | DELETE-Policy auf `bench_stats_votes` |
 | `006_phase4_rename_to_spots.sql` | `benches` → `spots`, `spot_type` Enum, `bench_stats_votes` → `spot_stats_votes`, RPC umbenannt |
 | `007_phase4_descriptions.sql` | `spot_descriptions` Tabelle + RLS + updated_at Trigger |
+| `008_phase5_favorites.sql` | `favorites` Tabelle (composite PK, private RLS) |

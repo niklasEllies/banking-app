@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useTransition } from 'react'
+import { updateMarkerEmoji } from '@/actions/profile'
 
-const EMOJI_KEY = 'benchmarks_user_emoji'
 const EMOJIS = ['🧍‍♂️', '🧍‍♀️', '👫', '🐕'] as const
 
 const EMOJI_LABELS: Record<typeof EMOJIS[number], string> = {
@@ -12,16 +12,27 @@ const EMOJI_LABELS: Record<typeof EMOJIS[number], string> = {
   '🐕': 'Hund',
 }
 
-export default function EmojiPicker() {
-  const [selected, setSelected] = useState('🧍‍♂️')
+const DEFAULT_EMOJI: typeof EMOJIS[number] = '🧍‍♂️'
 
-  useEffect(() => {
-    setSelected(localStorage.getItem(EMOJI_KEY) ?? '🧍‍♂️')
-  }, [])
+export default function EmojiPicker({ initialEmoji }: { initialEmoji: string | null }) {
+  const [selected, setSelected] = useState<string>(initialEmoji ?? DEFAULT_EMOJI)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   const handleSelect = (emoji: string) => {
+    if (emoji === selected) return
+    const previous = selected
     setSelected(emoji)
-    localStorage.setItem(EMOJI_KEY, emoji)
+    setError(null)
+    startTransition(async () => {
+      // Persist null when the user picks the default — keeps profiles clean
+      // and lets the default change in code without rewriting existing rows.
+      const result = await updateMarkerEmoji(emoji === DEFAULT_EMOJI ? null : emoji)
+      if (result.error) {
+        setSelected(previous)
+        setError(result.error)
+      }
+    })
   }
 
   return (
@@ -36,7 +47,8 @@ export default function EmojiPicker() {
             aria-checked={selected === emoji}
             aria-label={EMOJI_LABELS[emoji]}
             onClick={() => handleSelect(emoji)}
-            className={`text-3xl p-3 rounded-xl border-2 transition-all ${
+            disabled={isPending}
+            className={`text-3xl p-3 rounded-xl border-2 transition-all disabled:opacity-60 ${
               selected === emoji
                 ? 'border-primary bg-primary-light scale-110'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -46,7 +58,11 @@ export default function EmojiPicker() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Wird lokal auf diesem Gerät gespeichert</p>
+      {error ? (
+        <p className="text-xs text-red-500 dark:text-red-400 mt-2">{error}</p>
+      ) : (
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Wird in deinem Profil gespeichert</p>
+      )}
     </div>
   )
 }

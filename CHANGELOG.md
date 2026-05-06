@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.1 — Persistierung & System-Theme
+*6. Mai 2026*
+
+- 🌗 Neue Theme-Option "System" — folgt deiner OS-Einstellung automatisch
+- 💾 Marker-Emoji und Theme werden jetzt im Profil gespeichert (statt nur lokal pro Gerät)
+- 🔄 Anmeldung auf neuem Gerät übernimmt deine Einstellungen direkt
+- 🔁 OS-Theme-Wechsel im "System"-Modus wird live übernommen
+
 ## 0.8.0 — Landing Page
 *5. Mai 2026*
 

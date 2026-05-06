@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="de" className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{__html:`(function(){try{var t=localStorage.getItem('benchmarks-theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`}} />
+        <script dangerouslySetInnerHTML={{__html:`(function(){try{var s=localStorage.getItem('plaetzchen-theme')||localStorage.getItem('benchmarks-theme');var d=s==='dark'||((s==null||s==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`}} />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

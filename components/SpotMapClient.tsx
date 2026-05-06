@@ -20,6 +20,7 @@ interface SpotMapClientProps {
   onPositionUpdate?: (pos: { lat: number; lng: number }) => void
   onGpsStateChange?: (state: GpsState) => void
   gpsState?: GpsState
+  initialMarkerEmoji?: string | null
 }
 
 export default function SpotMapClient(props: SpotMapClientProps) {

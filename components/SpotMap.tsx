@@ -12,7 +12,6 @@ import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
 import type { SpotVisibility } from '@/lib/spot-visibility'
 
 const LOCATION_KEY = 'benchmarks_last_location'
-const EMOJI_KEY = 'benchmarks_user_emoji'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -97,6 +96,8 @@ interface SpotMapProps {
   onPositionUpdate?: (pos: { lat: number; lng: number }) => void
   onGpsStateChange?: (state: GpsState) => void
   gpsState?: GpsState
+  /** Server-resolved marker emoji from profiles.marker_emoji. Anon = null = default. */
+  initialMarkerEmoji?: string | null
 }
 
 
@@ -262,6 +263,7 @@ export default function SpotMap({
   onPositionUpdate,
   onGpsStateChange,
   gpsState = 'unknown',
+  initialMarkerEmoji = null,
 }: SpotMapProps) {
   const router = useRouter()
   const [localSpots, setLocalSpots] = useState(initialSpots)
@@ -269,11 +271,10 @@ export default function SpotMap({
   const [hasLivePosition, setHasLivePosition] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [cachedPosition, setCachedPosition] = useState<[number, number] | null>(null)
-  const [userEmoji, setUserEmoji] = useState('🧍‍♂️')
+  const userEmoji = initialMarkerEmoji ?? '🧍‍♂️'
   const [centerTrigger, setCenterTrigger] = useState(0)
 
   useEffect(() => {
-    setUserEmoji(localStorage.getItem(EMOJI_KEY) ?? '🧍‍♂️')
     const raw = localStorage.getItem(LOCATION_KEY)
     if (raw) {
       try {

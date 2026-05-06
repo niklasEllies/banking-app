@@ -14,7 +14,7 @@ export default async function ProfilPage() {
   const [{ data: profile }, incomingCount] = await Promise.all([
     supabase
       .from('profiles')
-      .select('username, is_admin')
+      .select('username, is_admin, marker_emoji')
       .eq('id', user.id)
       .maybeSingle(),
     countIncomingRequests(),
@@ -31,7 +31,7 @@ export default async function ProfilPage() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">@{profile?.username ?? user.email}</p>
 
         <div className="space-y-8">
-          <EmojiPicker />
+          <EmojiPicker initialEmoji={profile?.marker_emoji ?? null} />
 
           {/* Subscription */}
           <div>

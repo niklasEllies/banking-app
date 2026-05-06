@@ -24,17 +24,19 @@ export default async function HomePage({
   let isAdmin = false
   let favoriteIds: string[] = []
   let friendIds: string[] = []
+  let markerEmoji: string | null = null
   if (user) {
     const [profileResult, favIds, friends] = await Promise.all([
       supabase
         .from('profiles')
-        .select('is_admin')
+        .select('is_admin, marker_emoji')
         .eq('id', user.id)
         .maybeSingle(),
       listFavoriteSpotIds(),
       listFriends(),
     ])
     isAdmin = profileResult.data?.is_admin ?? false
+    markerEmoji = profileResult.data?.marker_emoji ?? null
     favoriteIds = favIds
     friendIds = friends.map((f) => f.id)
   }
@@ -53,6 +55,7 @@ export default async function HomePage({
         initialFavoriteIds={favoriteIds}
         initialFriendIds={friendIds}
         initialSpotId={initialSpotId ?? null}
+        initialMarkerEmoji={markerEmoji}
       />
       {latestEntry && <ChangelogModal latest={latestEntry} />}
     </div>

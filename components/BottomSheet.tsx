@@ -113,7 +113,7 @@ export default function BottomSheet({
     return (
       <button
         onClick={expand}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#1e231a] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a2f24]"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#1e231a] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a2f24] hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-300 dark:hover:border-[#3a4030] transition-colors"
       >
         {count} Plätzchen ↑
       </button>
@@ -139,7 +139,7 @@ export default function BottomSheet({
       >
         <div className="absolute left-1/2 -translate-x-1/2 top-3 w-10 h-1 bg-gray-400 dark:bg-gray-500 rounded-full" />
         {selectedSpotId ? (
-          <button onClick={onSpotDeselect} className="text-sm text-primary mt-2">
+          <button onClick={onSpotDeselect} className="text-sm text-primary mt-2 hover:text-primary-dark hover:underline transition-colors">
             ← Alle Plätzchen
           </button>
         ) : (

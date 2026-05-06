@@ -7,7 +7,7 @@ export interface SpotTypeMeta {
 }
 
 export const SPOT_TYPES: readonly SpotTypeMeta[] = [
-  { key: 'bench',     emoji: '🪑',  label: 'Bank' },
+  { key: 'bench',     emoji: '🛋️',  label: 'Bank' },
   { key: 'viewpoint', emoji: '🏔️', label: 'Aussichtspunkt' },
   { key: 'shelter',   emoji: '⛺',  label: 'Schutzhütte' },
   { key: 'picnic',    emoji: '🧺',  label: 'Rastplatz' },

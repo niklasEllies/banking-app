@@ -33,7 +33,7 @@ export default function FavoriteToggle({ spotId, isFavorite, onChange }: Favorit
       disabled={pending}
       aria-pressed={isFavorite}
       aria-label={isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
-      className={`min-w-11 min-h-11 flex items-center justify-center text-lg leading-none transition-opacity ${
+      className={`min-w-11 min-h-11 flex items-center justify-center text-lg leading-none transition-transform hover:scale-110 ${
         error ? 'text-red-500' : ''
       } disabled:opacity-60`}
     >

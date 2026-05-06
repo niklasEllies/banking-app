@@ -119,9 +119,10 @@ export default function BottomSheet({
     return (
       <button
         onClick={expand}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#1e231a] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a2f24] hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-300 dark:hover:border-[#3a4030] transition-colors"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 bg-white dark:bg-[#1e231a] rounded-full px-4 py-2 shadow-md text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a2f24] hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-300 dark:hover:border-[#3a4030] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap"
       >
-        {count} Plätzchen <IconChevronUp size={14} aria-hidden />
+        <span>{count} Plätzchen</span>
+        <IconChevronUp size={14} aria-hidden />
       </button>
     )
   }

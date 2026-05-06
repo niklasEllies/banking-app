@@ -38,7 +38,7 @@ export default function EmojiPicker({ initialEmoji }: { initialEmoji: string | n
   return (
     <div>
       <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">Dein Marker auf der Karte</p>
-      <div role="radiogroup" aria-label="Marker-Emoji für die Karte" className="flex gap-3 flex-wrap">
+      <div role="radiogroup" aria-label="Marker-Emoji für die Karte" className="grid grid-cols-4 gap-3">
         {EMOJIS.map((emoji) => (
           <button
             key={emoji}
@@ -48,10 +48,10 @@ export default function EmojiPicker({ initialEmoji }: { initialEmoji: string | n
             aria-label={EMOJI_LABELS[emoji]}
             onClick={() => handleSelect(emoji)}
             disabled={isPending}
-            className={`text-3xl p-3 rounded-xl border-2 transition-all disabled:opacity-60 ${
+            className={`rounded-xl border-2 transition-colors flex items-center justify-center text-3xl p-3 disabled:opacity-60 ${
               selected === emoji
-                ? 'border-primary bg-primary-light scale-110'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                ? 'border-primary bg-primary-light dark:bg-[#2a3f1e]'
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1e231a] hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             {emoji}

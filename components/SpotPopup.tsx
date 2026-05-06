@@ -23,6 +23,8 @@ export default function SpotPopup({
 }: SpotPopupProps) {
   const isOwner = userId && spot.created_by === userId
   const [rarityMedian, setRarityMedian] = useState<number | null>(null)
+  const TypeIcon = SPOT_TYPE_MAP[spot.type].Icon
+  const typeLabel = SPOT_TYPE_MAP[spot.type].label
 
   useEffect(() => {
     getSpotStats(spot.id).then(({ aggregated }) => {
@@ -35,7 +37,7 @@ export default function SpotPopup({
       {spot.photo_url ? (
         <img
           src={spot.photo_url}
-          alt="Bank"
+          alt={typeLabel}
           style={{
             width: '100%',
             height: '80px',
@@ -56,10 +58,9 @@ export default function SpotPopup({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '28px',
           }}
         >
-          {SPOT_TYPE_MAP[spot.type].emoji}
+          <TypeIcon size={36} stroke={1.5} color="#c8c8c0" aria-hidden />
         </div>
       )}
 
@@ -69,8 +70,8 @@ export default function SpotPopup({
         </strong>
         <RarityBadge median={rarityMedian} size="sm" />
       </div>
-      <small style={{ display: 'block', marginTop: '2px', marginBottom: '8px', color: '#888', fontSize: '11px' }}>
-        {SPOT_TYPE_MAP[spot.type].emoji} {SPOT_TYPE_MAP[spot.type].label}
+      <small style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px', marginBottom: '8px', color: '#888', fontSize: '11px' }}>
+        <TypeIcon size={12} stroke={1.5} aria-hidden /> {typeLabel}
       </small>
 
       <div style={{ display: 'flex', gap: '6px' }}>

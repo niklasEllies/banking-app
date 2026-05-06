@@ -76,7 +76,7 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-surface"
+              className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
             >
               Abbrechen
             </button>

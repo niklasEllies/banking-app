@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.6 — Performance
+*6. Mai 2026*
+
+- ⚡ Landing-Page-Daten werden 60 Sekunden gecached — spürbar schnellerer Erstaufruf
+- 💀 Lade-Skelette (Landing, Karte, Admin) zeigen sofort eine Vorschau statt leerem Bildschirm
+- 🖼️ Spot-Fotos werden jetzt automatisch optimiert (responsive, modernes Bildformat)
+- 📦 Bundle-Analyzer eingebaut (`npm run analyze`)
+
 ## 0.8.5 — UI-Polish
 *6. Mai 2026*
 

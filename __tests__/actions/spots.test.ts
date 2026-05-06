@@ -11,7 +11,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() => ({ getAll: () => [], set: vi.fn() })),
 }))
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), updateTag: vi.fn() }))
 
 const mockInsert = vi.fn()
 const mockSelect = vi.fn()

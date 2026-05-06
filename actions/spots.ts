@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { SpotType } from '@/lib/spot-types'
 import type { SpotVisibility } from '@/lib/spot-visibility'
@@ -73,12 +73,14 @@ export async function createSpot(state: FormState, formData: FormData): Promise<
     if (photoResult.error) {
       revalidatePath('/')
       revalidatePath('/map')
+      updateTag('marketing-stats')
       redirect(`/spots/${spot.id}/edit-photo`)
     }
   }
 
   revalidatePath('/')
   revalidatePath('/map')
+  updateTag('marketing-stats')
   redirect('/map')
 }
 
@@ -103,6 +105,7 @@ export async function deleteSpot(id: string): Promise<{ error?: string }> {
 
   revalidatePath('/')
   revalidatePath('/map')
+  updateTag('marketing-stats')
   return {}
 }
 
@@ -141,6 +144,7 @@ export async function updateSpot(
 
   revalidatePath('/')
   revalidatePath('/map')
+  updateTag('marketing-stats')
   return {}
 }
 
@@ -191,5 +195,6 @@ export async function uploadSpotPhoto(
 
   revalidatePath('/')
   revalidatePath('/map')
+  updateTag('marketing-stats')
   return { url: publicUrl }
 }

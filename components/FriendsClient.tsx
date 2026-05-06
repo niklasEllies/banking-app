@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { IconUsersGroup, IconInbox, IconSearch, IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+import { IconUsersGroup, IconInbox, IconSearch, IconChevronRight } from '@tabler/icons-react'
 import EmptyState from '@/components/EmptyState'
+import PageHeader from '@/components/ui/PageHeader'
 import {
   searchUserByUsername,
   sendFriendRequest,
@@ -140,16 +140,12 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-md mx-auto px-4 py-8">
-        <Link
-          href="/profil"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
-        >
-          <IconChevronLeft size={16} aria-hidden /> Zurück zum Profil
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Freunde</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          Verwalte deine Freunde und Anfragen.
-        </p>
+        <PageHeader
+          title="Freunde"
+          subtitle="Verwalte deine Freunde und Anfragen."
+          backHref="/profil"
+          backLabel="Zurück zum Profil"
+        />
 
         {/* Tab bar */}
         <div className="flex border-b border-gray-200 dark:border-[#2a2f24] mb-4">

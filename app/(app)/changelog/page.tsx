@@ -1,6 +1,5 @@
-import Link from 'next/link'
-import { IconChevronLeft } from '@tabler/icons-react'
 import { loadChangelog } from '@/lib/changelog-server'
+import PageHeader from '@/components/ui/PageHeader'
 
 export const metadata = {
   title: 'Was ist neu — Plätzchen',
@@ -12,16 +11,12 @@ export default async function ChangelogPage() {
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-md mx-auto px-4 py-8">
-        <Link
-          href="/profil"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
-        >
-          <IconChevronLeft size={16} aria-hidden /> Zurück zum Profil
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Was ist neu</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
-          Die größten Änderungen an Plätzchen — Neueste zuerst.
-        </p>
+        <PageHeader
+          title="Was ist neu"
+          subtitle="Die größten Änderungen an Plätzchen — Neueste zuerst."
+          backHref="/profil"
+          backLabel="Zurück zum Profil"
+        />
 
         <div className="space-y-6">
           {entries.map((entry) => (

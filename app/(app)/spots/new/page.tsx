@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { IconChevronLeft } from '@tabler/icons-react'
 import { createClient } from '@/lib/supabase/server'
 import AddSpotForm from '@/components/AddSpotForm'
+import PageHeader from '@/components/ui/PageHeader'
 
 interface PageProps {
   searchParams: Promise<{ lat?: string; lng?: string }>
@@ -21,13 +20,11 @@ export default async function NewSpotPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-sm mx-auto px-4 py-8">
-        <Link
-          href="/map"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
-        >
-          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Neues Plätzchen eintragen</h1>
+        <PageHeader
+          title="Neues Plätzchen eintragen"
+          backHref="/map"
+          backLabel="Zurück zur Karte"
+        />
         <AddSpotForm initialLat={lat} initialLng={lng} />
       </div>
     </div>

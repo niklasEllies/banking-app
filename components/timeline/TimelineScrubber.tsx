@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { IconPlayerPlayFilled, IconPlayerPauseFilled } from '@tabler/icons-react'
-import type { TimelineTab } from '@/lib/timeline-data'
+import type { TimelineTab } from '@/lib/timeline-types'
 import type { Bucket } from './useTimelineBucketing'
 import TimelineHistogram from './TimelineHistogram'
 

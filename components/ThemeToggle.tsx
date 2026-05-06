@@ -1,15 +1,18 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import { IconSun, IconMoon, IconSunMoon, type IconProps } from '@tabler/icons-react'
 import { updateThemePreference, type ThemePreference } from '@/actions/profile'
 
 const LS_KEY = 'plaetzchen-theme'
 const OLD_LS_KEY = 'benchmarks-theme'
 
-const THEMES: { value: ThemePreference; emoji: string; label: string }[] = [
-  { value: 'system', emoji: '🌓', label: 'System' },
-  { value: 'light', emoji: '☀️', label: 'Hell' },
-  { value: 'dark', emoji: '🌙', label: 'Dunkel' },
+type IconComponent = React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>
+
+const THEMES: { value: ThemePreference; Icon: IconComponent; label: string }[] = [
+  { value: 'system', Icon: IconSunMoon, label: 'System' },
+  { value: 'light',  Icon: IconSun,     label: 'Hell' },
+  { value: 'dark',   Icon: IconMoon,    label: 'Dunkel' },
 ]
 
 function isValid(v: string | null): v is ThemePreference {
@@ -80,15 +83,17 @@ export default function ThemeToggle({ userTheme }: { userTheme?: ThemePreference
 
   const current = THEMES.find((t) => t.value === theme) ?? THEMES[0]
 
+  const CurrentIcon = current.Icon
+
   return (
     <button
       type="button"
       onClick={cycle}
-      className="text-base leading-none text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+      className="inline-flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
       aria-label={`Theme: ${current.label}. Klicken zum Wechseln zwischen System, Hell und Dunkel.`}
       title={`Theme: ${current.label}`}
     >
-      {current.emoji}
+      <CurrentIcon size={18} stroke={1.6} aria-hidden />
     </button>
   )
 }

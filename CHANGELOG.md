@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.5 — UI-Polish
+*6. Mai 2026*
+
+- 🔗 Klick auf "Plätzchen" oben links bringt dich auf die Startseite
+- 🌗 Theme-Schalter (Hell/Dunkel/System) jetzt mit Icons statt Emojis
+- 🪧 Sichtbarkeits-Auswahl beim Eintragen mit Icons (Öffentlich/Freunde/Privat)
+- 🎨 Marker-Auswahl im Profil im gleichen Stil wie die Abo-Karten
+- 🖼️ Karten-Popup ohne Emoji im Foto-Platzhalter und Typ-Label
+- 🎯 Bottom-Sheet-Pille umbricht nicht mehr falsch
+- ✏️ Abbrechen-Button-Hover hat jetzt richtige Farben (hell und dunkel)
+
 ## 0.8.4 — Karten-Pins & SEO
 *6. Mai 2026*
 

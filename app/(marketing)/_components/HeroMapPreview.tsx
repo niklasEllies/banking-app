@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import type { HeroSpot } from '@/lib/marketing-stats'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
+import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), { ssr: false })
 const TileLayer = dynamic(() => import('react-leaflet').then((m) => m.TileLayer), { ssr: false })

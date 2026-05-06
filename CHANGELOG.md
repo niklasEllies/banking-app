@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.4 — Karten-Pins & SEO
+*6. Mai 2026*
+
+- 📍 Neue Marker auf der Karte: klassischer Drop-Pin in Plätzchen-Grün mit dem Spot-Typ-Icon im Kreis
+- 🔢 Cluster sind jetzt klare Zahlen-Pins (kein Stuhl-Emoji mehr im Cluster)
+- 🌐 Such-Sichtbarkeit: Sitemap mit allen öffentlichen Plätzchen, robots.txt, vollständige OG-/Twitter-Meta-Tags
+- 🖼️ Geteilte Links auf WhatsApp/Threads/Twitter zeigen jetzt eine schöne Vorschau-Karte (1200×630)
+- 🗂️ Bessere Seitentitel: "Plätzchen — Eine Karte für Orte, die nirgendwo stehen"
+
 ## 0.8.3 — Admin-Polish & Emoji-Cleanup
 *6. Mai 2026*
 

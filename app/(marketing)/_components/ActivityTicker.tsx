@@ -20,7 +20,11 @@ export default function ActivityTicker({ initialEvents }: { initialEvents: Activ
   const meta = SPOT_TYPE_MAP[ev.spotType]
 
   return (
-    <div className="mt-8 pt-4 border-t border-[#e6e3d3]/12 font-mono text-xs text-[#c8c8c0] tracking-wide h-6 overflow-hidden">
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      className="mt-8 pt-4 border-t border-[#e6e3d3]/12 font-mono text-xs text-[#c8c8c0] tracking-wide min-h-10 leading-6 whitespace-nowrap overflow-hidden"
+    >
       <div key={ev.id} className="opacity-0 animate-[fadeIn_0.5s_forwards]">
         <span className="text-[#5e9e3e]">→ </span>
         Neue {meta?.label ?? 'Eintrag'} · {formatTimeAgo(ev.createdAt, now)}

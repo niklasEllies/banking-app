@@ -19,10 +19,12 @@ vi.mock('next/headers', () => ({
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
-// search chain: from('profiles').select('id, username').eq('username', q).maybeSingle()
+// search chain: from('profiles').select('id, username').ilike('username', `%q%`).neq('id', uid).order('username').limit(20)
 const mockSearchSelect = vi.fn()
-const mockSearchEq = vi.fn()
-const mockSearchMaybeSingle = vi.fn()
+const mockSearchIlike = vi.fn()
+const mockSearchNeq = vi.fn()
+const mockSearchOrder = vi.fn()
+const mockSearchLimit = vi.fn()
 
 // insert (sendFriendRequest): from('friendships').insert({...}) -> resolves
 const mockInsert = vi.fn()
@@ -92,10 +94,12 @@ beforeEach(() => {
   nextFromBehavior = 'friendships'
   nextFriendshipsAction = 'insert'
 
-  // search default: no match
-  mockSearchMaybeSingle.mockResolvedValue({ data: null, error: null })
-  mockSearchEq.mockReturnValue({ maybeSingle: mockSearchMaybeSingle })
-  mockSearchSelect.mockReturnValue({ eq: mockSearchEq })
+  // search default: no matches
+  mockSearchLimit.mockResolvedValue({ data: [], error: null })
+  mockSearchOrder.mockReturnValue({ limit: mockSearchLimit })
+  mockSearchNeq.mockReturnValue({ order: mockSearchOrder })
+  mockSearchIlike.mockReturnValue({ neq: mockSearchNeq })
+  mockSearchSelect.mockReturnValue({ ilike: mockSearchIlike })
 
   // insert default: success
   mockInsert.mockResolvedValue({ error: null })
@@ -135,42 +139,46 @@ beforeEach(() => {
 })
 
 describe('searchUserByUsername', () => {
-  it('returns null when query is empty / whitespace-only', async () => {
-    expect(await searchUserByUsername('')).toBeNull()
-    expect(await searchUserByUsername('   ')).toBeNull()
+  it('returns [] when query is empty / whitespace-only', async () => {
+    expect(await searchUserByUsername('')).toEqual([])
+    expect(await searchUserByUsername('   ')).toEqual([])
     expect(mockSupabase.from).not.toHaveBeenCalled()
   })
 
-  it('returns null when no match', async () => {
-    mockSearchMaybeSingle.mockResolvedValue({ data: null, error: null })
+  it('returns [] when no matches', async () => {
+    mockSearchLimit.mockResolvedValue({ data: [], error: null })
     const result = await searchUserByUsername('ghost')
-    expect(result).toBeNull()
+    expect(result).toEqual([])
     expect(mockSupabase.from).toHaveBeenCalledWith('profiles')
-    expect(mockSearchEq).toHaveBeenCalledWith('username', 'ghost')
+    expect(mockSearchIlike).toHaveBeenCalledWith('username', '%ghost%')
   })
 
-  it('returns the user (id + username) on exact match', async () => {
-    mockSearchMaybeSingle.mockResolvedValue({
-      data: { id: 'other-id', username: 'niklas' },
+  it('returns matching users (case-insensitive partial)', async () => {
+    mockSearchLimit.mockResolvedValue({
+      data: [
+        { id: 'user-2', username: 'niklas' },
+        { id: 'user-3', username: 'NiklasE' },
+      ],
       error: null,
     })
-    const result = await searchUserByUsername('niklas')
-    expect(result).toEqual({ id: 'other-id', username: 'niklas' })
+    const result = await searchUserByUsername('nik')
+    expect(result).toEqual([
+      { id: 'user-2', username: 'niklas' },
+      { id: 'user-3', username: 'NiklasE' },
+    ])
+    // Self-exclusion done at SQL level
+    expect(mockSearchNeq).toHaveBeenCalledWith('id', 'user-1')
   })
 
-  it('refuses to return self even if username matches', async () => {
-    mockSearchMaybeSingle.mockResolvedValue({
-      data: { id: 'user-1', username: 'me' },
-      error: null,
-    })
-    const result = await searchUserByUsername('me')
-    expect(result).toBeNull()
+  it('escapes ILIKE wildcards (%, _, \\) in user input', async () => {
+    await searchUserByUsername('100% admin_test')
+    expect(mockSearchIlike).toHaveBeenCalledWith('username', '%100\\% admin\\_test%')
   })
 
-  it('returns null when unauthenticated', async () => {
+  it('returns [] when unauthenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
     const result = await searchUserByUsername('niklas')
-    expect(result).toBeNull()
+    expect(result).toEqual([])
   })
 })
 

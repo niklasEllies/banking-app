@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -15,7 +15,6 @@ import {
 } from '@/actions/friends'
 
 type TabKey = 'friends' | 'requests' | 'search'
-type SearchState = FriendUser | null | 'not-found' | 'pending'
 
 interface FriendsClientProps {
   friends: FriendUser[]
@@ -30,8 +29,9 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
   const [searchPending, startSearchTransition] = useTransition()
 
   const [searchInput, setSearchInput] = useState('')
-  const [searchResult, setSearchResult] = useState<SearchState>(null)
-  const [sentConfirmation, setSentConfirmation] = useState(false)
+  const [searchResults, setSearchResults] = useState<FriendUser[]>([])
+  const [searchHasQueried, setSearchHasQueried] = useState(false)
+  const [sentToIds, setSentToIds] = useState<Set<string>>(() => new Set())
 
   const requestsCount = incoming.length + outgoing.length
 
@@ -90,9 +90,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         window.alert(result.error)
         return
       }
-      setSearchResult(null)
-      setSearchInput('')
-      setSentConfirmation(true)
+      setSentToIds((prev) => new Set(prev).add(id))
       router.refresh()
     })
   }
@@ -104,21 +102,31 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         window.alert(result.error)
         return
       }
-      setSearchResult(null)
+      setSearchResults([])
       setSearchInput('')
+      setSearchHasQueried(false)
       router.refresh()
     })
   }
 
-  const doSearch = () => {
+  // Debounced live search: triggers 300ms after the user stops typing
+  useEffect(() => {
     const trimmed = searchInput.trim()
-    if (!trimmed) return
-    setSentConfirmation(false)
-    startSearchTransition(async () => {
-      const result = await searchUserByUsername(trimmed)
-      setSearchResult(result ?? 'not-found')
-    })
-  }
+    if (!trimmed) {
+      setSearchResults([])
+      setSearchHasQueried(false)
+      return
+    }
+    const t = setTimeout(() => {
+      startSearchTransition(async () => {
+        const results = await searchUserByUsername(trimmed)
+        setSearchResults(results)
+        setSearchHasQueried(true)
+      })
+    }, 300)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput])
 
   const tabBtnClass = (active: boolean) =>
     `flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -281,87 +289,71 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
 
         {tab === 'search' && (
           <div className="space-y-4">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                doSearch()
-              }}
-              className="flex items-center gap-2"
-            >
+            <div className="relative">
               <input
                 type="text"
                 value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value)
-                  setSentConfirmation(false)
-                }}
-                placeholder="Username eingeben…"
-                className="flex-1 rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary"
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Username suchen… (mind. 1 Zeichen)"
+                aria-label="Username suchen"
+                className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary"
               />
-              <button
-                type="submit"
-                disabled={searchPending || !searchInput.trim()}
-                className="shrink-0 text-sm font-medium px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-60"
-              >
-                Suchen
-              </button>
-            </form>
+              {searchPending && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">…</span>
+              )}
+            </div>
 
-            {sentConfirmation && (
-              <p className="text-sm text-primary font-medium">Anfrage gesendet ✓</p>
-            )}
-
-            {searchResult === 'not-found' && (
+            {searchInput.trim() && searchHasQueried && searchResults.length === 0 && !searchPending && (
               <p className="italic text-sm text-gray-500 dark:text-gray-400">
                 Keinen User mit diesem Namen gefunden.
               </p>
             )}
 
-            {searchResult && typeof searchResult === 'object' && (
-              <div className="bg-white dark:bg-[#1e231a] rounded-xl p-3 flex items-center justify-between gap-3">
-                <span className="text-sm text-gray-800 dark:text-gray-200 truncate">
-                  @{searchResult.username ?? '—'}
-                </span>
-                {(() => {
-                  const id = searchResult.id
-                  if (friends.find((f) => f.id === id)) {
-                    return (
-                      <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
-                        Bereits Freunde
-                      </span>
-                    )
-                  }
-                  if (outgoing.find((r) => r.id === id)) {
-                    return (
-                      <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
-                        Anfrage läuft
-                      </span>
-                    )
-                  }
-                  if (incoming.find((r) => r.id === id)) {
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => handleAcceptFromSearch(id)}
-                        disabled={isPending}
-                        className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
-                      >
-                        Anfrage annehmen
-                      </button>
-                    )
-                  }
+            {searchResults.length > 0 && (
+              <ul className="space-y-2">
+                {searchResults.map((u) => {
+                  const isFriend = friends.find((f) => f.id === u.id)
+                  const isOutgoing = outgoing.find((r) => r.id === u.id) || sentToIds.has(u.id)
+                  const isIncoming = incoming.find((r) => r.id === u.id)
                   return (
-                    <button
-                      type="button"
-                      onClick={() => handleSend(id)}
-                      disabled={isPending}
-                      className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
+                    <li
+                      key={u.id}
+                      className="bg-white dark:bg-[#1e231a] rounded-xl p-3 flex items-center justify-between gap-3"
                     >
-                      Anfrage senden
-                    </button>
+                      <span className="text-sm text-gray-800 dark:text-gray-200 truncate">
+                        @{u.username ?? '—'}
+                      </span>
+                      {isFriend ? (
+                        <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
+                          Bereits Freunde
+                        </span>
+                      ) : isOutgoing ? (
+                        <span className="shrink-0 text-sm text-gray-500 dark:text-gray-400">
+                          Anfrage läuft
+                        </span>
+                      ) : isIncoming ? (
+                        <button
+                          type="button"
+                          onClick={() => handleAcceptFromSearch(u.id)}
+                          disabled={isPending}
+                          className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
+                        >
+                          Anfrage annehmen
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSend(u.id)}
+                          disabled={isPending}
+                          className="shrink-0 text-sm font-medium text-primary hover:underline disabled:opacity-60"
+                        >
+                          Anfrage senden
+                        </button>
+                      )}
+                    </li>
                   )
-                })()}
-              </div>
+                })}
+              </ul>
             )}
           </div>
         )}

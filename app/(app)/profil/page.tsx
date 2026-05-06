@@ -72,40 +72,47 @@ export default async function ProfilPage() {
           </div>
         </div>
 
-        <Link
-          href="/friends"
-          className="mt-10 flex items-center justify-between gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 px-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
-        >
-          <span>👥 Freunde</span>
-          {incomingCount > 0 && (
-            <span className="bg-primary text-white text-xs px-2 py-0.5 rounded-full">{incomingCount}</span>
-          )}
-        </Link>
-
-        <Link
-          href="/changelog"
-          className="mt-3 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
-        >
-          🆕 Was ist neu
-        </Link>
-
-        {profile?.is_admin && (
+        <div className="mt-10 space-y-3">
           <Link
-            href="/admin"
-            className="mt-3 flex items-center justify-center gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
+            href="/friends"
+            className="flex items-center justify-between gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
           >
-            🔧 Admin Dashboard
+            <span className="flex items-center gap-2"><span aria-hidden>👥</span><span>Freunde</span></span>
+            {incomingCount > 0 ? (
+              <span className="bg-primary text-white text-xs px-2 py-0.5 rounded-full">{incomingCount}</span>
+            ) : (
+              <span aria-hidden className="text-gray-300 dark:text-gray-600">›</span>
+            )}
           </Link>
-        )}
 
-        <form action={logout} className="mt-3">
-          <button
-            type="submit"
-            className="w-full text-sm text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 py-2 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+          <Link
+            href="/changelog"
+            className="flex items-center justify-between gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
           >
-            Abmelden
-          </button>
-        </form>
+            <span className="flex items-center gap-2"><span aria-hidden>🆕</span><span>Was ist neu</span></span>
+            <span aria-hidden className="text-gray-300 dark:text-gray-600">›</span>
+          </Link>
+
+          {profile?.is_admin && (
+            <Link
+              href="/admin"
+              className="flex items-center justify-between gap-2 w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 py-2.5 px-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#1e231a] transition-colors"
+            >
+              <span className="flex items-center gap-2"><span aria-hidden>🔧</span><span>Admin Dashboard</span></span>
+              <span aria-hidden className="text-gray-300 dark:text-gray-600">›</span>
+            </Link>
+          )}
+
+          <form action={logout}>
+            <button
+              type="submit"
+              className="flex items-center justify-between gap-2 w-full text-sm text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            >
+              <span className="flex items-center gap-2"><span aria-hidden>🚪</span><span>Abmelden</span></span>
+              <span aria-hidden className="text-red-300 dark:text-red-700">›</span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

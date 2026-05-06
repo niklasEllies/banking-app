@@ -40,25 +40,29 @@ function pickProfile(p: ProfileJoinValue): ProfileJoin | null {
 
 export async function searchUserByUsername(
   query: string,
-): Promise<FriendUser | null> {
+): Promise<FriendUser[]> {
   const trimmed = query.trim()
-  if (trimmed.length < 1) return null
+  if (trimmed.length < 1) return []
 
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) return []
+
+  // ILIKE = case-insensitive partial match. Escape % and _ to prevent
+  // a user typing "%" from globbing the entire profile table.
+  const escaped = trimmed.replace(/[%_\\]/g, (c) => `\\${c}`)
 
   const { data } = await supabase
     .from('profiles')
     .select('id, username')
-    .eq('username', trimmed)
-    .maybeSingle()
+    .ilike('username', `%${escaped}%`)
+    .neq('id', user.id) // hide self
+    .order('username')
+    .limit(20)
 
-  if (!data) return null
-  if (data.id === user.id) return null // hide self
-  return { id: data.id, username: data.username }
+  return (data ?? []).map((row) => ({ id: row.id, username: row.username }))
 }
 
 export async function sendFriendRequest(

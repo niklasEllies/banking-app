@@ -155,10 +155,94 @@ Abgeschlossen: 2026-05-05 · v0.8.0
 - Neue Dependency: `motion` v12, neue Font: Fraunces (italic accents über `--font-display` Tailwind-Theme-Var)
 - Deep-Link-Compat: `/?spot=<id>` redirected zu `/map?spot=<id>` (Phase 7 Bookmarks bleiben funktional)
 
-## Phase 9 — Social Polish 🔜
+## Phase 8.1 — UI-Polish ✅
 
-- [ ] In-App Notifications (eingehende Anfragen, Friend-Activity)
-- [ ] Email-Alerts bei neuen Anfragen (über Supabase)
-- [ ] Public Profile Page (`/u/:username` mit eigener Spot-Liste)
+Abgeschlossen: 2026-05-05/06 · v0.8.1 - v0.8.5
+
+- v0.8.1: Persistierung & System-Theme (`profiles.marker_emoji`, `profiles.theme_preference`, ThemeToggle 3-state mit prefers-color-scheme)
+- v0.8.2: Empty-States + Tabler-Icons (SPOT_TYPES.Icon, EmptyState component, BottomSheet/FriendsClient/SpotDescriptionFeed empty-states)
+- v0.8.3: Admin-Polish + Emoji-Cleanup (RLS-fix mit createAdminClient, Stats-Overview-Card, Search/Filter, /admin/users/[id], /admin/moderation; ~50 UI-Emojis durch Tabler-Icons ersetzt)
+- v0.8.4: Drop-Pin Map-Marker + SEO (lib/spot-marker-svg.ts mit Tabler-Paths hardcoded, /opengraph-image dynamic, /sitemap.xml, /robots.txt)
+- v0.8.5: UI-Konsistenz (ThemeToggle Tabler, VisibilityPicker Tabler, MapHeader Logo→/, EmojiPicker Card-Style, SpotPopup Type-Icon, Cancel-Hover-Fix, BottomSheet-Pill-Layout)
+
+## Phase 8.6 — Performance ✅
+
+Abgeschlossen: 2026-05-06 · v0.8.6 + v0.8.6.1
+
+- ISR-Cache via `unstable_cache` für `lib/marketing-stats.ts` (60s revalidate, tag `marketing-stats`)
+- Mutations rufen `updateTag('marketing-stats')` für read-your-own-writes invalidation
+- `loading.tsx` Suspense-Skeletons für /(marketing), /(app)/map, /(app)/admin
+- SpotDetail-Foto via `next/image` mit responsive `sizes` + `priority`
+- `next.config.ts` `images.remotePatterns` für Supabase Storage
+- @next/bundle-analyzer + `npm run analyze`-Script
+- Lazy-mount HeroMapPreview via IntersectionObserver — Leaflet-Bundle erst beim Scroll geladen
+- @vercel/speed-insights integriert für RUM (LCP/INP/CLS)
+
+## Phase 9 — Timeline ✅
+
+Abgeschlossen: 2026-05-06 · v0.9.0
+
+- Neue `/timeline`-Route — temporale Karten-Visualisierung
+- Time-Scrubber mit adaptivem Histogramm (day/week/month basierend auf Range)
+- Subtle Play-Button für Time-Lapse durch die Geschichte (600ms-Bucket-Steps)
+- Tabs Alle / Eigene / Freunde (gleiche Filter-Semantik wie /map BottomSheet)
+- Kumulativer Pin-Filter (`created_at <= scrubberNow`)
+- Auf "Alle" zukünftige Spots als Ghost-Pins mit 15% Opacity vorgezeichnet
+- URL-State `?at=YYYY-MM-DD&tab=...` bookmarkbar, shareable
+- Pin-Click deaktiviert (pure Visualisierung)
+- Auto-fit-bounds bei Tab-Wechsel
+- Neue Files: `lib/timeline-data.ts` (server, mit cached `getPublicTimelineSpots`), `lib/timeline-types.ts` (client-safe), `components/timeline/{TimelineMap, TimelineScrubber, TimelineHistogram, useTimelineBucketing}`
+- MapHeader hat IconHistory-Link
+
+## Phase 9.1 — UI-Konsolidierung Welle A ✅
+
+Abgeschlossen: 2026-05-06 · v0.9.1
+
+- `<PageHeader title subtitle? backHref backLabel />` — extrahiert für 8-9 Seiten (Profile, Friends, Changelog, Admin, Spots-new, SpotEditForm, EditPhotoForm, Admin-Moderation)
+- `<Card padding? className?>` — Wrapper für `bg-white dark:bg-[#1e231a] rounded-xl`; existierende Cards nicht refactored (opportunistische Adoption)
+- `<ListRow Icon? label rightSlot? tone? href|onClick>` — Profil-Menü (Freunde/Was-ist-neu/Admin/Abmelden); polymorph Link/button; danger-tone für Logout
+
+---
+
+## 🔜 Roadmap — was kommt als nächstes
+
+### Welle B — UI-Konsolidierung 2
+
+- [ ] `<Button variant="primary|secondary|ghost|danger" size="sm|md|lg">` für ~20 Stellen mit unterschiedlichen Padding/Hover-Inkonsistenzen
+- [ ] `<TabBar items value onChange>` vereinheitlicht BottomSheet (4 Tabs) und Timeline-Scrubber (3 Tabs)
+- [ ] `<SearchInput placeholder value onChange>` für AdminUsers/AdminSpots/AdminDescriptions/Friends-Search
+
+### Phase 10 — Social-Polish
+
+- [ ] In-App Notifications (eingehende Friend-Anfragen, Friend-Activity)
+- [ ] Email-Alerts bei neuen Anfragen (Supabase Auth-Hooks oder eigener Email-Service)
+- [ ] Public Profile-Page (`/u/[username]` mit eigener Spot-Liste, öffentlich teilbar)
 - [ ] Friend-Activity-Feed (was Freunde zuletzt eingetragen/favorisiert haben)
-- [ ] Web Push Notifications
+- [ ] Web Push Notifications (PWA-Voraussetzung)
+- [ ] Block-Mechanik in friendships (`status='blocked'` Extension)
+
+### Trigger-gebunden
+
+- [ ] **Cookie-Banner** — wenn Plausible/PostHog/Sentry-Replay/o.ä. eingeführt wird. Spec: `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`.
+- [ ] **Performance Phase 2** — wenn Beta >5.000 Spots erreicht: server-side bucketing, bbox-queries.
+- [ ] **OG-Image-Font-Fix** — Geist Mono explizit fetchen (cosmetic build-warning).
+
+### Phase 7+ — Bestehende Tech-Debt
+
+- [ ] SpotMap-Refactor (Custom Hooks: `useGpsState`, `useFlyController`, `useSheetState`)
+- [ ] PWA installable (Manifest + Service Worker + Offline-Strategie)
+- [ ] Vector-Icons (Custom-Set statt Tabler-Placeholder, sobald designt)
+
+### Compliance
+
+- [ ] Konto-Löschen + DSGVO-Datenexport (Pflicht-Light vor öffentlicher Beta-Erweiterung)
+- [ ] Leaked-Password-Protection in Supabase-Dashboard aktivieren (manueller Schritt)
+- [ ] Datenschutzerklärung + Impressum (Mini-Phase nach erstem Tracking-Event)
+
+### Bewusst zurückgestellt (Welle C / nicht jetzt)
+
+- Form-Components (Input, Label, Error)
+- Modal/Dialog-System
+- Toast/Notification-UI
+
+Wiederholung noch zu gering um Abstraktion zu rechtfertigen.

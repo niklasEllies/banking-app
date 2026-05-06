@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 — UI-Konsolidierung
+*6. Mai 2026*
+
+- 🔧 Konsistentes Seiten-Layout: alle Profil-/Admin-/Spot-Seiten haben jetzt den gleichen Header (Back-Button + Titel + Beschreibung)
+- 🎨 Aufgeräumtes Profil-Menü (Freunde, Was ist neu, Admin, Abmelden) — überall gleiches Design
+- 🛠️ Wartung intern: `<PageHeader>`, `<Card>`, `<ListRow>` als wiederverwendbare Komponenten — neue Seiten gehen schneller von der Hand
+
 ## 0.9.0 — Verlauf
 *6. Mai 2026*
 

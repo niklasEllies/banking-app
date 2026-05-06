@@ -8,6 +8,47 @@ Dieses Dokument ermöglicht einem AI-Agenten, das Projekt ohne Vorwissen fortzuf
 > 3. `docs/architecture.md` — Tech Stack, Datenfluss, Dateistruktur
 > 4. `docs/database-schema.md` — Tabellen, RLS, Migrationen
 
+## 🔥 Aktuell offen — Stand v0.9.1 (2026-05-06)
+
+Komprimierte Liste aller offenen Punkte. Nach jeder Phase aktualisieren.
+
+### Sofort verfügbar (kein Trigger nötig)
+
+- **Welle B — UI-Konsolidierung 2** (Component-Extracts, ~1-2h):
+  `<Button variant size>` für ~20 Stellen ohne einheitliches Padding · `<TabBar items value onChange>` für BottomSheet+Timeline-Scrubber · `<SearchInput>` für AdminUsers/AdminSpots/AdminDescriptions/Friends-Search.
+- **Manueller Real-Device + Lighthouse-Audit** auf der Vercel-Live-URL — Speed-Insights läuft seit v0.8.6.1 und sammelt RUM-Daten (LCP/INP/CLS).
+- **Leaked Password Protection** in Supabase-Dashboard → Auth → Settings einschalten (nicht via MCP machbar).
+
+### Trigger-gebunden (warten auf Auslöser)
+
+- **Cookie-Banner** — Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`. Auslöser: sobald Plausible/PostHog/Sentry-Replay/o.ä. eingeführt wird (TTDSG/DSGVO-Pflicht). Drei-Button-Pattern, Forest-Deep-Aesthetic, "Plätzchen = Sitzplatz UND Keks" Wortspiel.
+- **Performance-Phase 2** — wenn Beta >5.000 Spots erreicht: Server-side bucketing für Timeline-Histogram + bbox-query für /map. Aktuell naiver Client-Filter ausreichend.
+- **OG-Image-Font-Fix** — Build-Warning "Failed to load dynamic font for ◆" in `app/(marketing)/opengraph-image.tsx`. Cosmetic; Mono-Glyph rendert auf manchen Plattformen ohne Spezial-Font-Embed nicht. Fix: Geist-Mono-Font explizit fetchen und an ImageResponse übergeben.
+
+### Bewusst aufgeschoben (Welle C / Phase 10+)
+
+- **Form-Components** (Input, Label, Error-Message) — noch zu wenig Wiederholung um Abstraktion zu rechtfertigen.
+- **Modal/Dialog-Component** — existiert nicht oft genug.
+- **Toast/Notification-System** — aktuell nur `window.alert()` und inline error-states.
+- **Phase 10 Social-Polish:** Notifications, Email-Alerts, Public Profile-Page, Friend-Activity-Feed, Web-Push, Block-Mechanik bei Friendships.
+- **Vector-Icons als Plätzchen-Custom-Set** statt Tabler-Placeholder — sobald jemand designt hat. Implementierung trivial: Tabler-paths in `lib/spot-marker-svg.ts` ersetzen.
+- **PWA installable** — Manifest + Service Worker + Offline-Karten-Tile-Cache.
+- **SpotMap-Refactor** — der ~350-LOC-Component sollte in custom-Hooks zerlegt werden, ist aber stabil. Niemand nervt sich daran.
+- **Konto löschen + DSGVO-Datenexport** — Pflicht-Light, kommt vor offizieller Beta-Erweiterung.
+
+### Bewusste Emoji-Ausnahmen (kein Bug, dokumentiert)
+
+- `EmojiPicker` Marker-Auswahl — User-Daten, kein UI-Element.
+- `StarPicker ⭐` — Opacity-Fill-Pattern; Replacement = UX-Risiko.
+- `GPS-Banner ⚠️` in MapLayout — semantische Warnung.
+- `SPOT_TYPES.emoji` und `SPOT_VISIBILITIES.emoji` Felder — Daten-Stopgap, nicht UI-Render.
+
+### Tag-/Versionierungs-Disziplin
+
+- Jeder Phase-Merge bekommt ein annotated `vX.Y.Z` Tag, das mit dem CHANGELOG-Eintrag übereinstimmt.
+- Backfilled tags existieren für v0.2.0 bis v0.9.1.
+- CHANGELOG-Einträge sind in deutsch, user-speak, mit Tabler-Icon-Emojis als Bullet-Prefix.
+
 ## Was ist Plätzchen?
 
 Eine Community-Web-App zum Sammeln und Bewerten von **netten Pause-Spots beim Wandern**: Bänke, Aussichtspunkte, Schutzhütten, Rastplätze, Liegewiesen, Wasserstellen. Nutzer tragen Spots auf einer Karte ein, bewerten sie (Komfort, Aussicht, Zustand, Rarität, Schatten, Extras — alles optional), laden Fotos hoch und schreiben Community-Tipps (1 Tipp pro User pro Spot, editierbar).

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0 — Verlauf
+*6. Mai 2026*
+
+- 🕐 Neue Seite "Verlauf" (`/timeline`) — sieh, wie sich die Karte über die Zeit gefüllt hat
+- ▶️ Play-Button für Time-Lapse durch die Geschichte deiner Plätzchen
+- 📊 Histogramm zeigt aktive vs. ruhige Wochen, Klick auf einen Balken springt direkt dorthin
+- 🔗 URL teilbar: `?at=2026-04-15&tab=mine` zeigt einen exakten Moment auf der Karte
+- 🔍 Drei Filter: Alle, Eigene, Freunde
+- 👻 Auf "Alle" sind zukünftige Spots schon dezent vorgezeichnet — du siehst, wo's noch wachsen wird
+- 🆕 Neuer Header-Link mit Uhr-Icon zum Verlauf
+
 ## 0.8.6 — Performance
 *6. Mai 2026*
 

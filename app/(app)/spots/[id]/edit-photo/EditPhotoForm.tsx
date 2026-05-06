@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { IconChevronLeft, IconCamera } from '@tabler/icons-react'
+import { IconCamera } from '@tabler/icons-react'
 import { uploadSpotPhoto } from '@/actions/spots'
+import PageHeader from '@/components/ui/PageHeader'
 import { resizeImage } from '@/lib/image-utils'
 
 export default function EditPhotoForm({ spotId }: { spotId: string }) {
@@ -41,13 +41,11 @@ export default function EditPhotoForm({ spotId }: { spotId: string }) {
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-sm mx-auto px-4 py-8">
-        <Link
-          href="/map"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
-        >
-          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Foto hinzufügen</h1>
+        <PageHeader
+          title="Foto hinzufügen"
+          backHref="/map"
+          backLabel="Zurück zur Karte"
+        />
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {preview ? (

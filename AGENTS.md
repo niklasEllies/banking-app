@@ -6,7 +6,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 9 Timeline complete (v0.9.0).** Neue `/timeline`-Route — temporale Karten-Visualisierung mit Time-Scrubber + adaptivem Histogramm + Play-Button. Tabs Alle/Eigene/Freunde, kumulativer Pin-Filter (`created_at <= scrubberNow`), URL-State (`?at=&tab=`) bookmarkbar, Pin-Click deaktiviert (pure Visualisierung). Daten via `lib/timeline-data.ts` (server-only mit cached `getPublicTimelineSpots` + live `getAuthedExtraSpots`); Types client-safe in `lib/timeline-types.ts` extrahiert wegen Server/Client-Boundary. Bucketing-Hook `useTimelineBucketing` adaptiv day/week/month. `MapHeader` hat IconHistory-Link zum Verlauf. SEO/OG/Sitemap (8.4-8.6) und Speed-Insights live. Cookie-Banner-Spec deferred. Map-Marker bleiben Drop-Pins. Next: weiterer Polish nach Beta-Feedback oder Phase 10 (Notifications/Email-Alerts/Public-Profile etc.).
+**Current state: Phase 9.1 UI-Konsolidierung Welle A complete (v0.9.1).** `<PageHeader>`, `<Card>`, `<ListRow>` extrahiert in `components/ui/`. 8 Pages refactored auf PageHeader (Profile/Friends/Changelog/Admin/Spots-new/SpotEditForm/EditPhotoForm/AdminModeration). Profile-Menü auf ListRow. AdminUsers/[id] bewusst nicht refactored (komplexere Header-Struktur, opportunistic später). Phase 9 Timeline (v0.9.0) davor — `/timeline` mit Scrubber/Histogramm/Play-Button. Phase 8.6/8.6.1 Performance (ISR-Cache, loading.tsx, next/image, IntersectionObserver-Lazy-Hero, @vercel/speed-insights, Bundle-Analyzer).
+
+**🔥 Aktuell offene Punkte (Single-Source-of-Truth in `docs/agent-handoff.md` — "🔥 Aktuell offen"-Block ganz oben dort):**
+- **Welle B** UI-Konsolidierung 2 (Button/TabBar/SearchInput) — sofort verfügbar
+- **Phase 10** Social-Polish (Notifications/Email-Alerts/Public-Profile/Friend-Activity/Web-Push/Block) — sofort verfügbar
+- **Cookie-Banner** — Spec ready unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`, Trigger = Tracking-Einführung
+- **Performance Phase 2** — Trigger = >5.000 Spots
+- **Form-Components / Modal / Toast** (Welle C) — bewusst aufgeschoben, zu wenig Wiederholung
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
@@ -27,6 +34,9 @@ Key rules derived from these docs:
 - `params` is `Promise<{id: string}>` in Next.js 16 pages — use `React.use(params)` in Client Components
 - Use `SPOT_TYPES` / `SPOT_TYPE_MAP` from `lib/spot-types.ts` for any UI showing spot types — never hardcode emojis or labels. Each entry has `key`, `emoji` (stopgap, used on map markers), `label`, `Icon` (Tabler component — used in landing showcase, type-picker, future markers).
 - Empty-States nutzen `components/EmptyState.tsx` mit Tabler-Icon, Title, Body und optionaler Action. `compact` prop für In-List-Use.
+- Pages mit Back-Link nutzen `components/ui/PageHeader.tsx` (`title` + optional `subtitle` + `backHref` + `backLabel`). Nicht selbst back-link + h1 + p schreiben.
+- Listen-/Menü-Items nutzen `components/ui/ListRow.tsx` (Icon + label + optional rightSlot, polymorphic href oder onClick, tone='neutral'|'danger'). Default-rightSlot ist Chevron — pass `rightSlot={null}` zum Suppress, `rightSlot={<Badge/>}` zum Override.
+- Cards (weißer Hintergrund + rounded-xl) nutzen `components/ui/Card.tsx`. Existierende Cards sind opportunistically zu migrieren — kein Big-Bang-Refactor.
 - Admin-Queries gehen über `lib/admin-data.ts` (`requireAdmin`, `getAllSpots`, `getAllUsers`, `getAdminStats`, `getAllDescriptions`, `getUserDetail`). Spot-Queries MÜSSEN den admin-client (`createAdminClient`) nehmen — user-bound client respektiert RLS und filtert daher private/friends-only Spots heraus. Bei fehlendem `SUPABASE_SERVICE_ROLE_KEY` graceful Fallback + sichtbare Warnung.
 - UI-Emojis sind out — alle in 8.3-8.5 durch `@tabler/icons-react` ersetzt. Map-Marker seit 8.3.1 sind Drop-Pin-SVGs via `lib/spot-marker-svg.ts` (Tabler-Icon-Paths hardcoded — beim Tabler-Update gegenchecken). `SPOT_VISIBILITIES` hat seit 8.5 ebenfalls `Icon`-Field (IconWorld/IconUsers/IconLock). Ausnahmen die Emoji bleiben: EmojiPicker (literal user-marker selection), StarPicker ⭐ (opacity-fill UX-Pattern), GPS-Banner ⚠️ (semantic), `SPOT_TYPES.emoji` und `SPOT_VISIBILITIES.emoji` Felder (Daten-Stopgap, nicht UI-Render — bleiben für Fallbacks).
 - SEO/OG via `lib/site.ts` (SITE_URL, SITE_NAME, SITE_DESCRIPTION). `app/sitemap.ts` und `app/robots.ts` sind dynamic (Next.js 16 App-Router conventions). `app/(marketing)/opengraph-image.tsx` rendert dynamic 1200×630 OG image via `next/og`'s `ImageResponse`. Setze `NEXT_PUBLIC_SITE_URL` in Vercel für canonical URLs (sonst fallback auf `NEXT_PUBLIC_VERCEL_URL` → localhost).

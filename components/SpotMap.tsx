@@ -9,8 +9,9 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { deleteSpot } from '@/actions/spots'
 import SpotPopup from '@/components/SpotPopup'
-import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
+import { type SpotType } from '@/lib/spot-types'
 import type { SpotVisibility } from '@/lib/spot-visibility'
+import { buildPinSvg, buildClusterSvg, PIN_SIZE, PIN_ANCHOR, PIN_POPUP_ANCHOR } from '@/lib/spot-marker-svg'
 
 const LOCATION_KEY = 'benchmarks_last_location'
 
@@ -37,11 +38,11 @@ function getSpotIcon(type: SpotType): L.DivIcon {
   const cached = ICON_CACHE.get(type)
   if (cached) return cached
   const icon = new L.DivIcon({
-    html: `<span style="font-size:30px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.7))">${SPOT_TYPE_MAP[type].emoji}</span>`,
+    html: buildPinSvg(type),
     className: '',
-    iconSize: [30, 41],
-    iconAnchor: [15, 41],
-    popupAnchor: [0, -36],
+    iconSize: PIN_SIZE,
+    iconAnchor: PIN_ANCHOR,
+    popupAnchor: PIN_POPUP_ANCHOR,
   })
   ICON_CACHE.set(type, icon)
   return icon
@@ -50,24 +51,10 @@ function getSpotIcon(type: SpotType): L.DivIcon {
 const createClusterIcon = (cluster: any) => {
   const count = cluster.getChildCount()
   return new L.DivIcon({
-    html: `<div style="
-      background:white;
-      border:2px solid #3d6b2c;
-      border-radius:20px;
-      padding:4px 10px;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      font-family:system-ui,sans-serif;
-      box-shadow:0 2px 8px rgba(0,0,0,0.2);
-      white-space:nowrap;
-    ">
-      <span style="font-size:16px;line-height:1">🪑</span>
-      <span style="font-weight:700;font-size:13px;color:#3d6b2c">×${count}</span>
-    </div>`,
+    html: buildClusterSvg(count),
     className: '',
-    iconSize: [70, 32],
-    iconAnchor: [35, 16],
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   })
 }
 

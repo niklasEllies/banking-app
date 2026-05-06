@@ -58,3 +58,4 @@ Key rules derived from these docs:
 - Theme hat 3 States: `light` | `dark` | `system` (Default = `system` folgt `prefers-color-scheme`). Inline-Script in `app/layout.tsx` löst System-Mode synchron auf, vermeidet FOUC.
 - Ask for options + recommendation before implementing non-trivial features
 - Commit after every completed feature slice
+- **CHANGELOG ist user-facing** (`/changelog`-Modal in der App). Vor jedem Commit raus: Admin-only Changes, Dev-Tooling (Bundle-Analyzer, npm-scripts), reine Internal-Refactors (Component-Namen, File-Moves, Schema-Migrations-Internals), Tests, Performance-Work die der User nicht merkt. Faustregel: wenn ein normaler User keine Verhaltens-/Sichtbarkeits-Änderung erlebt → kein CHANGELOG-Bullet. Tech-Details gehören in `feature-status.md` / `agent-handoff.md` / Commit-Message.

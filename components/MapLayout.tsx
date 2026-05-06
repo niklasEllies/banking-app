@@ -18,6 +18,7 @@ interface MapLayoutProps {
   initialFavoriteIds?: string[]
   initialFriendIds?: string[]
   initialSpotId?: string | null
+  initialMarkerEmoji?: string | null
 }
 
 export default function MapLayout({
@@ -28,6 +29,7 @@ export default function MapLayout({
   initialFavoriteIds = [],
   initialFriendIds = [],
   initialSpotId = null,
+  initialMarkerEmoji = null,
 }: MapLayoutProps) {
   const router = useRouter()
   const [sheetExpanded, setSheetExpanded] = useState(false)
@@ -112,6 +114,7 @@ export default function MapLayout({
           onPositionUpdate={handlePositionUpdate}
           onGpsStateChange={handleGpsStateChange}
           gpsState={gpsState}
+          initialMarkerEmoji={initialMarkerEmoji}
         />
       </div>
       {!isAuthenticated && (

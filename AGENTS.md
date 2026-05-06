@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 8 Landing Page complete (v0.8.0).** Next: Phase 7+ remaining items (SpotMap-Refactor, PWA, Vector Icons, Block-Mechanik), Phase 8.1 (SEO/OG-Tags + Sitemap), oder Phase 9 (Notifications, Email-Alerts, Public Profile, Friend-Activity-Feed, Web Push).
+**Current state: Phase 8.2 Persistierung complete (v0.8.1).** Next: Phase 8.3 (Empty-States + Tabler Icons als Spot-Type-Placeholder), Phase 8.4 (Admin-Polish — Stats-Overview/Search/Filter/User-Detail; fix dabei den RLS-Bug in der Admin-Spots-Query — die nutzt user-gebundenen client und sieht daher nur eigene+öffentliche Spots, muss `createAdminClient()` werden). Cookie-Banner-Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md` (deferred bis Tracking eingeführt wird). Phase 9 (Notifications/Public Profile/etc.) danach.
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
@@ -37,5 +37,7 @@ Key rules derived from these docs:
 - All scroll-trigger animations honor `prefers-reduced-motion: reduce` (global override in `globals.css` + `useReducedMotion()` from `motion/react` in motion-driven components)
 - Server Actions that mutate spots/favorites/etc. now `revalidatePath('/map')` in addition to `revalidatePath('/')` so both Landing (Living Numbers) and Map (markers) invalidate
 - Post-auth redirects (login/signup/logout) point to `/map`, not `/` (since `/` is now the marketing page)
+- User-Preferences (`profiles.marker_emoji`, `profiles.theme_preference`) sind die Single-Source-of-Truth — `localStorage` ist nur Fast-Path für FOUC-Prevention. EmojiPicker und ThemeToggle nutzen `actions/profile.ts` zum Sync.
+- Theme hat 3 States: `light` | `dark` | `system` (Default = `system` folgt `prefers-color-scheme`). Inline-Script in `app/layout.tsx` löst System-Mode synchron auf, vermeidet FOUC.
 - Ask for options + recommendation before implementing non-trivial features
 - Commit after every completed feature slice

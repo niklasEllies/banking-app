@@ -3,6 +3,8 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { IconUsersGroup, IconInbox, IconSearch } from '@tabler/icons-react'
+import EmptyState from '@/components/EmptyState'
 import {
   searchUserByUsername,
   sendFriendRequest,
@@ -183,9 +185,20 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         {tab === 'friends' && (
           <div className="space-y-2">
             {friends.length === 0 ? (
-              <p className="italic text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
-                Du hast noch keine Freunde — suche jemanden im Tab &lsquo;Suchen&rsquo;.
-              </p>
+              <EmptyState
+                Icon={IconUsersGroup}
+                title="Noch keine Freunde"
+                body="Such jemanden per Username im Tab Suchen — wenn er die Anfrage annimmt, erscheinen die Plätzchen, die er mit Freunden geteilt hat, hier."
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setTab('search')}
+                    className="text-primary font-medium hover:underline"
+                  >
+                    Jemanden suchen →
+                  </button>
+                }
+              />
             ) : (
               friends.map((f) => (
                 <div
@@ -210,6 +223,22 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         )}
 
         {tab === 'requests' && (
+          incoming.length === 0 && outgoing.length === 0 ? (
+            <EmptyState
+              Icon={IconInbox}
+              title="Keine offenen Anfragen"
+              body="Eingehende und ausgehende Freundschaftsanfragen erscheinen hier."
+              action={
+                <button
+                  type="button"
+                  onClick={() => setTab('search')}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Freund suchen →
+                </button>
+              }
+            />
+          ) : (
           <div className="space-y-6">
             <section>
               <h2 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
@@ -285,6 +314,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
               )}
             </section>
           </div>
+          )
         )}
 
         {tab === 'search' && (
@@ -302,6 +332,15 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">…</span>
               )}
             </div>
+
+            {!searchInput.trim() && (
+              <EmptyState
+                Icon={IconSearch}
+                title="Such jemanden per Username"
+                body="Mindestens 1 Zeichen — Groß-/Kleinschreibung egal, Teil-Treffer zählen."
+                compact
+              />
+            )}
 
             {searchInput.trim() && searchHasQueried && searchResults.length === 0 && !searchPending && (
               <p className="italic text-sm text-gray-500 dark:text-gray-400">

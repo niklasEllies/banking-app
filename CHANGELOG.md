@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.2 — Empty-States & Tabler-Icons
+*6. Mai 2026*
+
+- 🎨 Spot-Typen mit eigenen Linien-Icons (Tabler) — wirkt sauberer als bunte Emoji
+- 💬 Hinweise und Vorschläge in leeren Listen: "Noch keine Plätzchen", "Noch keine Freunde", "Noch keine Tipps"
+- 🔍 Such-Tab in Freunden zeigt jetzt einen Hinweis bevor du eintippst
+- 📝 Marker auf der Karte bleiben vorerst als Emoji (Custom-Icons folgen)
+
 ## 0.8.1 — Persistierung & System-Theme
 *6. Mai 2026*
 

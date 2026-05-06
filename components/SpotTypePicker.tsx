@@ -26,7 +26,7 @@ export default function SpotTypePicker({ value, onChange }: SpotTypePickerProps)
                 : 'border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
-            <span className="text-2xl leading-none">{t.emoji}</span>
+            <t.Icon size={26} stroke={1.5} className={selected ? 'text-primary' : 'text-gray-600 dark:text-gray-300'} aria-hidden />
             <span className="text-xs text-gray-700 dark:text-gray-300">{t.label}</span>
           </button>
         )

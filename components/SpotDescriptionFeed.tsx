@@ -2,12 +2,14 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
+import { IconMessage2 } from '@tabler/icons-react'
 import {
   listDescriptions,
   upsertDescription,
   deleteDescription,
   type Description,
 } from '@/actions/descriptions'
+import EmptyState from '@/components/EmptyState'
 
 interface SpotDescriptionFeedProps {
   spotId: string
@@ -168,10 +170,13 @@ export default function SpotDescriptionFeed({ spotId, userId }: SpotDescriptionF
         </ul>
       )}
 
-      {others.length === 0 && !ownDescription && userId && !editing && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-          Noch keine Tipps. Sei der Erste!
-        </p>
+      {others.length === 0 && !ownDescription && !editing && (
+        <EmptyState
+          Icon={IconMessage2}
+          title="Noch keine Tipps"
+          body={userId ? 'Sei der Erste mit einem Tipp zu diesem Plätzchen.' : 'Sobald jemand einen Tipp hinterlässt, erscheint er hier.'}
+          compact
+        />
       )}
     </div>
   )

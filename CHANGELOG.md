@@ -3,9 +3,8 @@
 ## 0.9.1 — UI-Konsolidierung
 *6. Mai 2026*
 
-- 🔧 Konsistentes Seiten-Layout: alle Profil-/Admin-/Spot-Seiten haben jetzt den gleichen Header (Back-Button + Titel + Beschreibung)
-- 🎨 Aufgeräumtes Profil-Menü (Freunde, Was ist neu, Admin, Abmelden) — überall gleiches Design
-- 🛠️ Wartung intern: `<PageHeader>`, `<Card>`, `<ListRow>` als wiederverwendbare Komponenten — neue Seiten gehen schneller von der Hand
+- 🔧 Konsistentes Seiten-Layout: alle Unterseiten haben jetzt den gleichen Header (Back-Button + Titel + Beschreibung)
+- 🎨 Aufgeräumtes Profil-Menü — alle Einträge im gleichen Design
 
 ## 0.9.0 — Verlauf
 *6. Mai 2026*
@@ -22,9 +21,8 @@
 *6. Mai 2026*
 
 - ⚡ Landing-Page-Daten werden 60 Sekunden gecached — spürbar schnellerer Erstaufruf
-- 💀 Lade-Skelette (Landing, Karte, Admin) zeigen sofort eine Vorschau statt leerem Bildschirm
+- 💀 Lade-Skelette zeigen sofort eine Vorschau statt leerem Bildschirm
 - 🖼️ Spot-Fotos werden jetzt automatisch optimiert (responsive, modernes Bildformat)
-- 📦 Bundle-Analyzer eingebaut (`npm run analyze`)
 
 ## 0.8.5 — UI-Polish
 *6. Mai 2026*
@@ -46,14 +44,9 @@
 - 🖼️ Geteilte Links auf WhatsApp/Threads/Twitter zeigen jetzt eine schöne Vorschau-Karte (1200×630)
 - 🗂️ Bessere Seitentitel: "Plätzchen — Eine Karte für Orte, die nirgendwo stehen"
 
-## 0.8.3 — Admin-Polish & Emoji-Cleanup
+## 0.8.3 — Saubere Icons
 *6. Mai 2026*
 
-- 🛠️ Admin sieht jetzt ALLE Plätzchen (auch private und nur-Freunde-sichtbare)
-- 📊 Neue Übersichts-Karte im Admin: Gesamt-Zahlen, Wachstum diese Woche, Verteilung nach Typ und Sichtbarkeit
-- 🔍 Suchen und Filter im Admin: User nach Name/E-Mail, Plätzchen nach Typ und Sichtbarkeit
-- 👤 Klick auf einen User im Admin öffnet eine Detail-Seite mit seinen Plätzchen
-- 💬 Neue Moderations-Seite: alle Community-Tipps auf einen Blick, Löschen mit einem Klick
 - 🎨 Alle Emojis in der UI durch saubere Icons ersetzt (Pfeile, Häkchen, Profil-Menü, Tab-Icons, Buttons)
 - ✏️ Tippfehler "im Beta" → "in der Beta"
 
@@ -97,7 +90,6 @@
 - 👥 Neuer Tab "Freunde" in der Spot-Liste — sieh, was deine Freunde eingetragen haben
 - ♿ Bessere Tastatur-Navigation: Tab bleibt im Sheet, wenn es offen ist
 - 🌓 Etwas mehr Kontrast bei Drag-Handle und deaktivierten Buttons
-- ⚡ Schnellere Admin-Übersicht (kein N+1 mehr)
 
 ## 0.6.0 — Privacy & Friends
 *5. Mai 2026*
@@ -161,4 +153,3 @@
 - 🌙 Dark Mode
 - 👤 Account-System mit Email/Passwort
 - 🧍‍♂️ Wähle deinen Marker-Emoji
-- 🛠️ Admin-Dashboard

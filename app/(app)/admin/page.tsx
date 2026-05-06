@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   IconChevronLeft,
-  IconTool,
   IconAlertTriangle,
   IconUsers,
   IconMapPin,
@@ -63,14 +62,15 @@ export default async function AdminPage() {
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Link
-          href="/map"
+          href="/profil"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-6"
         >
-          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
+          <IconChevronLeft size={16} aria-hidden /> Zurück zum Profil
         </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 inline-flex items-center gap-2">
-          <IconTool size={20} aria-hidden /> Admin
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Admin</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Übersicht und Moderation für Plätzchen-Admins.
+        </p>
 
         {!hasServiceRoleKey() && (
           <div className="mb-6 rounded-lg border border-yellow-300 dark:border-yellow-900/50 bg-yellow-50 dark:bg-yellow-900/15 p-3">

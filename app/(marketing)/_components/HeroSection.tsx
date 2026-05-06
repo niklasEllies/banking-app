@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getHeroSampleSpots } from '@/lib/marketing-stats'
-import HeroMapPreview from './HeroMapPreview'
+import HeroMapPreviewLazy from './HeroMapPreviewLazy'
 import SectionMeta from './SectionMeta'
 
 export default async function HeroSection() {
@@ -45,7 +45,7 @@ export default async function HeroSection() {
         </div>
       </div>
       <div className="relative min-h-[360px] lg:min-h-0">
-        <HeroMapPreview spots={spots} />
+        <HeroMapPreviewLazy spots={spots} />
       </div>
     </section>
   )

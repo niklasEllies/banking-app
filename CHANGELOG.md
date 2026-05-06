@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.3 — Admin-Polish & Emoji-Cleanup
+*6. Mai 2026*
+
+- 🛠️ Admin sieht jetzt ALLE Plätzchen (auch private und nur-Freunde-sichtbare)
+- 📊 Neue Übersichts-Karte im Admin: Gesamt-Zahlen, Wachstum diese Woche, Verteilung nach Typ und Sichtbarkeit
+- 🔍 Suchen und Filter im Admin: User nach Name/E-Mail, Plätzchen nach Typ und Sichtbarkeit
+- 👤 Klick auf einen User im Admin öffnet eine Detail-Seite mit seinen Plätzchen
+- 💬 Neue Moderations-Seite: alle Community-Tipps auf einen Blick, Löschen mit einem Klick
+- 🎨 Alle Emojis in der UI durch saubere Icons ersetzt (Pfeile, Häkchen, Profil-Menü, Tab-Icons, Buttons)
+- ✏️ Tippfehler "im Beta" → "in der Beta"
+
 ## 0.8.2 — Empty-States & Tabler-Icons
 *6. Mai 2026*
 

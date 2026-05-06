@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { IconChevronLeft, IconTool } from '@tabler/icons-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import AdminUsers, { type AdminUser } from './AdminUsers'
@@ -61,9 +62,9 @@ export default async function AdminPage() {
           href="/map"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
-          ← Zurück zur Karte
+          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
         </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">🔧 Admin</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-8 inline-flex items-center gap-2"><IconTool size={18} aria-hidden /> Admin</h1>
 
         <div className="space-y-8">
           <AdminUsers users={users} currentUserId={user.id} />

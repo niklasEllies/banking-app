@@ -1,8 +1,13 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import {
+  IconTrash, IconUmbrella, IconAccessible, IconToolsKitchen2, IconBike,
+  IconStar, IconMountain, IconTrophy, IconHome, IconSun, IconCheck,
+} from '@tabler/icons-react'
+import type { ComponentType } from 'react'
 import { upsertStats, getSpotStats, type UserVote, type AggregatedStats } from '@/actions/stats'
-import { CONDITION_PRESETS, type ConditionPreset, conditionToPreset, shadowLabel } from '@/lib/stats-utils'
+import { CONDITION_PRESETS, type ConditionPreset, conditionToPreset } from '@/lib/stats-utils'
 
 const SHADOW_OPTIONS = [
   { value: 'none',    label: 'Keinen' },
@@ -11,12 +16,20 @@ const SHADOW_OPTIONS = [
   { value: 'allday',  label: 'Ganztags' },
 ]
 
-const EXTRAS_OPTIONS = [
-  { value: 'bin',        icon: '🗑',  label: 'Mülleimer' },
-  { value: 'roof',       icon: '☂',  label: 'Überdachung' },
-  { value: 'accessible', icon: '♿', label: 'Barrierefrei' },
-  { value: 'table',      icon: '🍽', label: 'Tisch' },
-  { value: 'bicycle',    icon: '🚲', label: 'Fahrradständer' },
+type IconComponent = ComponentType<{ size?: number; 'aria-hidden'?: boolean }>
+
+interface ExtraOption {
+  value: string
+  Icon: IconComponent
+  label: string
+}
+
+const EXTRAS_OPTIONS: ExtraOption[] = [
+  { value: 'bin',        Icon: IconTrash,           label: 'Mülleimer' },
+  { value: 'roof',       Icon: IconUmbrella,        label: 'Überdachung' },
+  { value: 'accessible', Icon: IconAccessible,      label: 'Barrierefrei' },
+  { value: 'table',      Icon: IconToolsKitchen2,   label: 'Tisch' },
+  { value: 'bicycle',    Icon: IconBike,            label: 'Fahrradständer' },
 ]
 
 interface StatsVoteFormProps {
@@ -74,22 +87,30 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
       </p>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="comfort-label">⭐ Komfort</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconStar size={13} aria-hidden /> Komfort
+        </p>
         <StarPicker value={comfort} onChange={setComfort} ariaLabel="Komfort-Bewertung" />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="view-label">🌄 Aussicht</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconMountain size={13} aria-hidden /> Aussicht
+        </p>
         <StarPicker value={viewRating} onChange={setViewRating} ariaLabel="Aussicht-Bewertung" />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5" id="rarity-label">🏆 Rarität</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconTrophy size={13} aria-hidden /> Rarität
+        </p>
         <StarPicker value={rarity} onChange={setRarity} ariaLabel="Raritäts-Bewertung" />
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">🏚 Zustand</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconHome size={13} aria-hidden /> Zustand
+        </p>
         <div className="flex gap-2 flex-wrap">
           {(Object.keys(CONDITION_PRESETS) as ConditionPreset[]).map(preset => (
             <button
@@ -110,7 +131,9 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">☀️ Schatten</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconSun size={13} aria-hidden /> Schatten
+        </p>
         <div className="flex gap-2 flex-wrap">
           {SHADOW_OPTIONS.map(opt => (
             <button
@@ -130,7 +153,9 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">✅ Extras</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+          <IconCheck size={13} aria-hidden /> Extras
+        </p>
         <div className="flex gap-2 flex-wrap">
           {EXTRAS_OPTIONS.map(opt => (
             <button
@@ -138,20 +163,24 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
               onClick={() => toggleExtra(opt.value)}
               aria-pressed={extras.includes(opt.value)}
               aria-label={opt.label}
-              className={`min-h-11 px-4 py-2.5 rounded-lg text-xs transition-all ${
+              className={`min-h-11 px-4 py-2.5 rounded-lg text-xs transition-all inline-flex items-center gap-1.5 ${
                 extras.includes(opt.value)
                   ? 'bg-primary text-white'
                   : 'bg-gray-100 dark:bg-[#2a3124] text-gray-600 dark:text-gray-400'
               }`}
             >
-              {opt.icon} {opt.label}
+              <opt.Icon size={14} aria-hidden /> {opt.label}
             </button>
           ))}
         </div>
       </div>
 
       {error && <p className="text-xs text-red-500 dark:text-red-400">{error}</p>}
-      {saved && <p className="text-xs text-primary">Bewertung gespeichert ✓</p>}
+      {saved && (
+        <p className="text-xs text-primary flex items-center gap-1">
+          Bewertung gespeichert <IconCheck size={14} aria-hidden />
+        </p>
+      )}
 
       <button
         onClick={handleSave}

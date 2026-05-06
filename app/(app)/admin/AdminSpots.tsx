@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { IconTrash } from '@tabler/icons-react'
 import { adminDeleteSpot } from '@/actions/admin'
 import { spotDisplayName } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
@@ -58,7 +59,7 @@ export default function AdminSpots({ spots: initial }: { spots: AdminSpot[] }) {
               className="shrink-0 min-w-11 min-h-11 flex items-center justify-center text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-40"
               aria-label="Plätzchen löschen"
             >
-              🗑
+              <IconTrash size={16} aria-hidden />
             </button>
           </div>
         ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { IconCurrentLocation } from '@tabler/icons-react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { useRouter } from 'next/navigation'
@@ -379,7 +380,7 @@ export default function SpotMap({
           }}
           aria-label={gpsState === 'available' ? 'Auf Standort zentrieren' : 'Standort nicht verfügbar'}
         >
-          📍
+          <IconCurrentLocation size={22} aria-hidden />
         </button>
       )}
 

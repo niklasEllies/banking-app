@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { IconChevronLeft, IconCamera } from '@tabler/icons-react'
 import { uploadSpotPhoto } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
 
@@ -44,7 +45,7 @@ export default function EditPhotoForm({ spotId }: { spotId: string }) {
           href="/map"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
-          ← Zurück zur Karte
+          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Foto hinzufügen</h1>
 
@@ -56,8 +57,8 @@ export default function EditPhotoForm({ spotId }: { spotId: string }) {
               className="w-full h-48 object-cover rounded-xl"
             />
           ) : (
-            <div className="w-full h-48 bg-gray-100 dark:bg-[#1e231a] rounded-xl flex items-center justify-center text-4xl">
-              🪑
+            <div className="w-full h-48 bg-gray-100 dark:bg-[#1e231a] rounded-xl flex items-center justify-center text-gray-400 dark:text-gray-500">
+              <IconCamera size={48} aria-hidden />
             </div>
           )}
 

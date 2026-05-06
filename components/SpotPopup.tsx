@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { IconChevronRight, IconTrash } from '@tabler/icons-react'
 import type { Spot } from '@/components/SpotMap'
 import RarityBadge from '@/components/RarityBadge'
 import { spotDisplayName } from '@/lib/spot-utils'
@@ -87,7 +88,7 @@ export default function SpotPopup({
             fontWeight: 600,
           }}
         >
-          Details →
+          Details <IconChevronRight size={12} aria-hidden style={{ display: 'inline', verticalAlign: 'middle' }} />
         </button>
         {isOwner && (
           <button
@@ -102,7 +103,7 @@ export default function SpotPopup({
               color: '#ef4444',
             }}
           >
-            🗑
+            <IconTrash size={14} aria-hidden />
           </button>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import { IconMapPin } from '@tabler/icons-react'
 import { login } from '@/actions/auth'
 
 export default function LoginPage() {
@@ -10,7 +11,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface dark:bg-[#141810] px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-8">📍 Plätzchen</h1>
+        <h1 className="text-2xl font-bold text-center mb-8 inline-flex items-center gap-2 w-full justify-center"><IconMapPin size={22} aria-hidden /> Plätzchen</h1>
         <form action={action} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">

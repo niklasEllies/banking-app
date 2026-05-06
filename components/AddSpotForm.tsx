@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { IconCurrentLocation } from '@tabler/icons-react'
 import { createSpot } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
 import SpotTypePicker from '@/components/SpotTypePicker'
@@ -62,9 +63,9 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
         <button
           type="button"
           onClick={handleUseCurrentLocation}
-          className="mt-2 text-xs text-primary font-medium hover:underline"
+          className="mt-2 inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"
         >
-          📍 Meinen Standort verwenden
+          <IconCurrentLocation size={14} aria-hidden /> Meinen Standort verwenden
         </button>
       </div>
 

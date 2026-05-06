@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { IconCheck } from '@tabler/icons-react'
 import { setAdminRole } from '@/actions/admin'
 
 export interface AdminUser {
@@ -74,7 +75,7 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
               : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary'
           }`}
         >
-          {isAdmin ? 'Admin ✓' : 'Admin'}
+          {isAdmin ? <span className="inline-flex items-center gap-1">Admin <IconCheck size={12} aria-hidden /></span> : 'Admin'}
         </button>
       )}
     </div>

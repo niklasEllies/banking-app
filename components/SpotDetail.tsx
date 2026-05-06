@@ -2,9 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { IconSun, IconStar, IconMountain, IconHome, IconTrash, IconUmbrella, IconAccessible, IconToolsKitchen2, IconBike } from '@tabler/icons-react'
+import type { ComponentType } from 'react'
 import type { Spot } from '@/components/SpotMap'
 import { getSpotStats, type AggregatedStats, type UserVote } from '@/actions/stats'
-import { conditionLabel, shadowLabel, extrasIcon } from '@/lib/stats-utils'
+import { conditionLabel, shadowLabel } from '@/lib/stats-utils'
+
+const EXTRAS_ICON_MAP: Record<string, ComponentType<{ size?: number; 'aria-hidden'?: boolean }>> = {
+  bin:        IconTrash,
+  roof:       IconUmbrella,
+  accessible: IconAccessible,
+  table:      IconToolsKitchen2,
+  bicycle:    IconBike,
+}
 import { spotDisplayName } from '@/lib/spot-utils'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import { SPOT_VISIBILITY_MAP } from '@/lib/spot-visibility'
@@ -112,31 +122,34 @@ export default function SpotDetail({ spot, userId }: SpotDetailProps) {
         {hasAnyStats && (
           <div className="flex flex-wrap gap-2">
             {aggregated.comfort_median !== null && (
-              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-                ⭐ <strong>{aggregated.comfort_median.toFixed(1)}</strong>/5 Komfort
+              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 inline-flex items-center gap-1">
+                <IconStar size={13} aria-hidden /> <strong>{aggregated.comfort_median.toFixed(1)}</strong>/5 Komfort
               </div>
             )}
             {aggregated.view_median !== null && (
-              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-                🌄 <strong>{aggregated.view_median.toFixed(1)}</strong>/5 Aussicht
+              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 inline-flex items-center gap-1">
+                <IconMountain size={13} aria-hidden /> <strong>{aggregated.view_median.toFixed(1)}</strong>/5 Aussicht
               </div>
             )}
             {condition && (
               <div
-                className="rounded-lg px-3 py-1.5 text-sm font-semibold"
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold inline-flex items-center gap-1"
                 style={{ background: condition.color, color: '#141810' }}
               >
-                🏚 {condition.short} — {condition.full}
+                <IconHome size={13} aria-hidden /> {condition.short} — {condition.full}
               </div>
             )}
             {shadow && (
-              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-                ☀️ {shadow}
+              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 inline-flex items-center gap-1">
+                <IconSun size={13} aria-hidden /> {shadow}
               </div>
             )}
             {(aggregated.extras_threshold?.length ?? 0) > 0 && (
-              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200">
-                {aggregated.extras_threshold.map(e => extrasIcon(e)).join(' ')}
+              <div className="bg-gray-100 dark:bg-[#2a3124] rounded-lg px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                {aggregated.extras_threshold.map(e => {
+                  const ExtraIcon = EXTRAS_ICON_MAP[e]
+                  return ExtraIcon ? <ExtraIcon key={e} size={14} aria-hidden /> : null
+                })}
               </div>
             )}
           </div>

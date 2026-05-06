@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { IconChevronLeft } from '@tabler/icons-react'
 import { loadChangelog } from '@/lib/changelog-server'
 
 export const metadata = {
@@ -15,7 +16,7 @@ export default async function ChangelogPage() {
           href="/profil"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
-          ← Zurück zum Profil
+          <IconChevronLeft size={16} aria-hidden /> Zurück zum Profil
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Was ist neu</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">

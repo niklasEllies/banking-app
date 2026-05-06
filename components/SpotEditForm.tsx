@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { IconChevronLeft } from '@tabler/icons-react'
 import { updateSpot } from '@/actions/spots'
 import SpotTypePicker from '@/components/SpotTypePicker'
 import VisibilityPicker from '@/components/VisibilityPicker'
@@ -41,7 +42,7 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
           href="/map"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
-          ← Zurück zur Karte
+          <IconChevronLeft size={16} aria-hidden /> Zurück zur Karte
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Spot bearbeiten</h1>
 

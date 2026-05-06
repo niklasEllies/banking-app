@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { IconUsersGroup, IconInbox, IconSearch } from '@tabler/icons-react'
+import { IconUsersGroup, IconInbox, IconSearch, IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import EmptyState from '@/components/EmptyState'
 import {
   searchUserByUsername,
@@ -144,7 +144,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
           href="/profil"
           className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mb-6"
         >
-          ← Zurück zum Profil
+          <IconChevronLeft size={16} aria-hidden /> Zurück zum Profil
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">Freunde</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
@@ -193,9 +193,9 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                   <button
                     type="button"
                     onClick={() => setTab('search')}
-                    className="text-primary font-medium hover:underline"
+                    className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
                   >
-                    Jemanden suchen →
+                    Jemanden suchen <IconChevronRight size={14} aria-hidden />
                   </button>
                 }
               />
@@ -234,7 +234,7 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                   onClick={() => setTab('search')}
                   className="text-primary font-medium hover:underline"
                 >
-                  Freund suchen →
+                  Freund suchen <IconChevronRight size={14} aria-hidden />
                 </button>
               }
             />

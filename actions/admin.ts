@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/admin-data'
 
 export async function setAdminRole(userId: string, isAdmin: boolean) {
@@ -32,6 +32,7 @@ export async function adminDeleteSpot(id: string) {
   revalidatePath('/admin')
   revalidatePath('/')
   revalidatePath('/map')
+  updateTag('marketing-stats')
   return {}
 }
 

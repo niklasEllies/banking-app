@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { IconSun, IconStar, IconMountain, IconHome, IconTrash, IconUmbrella, IconAccessible, IconToolsKitchen2, IconBike } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
 import type { Spot } from '@/components/SpotMap'
@@ -63,23 +64,27 @@ export default function SpotDetail({ spot, userId }: SpotDetailProps) {
   const condition = conditionLabel(aggregated?.condition_median ?? null)
   const shadow = shadowLabel(aggregated?.shadow_mode ?? null)
   const hasAnyStats = aggregated && aggregated.vote_count > 0
+  const TypeIcon = SPOT_TYPE_MAP[spot.type].Icon
 
   return (
     <div>
       {/* Photo header */}
       <div className="relative" style={{ height: '110px' }}>
         {spot.photo_url ? (
-          <img
+          <Image
             src={spot.photo_url}
-            alt="Bank"
-            className="w-full h-full object-cover"
+            alt={SPOT_TYPE_MAP[spot.type].label}
+            fill
+            sizes="(max-width: 640px) 100vw, 600px"
+            className="object-cover"
+            priority
           />
         ) : (
           <div
-            className="w-full h-full flex items-center justify-center text-4xl"
+            className="w-full h-full flex items-center justify-center"
             style={{ background: '#2d3a1e' }}
           >
-            {SPOT_TYPE_MAP[spot.type].emoji}
+            <TypeIcon size={42} stroke={1.5} color="#c8c8c0" aria-hidden />
           </div>
         )}
         {/* Name + rarity overlay */}

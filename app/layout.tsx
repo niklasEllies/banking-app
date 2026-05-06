@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,8 +22,30 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: 'Plätzchen',
-  description: 'Sammle und teile schöne Pause-Spots beim Wandern',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
+  generator: 'Next.js',
+  referrer: 'strict-origin-when-cross-origin',
+  keywords: ['Wandern', 'Spazieren', 'Bank', 'Plätzchen', 'Karte', 'Outdoor', 'Slow Travel'],
+  openGraph: {
+    type: 'website',
+    locale: 'de_DE',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

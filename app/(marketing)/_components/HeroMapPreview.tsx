@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import type { HeroSpot } from '@/lib/marketing-stats'
-import { SPOT_TYPE_MAP } from '@/lib/spot-types'
+import { buildPinSvg, PIN_SIZE, PIN_ANCHOR } from '@/lib/spot-marker-svg'
 import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then((m) => m.MapContainer), { ssr: false })
@@ -39,29 +39,27 @@ export default function HeroMapPreview({ spots }: { spots: HeroSpot[] }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           opacity={0.5}
         />
-        {spots.map((spot, idx) => {
-          const meta = SPOT_TYPE_MAP[spot.type]
-          return (
-            <Marker
-              key={spot.id}
-              position={[spot.lat, spot.lng]}
-              icon={createPulseIcon(meta?.emoji ?? '📍', idx)}
-            />
-          )
-        })}
+        {spots.map((spot, idx) => (
+          <Marker
+            key={spot.id}
+            position={[spot.lat, spot.lng]}
+            icon={createHeroPinIcon(spot.type, idx)}
+          />
+        ))}
       </MapContainer>
     </div>
   )
 }
 
-function createPulseIcon(emoji: string, idx: number) {
+function createHeroPinIcon(type: HeroSpot['type'], idx: number) {
   // Avoid SSR import — leaflet only loads client-side
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const L = require('leaflet')
   return L.divIcon({
-    className: 'hero-marker',
-    html: `<div class="hero-marker-inner" style="animation-delay: ${idx * 0.4}s">${emoji}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
+    className: 'hero-pin',
+    // Wrap in a span so the staggered pulse-bob animation can apply via CSS sibling.
+    html: `<span class="hero-pin-bob" style="animation-delay:${idx * 0.4}s">${buildPinSvg(type)}</span>`,
+    iconSize: PIN_SIZE,
+    iconAnchor: PIN_ANCHOR,
   })
 }

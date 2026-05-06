@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { IconShare } from '@tabler/icons-react'
 
 interface SpotShareButtonProps {
   spotId: string
@@ -31,7 +32,7 @@ export default function SpotShareButton({ spotId }: SpotShareButtonProps) {
       aria-label="Teilen"
       className="min-w-11 min-h-11 flex items-center justify-center text-lg leading-none text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 relative"
     >
-      📤
+      <IconShare size={18} aria-hidden />
       {copied && (
         <span className="absolute -top-8 right-0 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
           Link kopiert

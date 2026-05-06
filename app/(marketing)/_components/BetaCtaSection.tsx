@@ -12,7 +12,7 @@ export default async function BetaCtaSection() {
         <SectionMeta number="05" label="Beta" />
       </div>
       <h2 className="font-bold uppercase text-3xl lg:text-5xl tracking-tight">
-        Wir sind im Beta.{' '}
+        Wir sind in der Beta.{' '}
         <span className="font-[var(--font-display)] font-light italic text-[#5e9e3e] normal-case">Du gestaltest mit.</span>
       </h2>
       <p className="text-[#c8c8c0] text-lg mt-4 leading-relaxed">

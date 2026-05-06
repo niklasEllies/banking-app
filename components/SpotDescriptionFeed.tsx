@@ -123,7 +123,7 @@ export default function SpotDescriptionFeed({ spotId, userId }: SpotDescriptionF
         </div>
       ) : ownDescription ? (
         <div className="bg-gray-50 dark:bg-[#1a1f14] rounded-lg p-3 space-y-2">
-          <p className="text-xs font-semibold text-primary">💬 Dein Tipp</p>
+          <p className="text-xs font-semibold text-primary flex items-center gap-1"><IconMessage2 size={14} aria-hidden /> Dein Tipp</p>
           <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
             {ownDescription.text}
           </p>

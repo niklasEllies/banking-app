@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { IconSparkles } from '@tabler/icons-react'
 import type { ChangelogEntry } from '@/lib/changelog'
 import { compareVersions } from '@/lib/changelog'
 
@@ -51,7 +52,7 @@ export default function ChangelogModal({ latest }: ChangelogModalProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="changelog-modal-title"
-      className="fixed inset-0 z-[2000] flex items-center justify-center px-4 bg-black/50"
+      className="fixed inset-0 z-2000 flex items-center justify-center px-4 bg-black/50"
       onClick={dismiss}
     >
       <div
@@ -59,7 +60,7 @@ export default function ChangelogModal({ latest }: ChangelogModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="changelog-modal-title" className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-          🆕 Neu in <span className="text-primary">{latest.version}</span> — {latest.title}
+          <IconSparkles size={16} className="inline-block mr-1 text-primary" aria-hidden /> Neu in <span className="text-primary">{latest.version}</span> — {latest.title}
         </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{latest.date}</p>
 

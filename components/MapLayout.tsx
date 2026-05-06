@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { IconChevronRight, IconX } from '@tabler/icons-react'
 import SpotMapClient from '@/components/SpotMapClient'
 import BottomSheet from '@/components/BottomSheet'
 import type { Spot } from '@/components/SpotMap'
@@ -118,17 +119,17 @@ export default function MapLayout({
         />
       </div>
       {!isAuthenticated && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-[9999] bg-[#1d2218]/95 backdrop-blur-sm border border-[#5e9e3e]/40 rounded-full px-4 py-2 text-sm text-[#c8c8c0] flex items-center gap-3 shadow-lg pointer-events-auto whitespace-nowrap">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-9999 bg-[#1d2218]/95 backdrop-blur-sm border border-[#5e9e3e]/40 rounded-full px-4 py-2 text-sm text-[#c8c8c0] flex items-center gap-3 shadow-lg pointer-events-auto whitespace-nowrap">
           <span>Du erkundest als Gast</span>
-          <a href="/signup" className="text-[#5e9e3e] font-semibold hover:underline">Beta beitreten →</a>
+          <a href="/signup" className="inline-flex items-center gap-1 text-[#5e9e3e] font-semibold hover:underline">Beta beitreten <IconChevronRight size={14} aria-hidden /></a>
         </div>
       )}
       {showBanner && (
         <div
           role="status"
-          className="absolute top-16 left-0 right-0 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 px-4 py-3 flex items-start gap-3 z-[600]"
+          className="absolute top-16 left-0 right-0 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 px-4 py-3 flex items-start gap-3 z-600"
         >
-          <span aria-hidden="true" className="flex-shrink-0 mt-0.5">⚠️</span>
+          <span aria-hidden="true" className="shrink-0 mt-0.5">⚠️</span>
           <p className="text-sm flex-1">
             Standort nicht verfügbar — Distanz und Zentrieren-Button sind deaktiviert.
             Erlaube den Standort in den Browser-Einstellungen.
@@ -136,9 +137,9 @@ export default function MapLayout({
           <button
             onClick={handleDismissBanner}
             aria-label="Hinweis schließen"
-            className="flex-shrink-0 p-2 -m-2 rounded hover:bg-amber-100 dark:hover:bg-amber-900/40"
+            className="shrink-0 p-2 -m-2 rounded hover:bg-amber-100 dark:hover:bg-amber-900/40"
           >
-            ✕
+            <IconX size={16} aria-hidden />
           </button>
         </div>
       )}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
+import { IconMapPinPlus, IconUsers, IconHeart, IconLogin } from '@tabler/icons-react'
 import type { Spot } from '@/components/SpotMap'
 import { deleteSpot } from '@/actions/spots'
 import { spotDisplayName, distanceTo, distMeters } from '@/lib/spot-utils'
@@ -10,6 +11,7 @@ import SpotDetail from '@/components/SpotDetail'
 import FavoriteToggle from '@/components/FavoriteToggle'
 import SpotActionMenu from '@/components/SpotActionMenu'
 import SpotShareButton from '@/components/SpotShareButton'
+import EmptyState from '@/components/EmptyState'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
@@ -205,55 +207,59 @@ export default function BottomSheet({
         {selectedSpot ? (
           <SpotDetail spot={selectedSpot} userId={userId} />
         ) : (viewMode === 'mine' || viewMode === 'friends' || viewMode === 'favorites') && !userId ? (
-          <div className="py-12 px-6 text-center">
-            <p className="text-base text-gray-700 dark:text-gray-300 mb-2">
-              Logge dich ein, um {viewMode === 'mine' ? 'deine eigenen Plätzchen' : viewMode === 'friends' ? 'Plätzchen von Freunden' : 'deine Favoriten'} zu sehen.
-            </p>
-            <Link href="/login" className="text-primary font-medium hover:underline">
-              Login
-            </Link>
-          </div>
+          <EmptyState
+            Icon={IconLogin}
+            title="Login erforderlich"
+            body={`Logge dich ein, um ${viewMode === 'mine' ? 'deine eigenen Plätzchen' : viewMode === 'friends' ? 'Plätzchen von Freunden' : 'deine Favoriten'} zu sehen.`}
+            action={
+              <Link href="/login" className="text-primary font-medium hover:underline">
+                Login →
+              </Link>
+            }
+          />
         ) : sorted.length === 0 ? (
           viewMode === 'mine' ? (
-            <div className="py-12 px-6 text-center">
-              <div className="text-5xl mb-3">📍</div>
-              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Du hast noch keine Plätzchen eingetragen.
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
-              </p>
-            </div>
+            <EmptyState
+              Icon={IconMapPinPlus}
+              title="Noch keine eigenen Plätzchen"
+              body={<>Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.</>}
+            />
           ) : viewMode === 'friends' ? (
-            <div className="py-12 px-6 text-center">
-              <div className="text-5xl mb-3">👥</div>
-              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Keine Plätzchen von Freunden in der Nähe.
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Füge Freunde hinzu auf <Link href="/friends" className="text-primary font-medium hover:underline">der Freunde-Seite</Link>.
-              </p>
-            </div>
+            <EmptyState
+              Icon={IconUsers}
+              title="Keine Plätzchen von Freunden"
+              body={
+                <>
+                  Sobald deine Freunde Spots eintragen, erscheinen sie hier.{' '}
+                  <Link href="/friends" className="text-primary font-medium hover:underline">
+                    Freunde verwalten →
+                  </Link>
+                </>
+              }
+            />
           ) : viewMode === 'favorites' ? (
-            <div className="py-12 px-6 text-center">
-              <div className="text-5xl mb-3">❤️</div>
-              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Noch keine Favoriten.
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Markiere einen Spot mit ❤️ um ihn hier zu speichern.
-              </p>
-            </div>
+            <EmptyState
+              Icon={IconHeart}
+              title="Noch keine Favoriten"
+              body="Tippe in der Detail-Ansicht auf das Herz, um einen Spot hier zu speichern."
+            />
           ) : (
-            <div className="py-12 px-6 text-center">
-              <div className="text-5xl mb-3">📍</div>
-              <p className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                Noch keine Plätzchen in der Nähe.
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.
-              </p>
-            </div>
+            <EmptyState
+              Icon={IconMapPinPlus}
+              title="Noch keine Plätzchen hier"
+              body={
+                userId ? (
+                  <>Tippe auf <strong className="text-primary">+</strong> unten rechts, um dein erstes einzutragen.</>
+                ) : (
+                  <>
+                    <Link href="/signup" className="text-primary font-medium hover:underline">
+                      Trag dich in die Beta ein
+                    </Link>
+                    {' '}und werde der erste, der hier ein Plätzchen einträgt.
+                  </>
+                )
+              }
+            />
           )
         ) : (
           <>

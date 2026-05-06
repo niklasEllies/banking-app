@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 8.2 Persistierung complete (v0.8.1).** Next: Phase 8.3 (Empty-States + Tabler Icons als Spot-Type-Placeholder), Phase 8.4 (Admin-Polish — Stats-Overview/Search/Filter/User-Detail; fix dabei den RLS-Bug in der Admin-Spots-Query — die nutzt user-gebundenen client und sieht daher nur eigene+öffentliche Spots, muss `createAdminClient()` werden). Cookie-Banner-Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md` (deferred bis Tracking eingeführt wird). Phase 9 (Notifications/Public Profile/etc.) danach.
+**Current state: Phase 8.3 Empty-States + Tabler-Icons complete (v0.8.2).** Next: Phase 8.4 (Admin-Polish — Stats-Overview/Search/Filter/User-Detail; fix dabei den RLS-Bug in der Admin-Spots-Query — die nutzt user-gebundenen client und sieht daher nur eigene+öffentliche Spots, muss `createAdminClient()` werden). Map-Marker bleiben Emoji bis Custom-Vector-Icons designed sind (Phase 8.3.1 nachschiebbar via SVG-DivIcon-Refactor). Cookie-Banner-Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md` (deferred bis Tracking eingeführt wird). Phase 9 (Notifications/Public Profile/etc.) danach.
 
 Repo working title is still `banking-app` — actual product is **Plätzchen**, a community web app for collecting and rating nice pause-spots while hiking (benches, viewpoints, shelters, picnic areas, meadows, water spots).
 
@@ -25,7 +25,8 @@ Key rules derived from these docs:
 - Dark mode: always add `dark:` variants with explicit hex values — CSS vars don't work with `@theme inline`
 - Dark mode palette: bg `#141810`, surface `#1e231a`, chips `#2a3124`, border `#2a2f24`, primary `#5e9e3e`
 - `params` is `Promise<{id: string}>` in Next.js 16 pages — use `React.use(params)` in Client Components
-- Use `SPOT_TYPES` / `SPOT_TYPE_MAP` from `lib/spot-types.ts` for any UI showing spot types — never hardcode emojis or labels
+- Use `SPOT_TYPES` / `SPOT_TYPE_MAP` from `lib/spot-types.ts` for any UI showing spot types — never hardcode emojis or labels. Each entry has `key`, `emoji` (stopgap, used on map markers), `label`, `Icon` (Tabler component — used in landing showcase, type-picker, future markers).
+- Empty-States nutzen `components/EmptyState.tsx` mit Tabler-Icon, Title, Body und optionaler Action. `compact` prop für In-List-Use.
 - Use `SPOT_VISIBILITIES` / `SPOT_VISIBILITY_MAP` from `lib/spot-visibility.ts` for any UI showing visibility levels (public/friends/private)
 - Spots have a `visibility` field — RLS enforces who sees what via `can_see_spot()` helper. Cascades automatically to descriptions, votes, favorites.
 - Friendships are directed: `actions/friends.ts` exposes the lifecycle. `are_friends(a, b)` is the SQL helper used in RLS.

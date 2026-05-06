@@ -17,9 +17,9 @@ export default async function SpotTypesShowcase() {
         {SPOT_TYPES.map((t) => (
           <div
             key={t.key}
-            className="rounded-lg border border-[#5e9e3e]/22 bg-[#5e9e3e]/[0.06] px-3 py-5 text-center"
+            className="rounded-lg border border-[#5e9e3e]/22 bg-[#5e9e3e]/[0.06] px-3 py-5 text-center flex flex-col items-center"
           >
-            <div className="text-3xl mb-2">{t.emoji}</div>
+            <t.Icon size={32} stroke={1.5} className="mb-2 text-[#8aa376]" aria-hidden />
             <div className="font-mono text-[10px] uppercase tracking-wider text-[#c8c8c0]">{t.label}</div>
             <div className="font-mono text-[10px] text-[#5e9e3e] mt-1">{counts[t.key] ?? 0}</div>
           </div>

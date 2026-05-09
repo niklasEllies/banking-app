@@ -6,6 +6,7 @@ import { IconUsersGroup, IconInbox, IconSearch, IconChevronRight } from '@tabler
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/EmptyState'
 import PageHeader from '@/components/ui/PageHeader'
+import TabBar from '@/components/ui/TabBar'
 import {
   searchUserByUsername,
   sendFriendRequest,
@@ -131,13 +132,6 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput])
 
-  const tabBtnClass = (active: boolean) =>
-    `flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-      active
-        ? 'text-primary border-primary'
-        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200'
-    }`
-
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-md mx-auto px-4 py-8">
@@ -148,35 +142,17 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
           backLabel="Zurück zum Profil"
         />
 
-        {/* Tab bar */}
-        <div className="flex border-b border-gray-200 dark:border-[#2a2f24] mb-4">
-          <button
-            type="button"
-            onClick={() => setTab('friends')}
-            role="tab"
-            aria-selected={tab === 'friends'}
-            className={tabBtnClass(tab === 'friends')}
-          >
-            Freunde ({friends.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('requests')}
-            role="tab"
-            aria-selected={tab === 'requests'}
-            className={tabBtnClass(tab === 'requests')}
-          >
-            Anfragen ({requestsCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('search')}
-            role="tab"
-            aria-selected={tab === 'search'}
-            className={tabBtnClass(tab === 'search')}
-          >
-            Suchen
-          </button>
+        <div className="mb-4">
+          <TabBar<TabKey>
+            tabs={[
+              { value: 'friends', label: 'Freunde', count: friends.length },
+              { value: 'requests', label: 'Anfragen', count: requestsCount },
+              { value: 'search', label: 'Suchen' },
+            ]}
+            active={tab}
+            onChange={setTab}
+            ariaLabel="Freunde-Ansicht"
+          />
         </div>
 
         {tab === 'friends' && (

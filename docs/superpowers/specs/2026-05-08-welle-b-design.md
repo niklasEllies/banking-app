@@ -13,7 +13,7 @@ Nachfolger von **Welle A** (v0.9.1: `<PageHeader>`, `<Card>`, `<ListRow>`).
 Drei neue Files in `components/ui/`:
 
 - `Button.tsx` — generischer Button mit 4 Variants × 2 Sizes
-- `TabBar.tsx` — generischer Tab-Wechsler mit 2 Variants (underline / pill)
+- `TabBar.tsx` — generischer Tab-Wechsler (underline-Style, light/dark-adaptive)
 - `SearchInput.tsx` — Such-Input mit Icon links + optionalem Clear-Button rechts
 
 Alle drei sind **Client Components** (interaktiv). Kein State außerhalb von Standard-React-Patterns. Components sind dumm/kontrolliert — Caller besitzt den State.
@@ -89,8 +89,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 **File:** `components/ui/TabBar.tsx`
 
 ```tsx
-type TabBarVariant = 'underline' | 'pill'
-
 interface TabItem<T extends string> {
   value: T
   label: string
@@ -101,24 +99,16 @@ interface TabBarProps<T extends string> {
   tabs: TabItem<T>[]
   active: T
   onChange: (value: T) => void
-  variant?: TabBarVariant   // default 'underline'
   ariaLabel: string         // required, z.B. "Freunde-Ansicht"
 }
 ```
 
-### Variant: `underline` (Page-Level)
+### Style (nur Underline-Variant)
 
 - Container: `flex border-b border-gray-200 dark:border-[#2a2f24]`, `role="tablist"`, `aria-label`
 - Tab: `flex-1 py-2 text-sm font-medium border-b-2 transition-colors -mb-px`
 - Active: `text-primary border-primary`
 - Inactive: `text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200`
-
-### Variant: `pill` (Embedded)
-
-- Container: `flex gap-1 bg-gray-100 dark:bg-[#2a3124] rounded-full p-1`, `role="tablist"`, `aria-label`
-- Tab: `flex-1 py-1.5 text-xs font-medium rounded-full transition-colors`
-- Active: `bg-white dark:bg-[#141810] text-primary shadow-sm`
-- Inactive: `text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100`
 
 ### Accessibility
 
@@ -139,15 +129,20 @@ interface TabBarProps<T extends string> {
 
 Type-Inferenz aus `tabs`-Array funktioniert ohne explizite Generic-Annotation.
 
-### Migration-Targets (3 Call-Sites)
+### Migration-Targets (2 Call-Sites)
 
-| Datei | Variant |
-|-------|---------|
-| `components/FriendsClient.tsx` | `underline` (3 Tabs: Freunde / Anfragen / Suchen) |
-| `components/BottomSheet.tsx` | `underline` (3 Tabs: Alle / Eigene / Favoriten) |
-| `components/timeline/TimelineScrubber.tsx` | `pill` (3 Tabs: Alle / Eigene / Freunde) |
+| Datei | Tabs |
+|-------|------|
+| `components/FriendsClient.tsx` | 3 Tabs: Freunde / Anfragen / Suchen |
+| `components/BottomSheet.tsx` | 4 Tabs: Alle / Eigene / Freunde / Favoriten |
 
 `FriendsClient.tabBtnClass` Helper wird ersatzlos gestrichen.
+
+### Bewusst NICHT migriert
+
+- `components/timeline/TimelineScrubber.tsx` — Tabs sind dark-on-map-spezifisch (`bg-[#14180f]/80` over Karte, `bg-primary text-[#14180f]` invertiert active-State). Kein generischer light/dark-Pattern, sondern Map-Overlay-UI analog zu `SpotPopup`/`MapHeader`. Bleibt custom, vermeidet künstlichen `tone="overlay"`-Prop ohne weiteren Consumer.
+
+Pill-Variant ist deshalb in dieser Welle nicht implementiert (YAGNI). Wenn ein zukünftiger Use-Case Pill-Tabs auf einer Light/Dark-Page benötigt, kann TabBar dann um den Variant erweitert werden.
 
 ## Component 3: SearchInput
 
@@ -184,20 +179,22 @@ interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, '
 
 ## Testing
 
-Vitest unit tests pro Component (`components/ui/Button.test.tsx`, `TabBar.test.tsx`, `SearchInput.test.tsx`):
+**Keine neuen Component-Tests** — analog zu Welle A (`PageHeader`/`Card`/`ListRow` haben auch keine). Vitest läuft mit `environment: 'node'`, DOM-Component-Tests würden jsdom + `@testing-library/react` Setup voraussetzen — das ist eine separate Welle.
 
-- **Button:** rendert mit Variant-Klassen, Icon vor Label, `disabled` propagiert, `fullWidth` setzt `w-full`, Click-Handler feuert
-- **TabBar:** rendert N Tabs, aktiver Tab hat `aria-selected="true"`, onChange feuert mit korrektem Value, beide Variants haben distinkte Container-Klassen, count rendert als Suffix
-- **SearchInput:** rendert IconSearch, Clear-Button erscheint nur wenn `onClear && value`, Clear-Click ruft `onClear`, native input-Props (placeholder, value, disabled) propagieren
+Coverage kommt über:
+1. **TypeScript** — Component-API ist strikt typisiert, Caller-Mismatches werden vom Compiler abgefangen (Discriminated Unions für ListRow-artige Patterns, Generic-Types für TabBar)
+2. **Existing tests** — `__tests__/` (actions, lib) müssen weiterhin grün bleiben; Migrations berühren keine getestete Logik
+3. **Manueller Smoketest** nach jeder Component-Familie: `npm run dev`, betroffene Routes durchklicken, Visual-Diff prüfen
+4. **`npm run build` + `npm run lint`** vor jedem Commit — beides muss clean sein
 
-Integration: nach jeder Migration manuell mit `npm run dev` smoketesten — Login, AddSpot, Friends-Tabs, Timeline-Scrubber-Tabs, Admin-Search.
+Wenn künftig Welle (z.B. Form-Components Welle C) testbarer werden soll, kann jsdom + Testing-Library als separates Setup eingeführt werden. Für Welle B nicht im Scope.
 
 ## Migration Strategy
 
-1. **Components extrahieren** (Component + Test pro Stück, in dieser Reihenfolge: Button → TabBar → SearchInput) — jede Component bekommt Test-Coverage und einen ersten Beispiel-Migrate vor Commit
-2. **Per Component → restliche Migration** in einem Commit pro Component-Familie (z.B. `feat(ui): migrate forms to Button`, `feat(ui): migrate tabs to TabBar`, `feat(ui): migrate searches to SearchInput`)
-3. **Cleanup-Commit:** `FriendsClient.tabBtnClass` Helper entfernen
-4. **CHANGELOG-Eintrag** v0.9.2 mit user-facing-Bullet (z.B. "🎨 Konsistenteres Look-and-Feel bei Buttons, Tabs, Suche")
+1. **Components extrahieren** in dieser Reihenfolge: Button → TabBar → SearchInput. Component + erste Beispiel-Migration in einem Commit (Login/Signup für Button, FriendsClient für TabBar, FriendsClient für SearchInput)
+2. **Per Component → restliche Migration** in einem Commit pro Component-Familie (z.B. `refactor(ui): migrate forms to <Button>`, `refactor(ui): migrate BottomSheet tabs to <TabBar>`, `refactor(ui): migrate admin searches to <SearchInput>`)
+3. **Cleanup-Commit:** `FriendsClient.tabBtnClass` Helper entfernen (sollte nach Migration unbenutzt sein)
+4. **CHANGELOG-Eintrag** v0.9.2 mit user-facing-Bullet (z.B. "🎨 Konsistenteres Look-and-Feel bei Buttons, Tabs, Suche") — bewusst nichts über Component-Namen ("PageHeader extracted"-Stil ist out per AGENTS.md-Rule)
 5. **Tag** v0.9.2 nach Merge zu master
 
 Erwarteter Aufwand: ~1-2 Stunden via Subagent-Driven-Development.
@@ -221,8 +218,9 @@ Erwarteter Aufwand: ~1-2 Stunden via Subagent-Driven-Development.
 
 ## Success Criteria
 
-- 15 Call-Sites umgeschrieben (8 Buttons + 3 TabBars + 4 SearchInputs — siehe Tabellen oben)
-- Vitest grün
+- 15 Call-Sites umgeschrieben (9 Buttons + 2 TabBars + 4 SearchInputs — siehe Tabellen oben)
+- Vitest grün (existing tests bleiben grün — keine neuen Component-Tests, analog zu Welle A)
 - `npm run build` & `npm run lint` clean
-- Manueller Smoketest: Login, AddSpot, Friends-Tabs, BottomSheet-View-Mode, Timeline-Scrubber-Tabs, Admin-Search alle weiterhin funktional und visuell ungestört
+- Manueller Smoketest: Login, AddSpot, Friends-Tabs, BottomSheet-View-Mode, Admin-Search alle weiterhin funktional und visuell ungestört
+- TimelineScrubber-Tabs visuell unverändert (nicht migriert)
 - v0.9.2 Tag + CHANGELOG-Bullet

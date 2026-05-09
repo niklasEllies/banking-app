@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { IconMapPin } from '@tabler/icons-react'
 import { login } from '@/actions/auth'
+import Button from '@/components/ui/Button'
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, undefined)
@@ -40,13 +41,9 @@ export default function LoginPage() {
           {state?.error && (
             <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
           )}
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full bg-primary text-white rounded-lg py-2 text-sm font-medium hover:bg-primary-dark disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#141810]"
-          >
+          <Button type="submit" variant="primary" size="sm" fullWidth loading={pending}>
             {pending ? 'Einloggen...' : 'Einloggen'}
-          </button>
+          </Button>
         </form>
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
           Noch kein Konto?{' '}

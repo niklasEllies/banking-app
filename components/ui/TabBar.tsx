@@ -33,6 +33,7 @@ export default function TabBar<T extends string>({
             type="button"
             role="tab"
             aria-selected={isActive}
+            tabIndex={isActive ? 0 : -1}
             onClick={() => onChange(t.value)}
             className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
               isActive

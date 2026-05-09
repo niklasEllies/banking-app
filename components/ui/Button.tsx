@@ -20,6 +20,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger: 'bg-red-600 text-white hover:bg-red-700',
 }
 
+// Both sizes use text-sm — the difference is only vertical padding (md = slightly larger tap-target).
 const SIZES: Record<ButtonSize, string> = {
   sm: 'py-2 text-sm',
   md: 'py-2.5 text-sm',
@@ -42,7 +43,9 @@ export default function Button({
   // ghost = pure text-link look, no padding-x or background box
   const padX = variant === 'ghost' ? '' : 'px-4'
   const width = fullWidth ? 'w-full' : ''
-  const cls = `${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${padX} ${width} ${className}`.trim()
+  const cls = [BASE, VARIANTS[variant], SIZES[size], padX, width, className]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <button {...rest} disabled={disabled || loading} className={cls}>

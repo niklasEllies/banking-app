@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import EmptyState from '@/components/EmptyState'
 import PageHeader from '@/components/ui/PageHeader'
 import TabBar from '@/components/ui/TabBar'
+import SearchInput from '@/components/ui/SearchInput'
 import {
   searchUserByUsername,
   sendFriendRequest,
@@ -295,16 +296,15 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         {tab === 'search' && (
           <div className="space-y-4">
             <div className="relative">
-              <input
-                type="text"
+              <SearchInput
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
+                onClear={() => setSearchInput('')}
                 placeholder="Username suchen… (mind. 1 Zeichen)"
                 aria-label="Username suchen"
-                className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary"
               />
               {searchPending && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">…</span>
+                <span className="absolute right-9 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">…</span>
               )}
             </div>
 

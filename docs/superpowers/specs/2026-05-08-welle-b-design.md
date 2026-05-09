@@ -43,7 +43,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 |---------|---------|
 | `primary` | `bg-primary text-white hover:bg-primary-dark` |
 | `ghost` | `text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200` |
-| `outline` | `border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1e231a]` |
+| `outline` | `border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#262b1f]` |
 | `danger` | `bg-red-600 text-white hover:bg-red-700` |
 
 ### Size-Styles

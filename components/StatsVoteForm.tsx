@@ -6,6 +6,7 @@ import {
   IconStar, IconMountain, IconTrophy, IconHome, IconSun, IconCheck,
 } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
+import Button from '@/components/ui/Button'
 import { upsertStats, getSpotStats, type UserVote, type AggregatedStats } from '@/actions/stats'
 import { CONDITION_PRESETS, type ConditionPreset, conditionToPreset } from '@/lib/stats-utils'
 
@@ -182,13 +183,9 @@ export default function StatsVoteForm({ benchId, initialVote, onSaved }: StatsVo
         </p>
       )}
 
-      <button
-        onClick={handleSave}
-        disabled={isPending}
-        className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
-      >
+      <Button type="button" variant="primary" fullWidth onClick={handleSave} loading={isPending}>
         {isPending ? 'Speichern…' : 'Bewertung speichern'}
-      </button>
+      </Button>
     </div>
   )
 }

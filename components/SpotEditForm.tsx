@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateSpot } from '@/actions/spots'
+import Button from '@/components/ui/Button'
 import PageHeader from '@/components/ui/PageHeader'
 import SpotTypePicker from '@/components/SpotTypePicker'
 import VisibilityPicker from '@/components/VisibilityPicker'
@@ -70,20 +71,17 @@ export default function SpotEditForm({ spot }: SpotEditFormProps) {
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           <div className="flex gap-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => router.back()}
-              className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+              className="flex-1"
             >
               Abbrechen
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
-            >
+            </Button>
+            <Button type="submit" variant="primary" loading={isPending} className="flex-1">
               {isPending ? 'Speichern…' : 'Änderungen speichern'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { IconCurrentLocation } from '@tabler/icons-react'
 import { createSpot } from '@/actions/spots'
 import { resizeImage } from '@/lib/image-utils'
+import Button from '@/components/ui/Button'
 import SpotTypePicker from '@/components/SpotTypePicker'
 import VisibilityPicker from '@/components/VisibilityPicker'
 import type { SpotType } from '@/lib/spot-types'
@@ -117,20 +118,17 @@ export default function AddSpotForm({ initialLat, initialLng }: AddSpotFormProps
       )}
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => router.back()}
-          className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#262b1f] hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          className="flex-1"
         >
           Abbrechen
-        </button>
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex-1 bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
-        >
+        </Button>
+        <Button type="submit" variant="primary" loading={pending} className="flex-1">
           {pending ? 'Speichern...' : 'Plätzchen eintragen'}
-        </button>
+        </Button>
       </div>
     </form>
   )

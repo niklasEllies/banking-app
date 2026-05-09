@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { IconUsersGroup, IconInbox, IconSearch, IconChevronRight } from '@tabler/icons-react'
+import Button from '@/components/ui/Button'
 import EmptyState from '@/components/EmptyState'
 import PageHeader from '@/components/ui/PageHeader'
 import {
@@ -296,14 +297,16 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                       <span className="text-sm text-gray-800 dark:text-gray-200 truncate">
                         @{r.username ?? '—'}
                       </span>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleCancel(r.id)}
                         disabled={isPending}
-                        className="shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-60"
+                        className="shrink-0"
                       >
                         Anfrage zurückziehen
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>

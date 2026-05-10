@@ -27,7 +27,7 @@ export default function SearchInput({
         {...rest}
         type="search"
         value={value}
-        className={`w-full pl-9 pr-9 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1e231a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent [&::-webkit-search-cancel-button]:hidden ${className}`.trim()}
+        className={`w-full pl-9 pr-9 py-2 text-sm rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent [&::-webkit-search-cancel-button]:hidden ${className}`.trim()}
       />
       {showClear && (
         <button

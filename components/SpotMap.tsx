@@ -288,14 +288,7 @@ export default function SpotMap({
   }, [initialSpots])
 
   const handleFabClick = () => {
-    if (userPosition) {
-      router.push(`/spots/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
-      return
-    }
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => router.push(`/spots/new?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`),
-      () => router.push('/spots/new?lat=51.1&lng=10.4')
-    )
+    router.push('/spots/from-photo')
   }
 
   return (
@@ -379,7 +372,7 @@ export default function SpotMap({
             bottom: sheetExpanded ? 'calc(55vh + 16px)' : '5rem',
             transition: 'bottom 0.25s ease',
           }}
-          aria-label="Bank eintragen"
+          aria-label="Plätzchen mit Foto eintragen"
         >
           +
         </button>

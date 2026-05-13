@@ -59,7 +59,7 @@ Eine Community-Web-App zum Sammeln und Bewerten von **netten Pause-Spots beim Wa
 - Node.js 24 LTS
 - Git: branch `master`
 - Dev-Server: `npm run dev` → http://localhost:3000
-- Tests: `npm test` (Vitest, 64 Tests)
+- Tests: `npm test` (Vitest, 149 Tests) — `environment: 'node'`, kein jsdom. Component-DOM-Tests werden bewusst NICHT geschrieben (Welle-A-/B-/9.3-Convention). Pure-Logic-Libs (`lib/*`) MÜSSEN Tests haben (z.B. `lib/exif-utils.ts`).
 - Build: `npm run build`
 
 ## Supabase Setup
@@ -101,9 +101,9 @@ Forest Deep Farbpalette (Dark Mode):
 
 **Neue UI-Elemente immer mit `dark:` Varianten versehen. Explizite Hex-Werte, keine CSS-Vars.**
 
-## Aktuelle Datenbankstruktur (Stand: Phase 6)
+## Aktuelle Datenbankstruktur (Stand: Phase 8.2)
 
-- `profiles`: id, username, is_admin
+- `profiles`: id, username, is_admin, **marker_emoji** (Phase 8.2), **theme_preference** (Phase 8.2, `'light' | 'dark' | 'system'`)
 - `spots`: id, created_by, lat, lng, name, photo_url, **type** (`spot_type` enum), **visibility** (`spot_visibility` enum, Phase 6), created_at
   - `type` enum values: `bench`, `viewpoint`, `shelter`, `picnic`, `meadow`, `water`
   - `visibility` enum values: `public`, `friends`, `private` — default `public`
@@ -123,6 +123,7 @@ Forest Deep Farbpalette (Dark Mode):
   - status: `'pending'` | `'accepted'`
   - RLS: SELECT eigene Pair-Rows, INSERT als requester, UPDATE als addressee (accept), DELETE beide Seiten
 - Storage Bucket `bench-photos`: public read, owner write/delete (interner Name beibehalten)
+- **Phase 7.5 Hardening:** alle `SECURITY DEFINER` Funktionen haben `SET search_path = public, pg_catalog`. KEIN `SELECT`-Policy auf `storage.objects` für `bench-photos` (public-read passiert via direct-CDN-URL, kein listing).
 
 Aggregation via `get_spot_aggregated_stats(p_spot_id uuid)` Postgres-Funktion (`SECURITY DEFINER` — bypassed RLS, uuid-opak).
 
@@ -148,9 +149,9 @@ export type SpotType = 'bench' | 'viewpoint' | 'shelter' | 'picnic' | 'meadow' |
 | meadow | 🌿 | Liegewiese |
 | water | 💧 | Wasserstelle |
 
-**Regel:** Niemals Emojis oder Labels hardcoden — immer `SPOT_TYPE_MAP[spot.type].emoji` und `.label`.
+**Regel:** Niemals Emojis oder Labels hardcoden — immer `SPOT_TYPE_MAP[spot.type].Icon` (Tabler-Component) oder `.label`. `.emoji` ist Daten-Stopgap, nicht UI-Render (Ausnahme: Fallback-Zwecke).
 
-Map-Marker: `getSpotIcon(type)` in `components/SpotMap.tsx` cached `L.DivIcon` per Type. Vector-Icons (User designt) ersetzen die Emoji-Marker irgendwann (Phase 7+).
+Map-Marker (seit Phase 8.4): Drop-Pin-SVG via `lib/spot-marker-svg.ts buildPinSvg(type)` — Tabler-Icon-Paths hardcoded. `ICON_CACHE` in `SpotMap.tsx` und `PinPickerMap.tsx` cached `L.DivIcon` per Type. Bei Tabler-Library-Update: SVG-Paths gegenchecken.
 
 ## Changelog (post-Phase-5 Mini-Feature)
 
@@ -170,6 +171,105 @@ User-facing changelog page at `/changelog`. Source-of-truth: `CHANGELOG.md` in r
 After deploy, returning users see a one-time modal with the new bullets. First-time visitors don't see the modal (would feel like an upgrade nag they didn't earn).
 
 **Important:** Don't import from `lib/changelog-server.ts` in any Client Component. Use `lib/changelog.ts` for shared types + pure functions; the server file uses `node:fs` and is `'server-only'` enforced.
+
+## Phase 9.3 Patterns — GPS-UX (v0.9.3, 2026-05-13)
+
+### Live-Tracking via ref-Pattern
+- State `liveTracking` in `SpotMap.tsx` (opt-in pro Session, kein localStorage). Toggle-Button neben Center-FAB.
+- WICHTIG: `LocationController` liest `liveTracking` und `onLiveUpdate` aus `useRef`s (gesynct via separate useEffects), NICHT direkt aus Props. Sonst würde Toggle-Wechsel den watchPosition tearen + neu installieren (UX-Flash "Standort wird ermittelt…").
+- Accuracy-Filter: `<80m` für initial-lock, `<200m` für live-updates (toleranter für mobile Bewegung). Updates >200m ignoriert.
+- `localStorage` wird nur beim initial-lock geschrieben, NICHT in live-update path (sync I/O blockt Main-Thread).
+- Auto-Follow: `FollowController` macht `map.flyTo(pos, currentZoom, {duration: 0.5})` wenn `enabled && !followBroken`. Pan-to-break über `useMapEvents({ dragstart, zoomstart })` — `zoomstart` für mobile pinch-zoom; `flyTo` mit fixiertem `zoom` triggert kein zoomstart selbst.
+- Re-engage: Toggle erneut tappen ODER Center-FAB klicken → `setFollowBroken(false)`.
+
+### Foto-First-Flow `/spots/from-photo`
+- Default-Pfad ab Map-FAB-Klick (statt `/spots/new?lat=&lng=`). Legacy `/spots/new` bleibt erreichbar via "Ohne Foto eintragen"-Link auf der neuen Page.
+- `PhotoFirstForm.tsx` ist single Client-Component mit progressive disclosure (Photo-Picker → nach Auswahl: Map + Details inline).
+- **EXIF-Reihenfolge ist kritisch:** `readExifGps(file)` MUSS vor `URL.createObjectURL` und vor `resizeImage(file)` aufgerufen werden. Canvas-Resize strippt EXIF.
+- Fallback-Kette: EXIF → current-GPS (one-shot) → DE-Default. User sieht jeweils Banner (grün/gelb).
+- Race-Guard: `pickGenRef` (useRef-Counter) verhindert dass stale EXIF-Read eines früheren File-Picks State eines späteren Picks überschreibt.
+- Blob-URL-Cleanup: `useEffect(() => () => revokeObjectURL(preview), [preview])`. Sonst leakt der letzte Preview beim Wegnavigieren.
+- `try/catch` um `createSpot` — Netzwerk-Errors landen in `setError` statt silently die `startTransition` zu killen.
+
+### `<PinPickerMap>` (in `PinPickerMapClient.tsx` dynamic-ssr-false)
+- Single tappable + draggable Pin, reuse `buildPinSvg(type)` + `ICON_CACHE`-Pattern wie SpotMap.
+- `useMapEvents({ click(e) { onPinChange(e.latlng.lat, e.latlng.lng) } })` für tap-anywhere.
+- Marker `draggable + eventHandlers.dragend` für drag-update.
+- Wrapper-Div hat `role="application"` + `aria-label` für AT.
+
+### `lib/exif-utils.ts` — pure-logic mit Unit-Tests
+- `readExifGps(file): Promise<{lat,lng}|null>` graceful-fallback bei: non-image MIME, fehlendem EXIF, 0/0 zeroed coords, Parser-Throw.
+- Importiert `exifr` über deep-path `exifr/dist/mini.esm.mjs` (~10kb gzipped GPS-only) statt full bundle (~30kb). HEIC nicht unterstützt — aber app accept-Filter ist `image/jpeg,image/png,image/webp`, also kein Problem.
+- 7 Unit-Tests in `__tests__/lib/exif-utils.test.ts` mocken die exifr-mini path via `vi.mock('exifr/dist/mini.esm.mjs', ...)`.
+
+## Phase 9.1 / 9.2 Patterns — UI-Konsolidierung (Welle A + B, v0.9.1 + v0.9.2)
+
+### `components/ui/`-Components (verpflichtend nutzen)
+- `<PageHeader title subtitle? backHref backLabel />` für ALLE neuen Pages mit Back-Link.
+- `<Card padding? className?>` für Cards (graduelle Adoption, kein Big-Bang-Refactor).
+- `<ListRow href|onClick Icon? label rightSlot? tone='neutral'|'danger'>` polymorphic Link/Button für Menü-/Listen-Items. Default-rightSlot = Chevron. `rightSlot={null}` zum Suppress.
+- `<Button variant size? fullWidth? loading? Icon?>` — 4 variants × 2 sizes. Stateful Icon-Buttons (FavoriteToggle/ThemeToggle/SpotShareButton) bleiben custom.
+- `<TabBar tabs active onChange ariaLabel>` — generisch `<T extends string>`, underline-Style, ARIA roving-tabindex.
+- `<SearchInput value onChange onClear? placeholder>` — IconSearch links + optional Clear-X rechts. Debounce ist Caller-Sache.
+
+### TimelineScrubber-Tabs bewusst NICHT migriert
+Dark-on-map-spezifisch (`bg-[#14180f]/80` über Karte, `bg-primary text-[#14180f]` invertiert), kein generischer light/dark-Pattern. Analog zu Phase-9.1's bewusster Auslassung von AdminUsers/[id].
+
+## Phase 9 Patterns — Timeline (v0.9.0)
+
+### Server/Client Split via separate Type-File
+- `lib/timeline-data.ts` ist server-only (importiert `next/headers` indirekt via supabase server-client). Client-Components dürfen das NICHT importieren.
+- `lib/timeline-types.ts` exportiert pure Types + `applyTabFilter` (`'all'|'mine'|'friends'`) — client-safe.
+- Beim Hinzufügen neuer server-only Libs: shared Types in separates `*-types.ts` extrahieren.
+
+### `getPublicTimelineSpots` ist gecached
+- `unstable_cache` mit Tag `marketing-stats` (gleicher Tag wie Landing-Page-Stats — Spot-Mutations rufen `updateTag('marketing-stats')` und invalidieren beides).
+- `createAnonReadClient()` aus `lib/supabase/anon-read.ts` für cookie-freie Reads (cookies() throws inside unstable_cache).
+
+### Adaptive Bucketing
+`components/timeline/useTimelineBucketing.ts` ist isomorph (kein Server-State). Buckets `day|week|month` je nach Range.
+
+## Phase 8.x Patterns — Performance + Persistierung + Polish
+
+### ISR-Cache + Tag-Invalidation
+- Marketing-Stats: `unstable_cache(fn, key, { revalidate: 60, tags: ['marketing-stats'] })`.
+- Spot-Mutations MÜSSEN `updateTag('marketing-stats')` aufrufen (aus `'next/cache'` — `revalidateTag` ist deprecated in Next.js 16).
+- Cookie-freier Read-Client für cached scopes: `createAnonReadClient()` aus `lib/supabase/anon-read.ts`.
+
+### User-Preferences ServerSide-First (Phase 8.2)
+- `profiles.marker_emoji` + `profiles.theme_preference` sind die Source of Truth.
+- `localStorage` ist NUR FOUC-Fast-Path (Inline-Script in `app/layout.tsx` löst System-Mode synchron auf).
+- `EmojiPicker` und `ThemeToggle` rufen `actions/profile.ts` für Sync.
+
+### 3-State Theme (Phase 8.2)
+`light | dark | system`. Default = `system` folgt `prefers-color-scheme`. Inline-Script in `<head>` von `app/layout.tsx` vermeidet FOUC.
+
+### Empty-States + Tabler-Icons (Phase 8.3)
+- `<EmptyState Icon title body? action? compact?>` für alle leeren Listen.
+- UI-Emojis raus — nutze `@tabler/icons-react`. Ausnahmen: EmojiPicker (User-Marker-Auswahl), StarPicker ⭐, GPS-Banner ⚠️.
+
+### Drop-Pin Marker (Phase 8.4)
+- `lib/spot-marker-svg.ts buildPinSvg(type)` rendert Drop-Pin in Plätzchen-Grün mit Tabler-Icon im Kreis.
+- Tabler-Icon-Paths sind hardcoded — bei Tabler-Update gegenchecken.
+- `buildClusterSvg(count)` ersetzt Stuhl-Emoji-Cluster.
+
+### SEO/OG (Phase 8.4)
+- `lib/site.ts` (SITE_URL, SITE_NAME, SITE_DESCRIPTION).
+- `app/sitemap.ts` + `app/robots.ts` dynamic (Next.js 16 App-Router convention).
+- `app/(marketing)/opengraph-image.tsx` rendert dynamic 1200×630 OG via `next/og`'s `ImageResponse`.
+- `NEXT_PUBLIC_SITE_URL` in Vercel für canonical URLs setzen.
+
+### Landing/Map Split (Phase 8)
+- `/` ist die Marketing-Landing-Page (Server Component, in `app/(marketing)/`).
+- `/map` ist die Karte (in `app/(app)/map/`).
+- Map ist anon-aware: anon User sehen nur `visibility='public'` Spots, Add/Edit/Favorite/Description UI ist hidden via `isAuthenticated` prop-chain.
+- Post-auth redirects (login/signup/logout) zeigen auf `/map`, NICHT auf `/`.
+
+## Phase 7.5 Patterns — Security Hardening
+
+- Alle `SECURITY DEFINER` Postgres-Funktionen haben `SET search_path = public, pg_catalog` (verhindert search_path injection).
+- `next.config.ts` shipt X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy headers.
+- Foto-Bucket `bench-photos`: kein `SELECT`-Policy auf `storage.objects` — public read passiert via direct-CDN-URL.
 
 ## Phase 6 Patterns (zusätzlich zu Phase 5)
 

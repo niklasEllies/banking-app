@@ -154,6 +154,11 @@ function FollowController({
     dragstart() {
       onPanBreak()
     },
+    // User-initiated pinch-zoom on mobile doesn't fire dragstart — catch it via zoomstart.
+    // FollowController's flyTo passes map.getZoom() so zoom doesn't change → no self-trigger.
+    zoomstart() {
+      onPanBreak()
+    },
   })
   return null
 }
@@ -175,6 +180,12 @@ function LocationController({
 }) {
   const map = useMap()
   const centeredRef = useRef(false)
+
+  // Refs let us read latest values from watchPosition callback without re-running the effect
+  const liveTrackingRef = useRef(liveTracking)
+  const onLiveUpdateRef = useRef(onLiveUpdate)
+  useEffect(() => { liveTrackingRef.current = liveTracking }, [liveTracking])
+  useEffect(() => { onLiveUpdateRef.current = onLiveUpdate }, [onLiveUpdate])
 
   // Center on cached position immediately (deferred so Leaflet container is ready)
   useEffect(() => {
@@ -246,14 +257,14 @@ function LocationController({
           onLocating(false)
           onGpsStateChange?.('available')
           map.flyTo(latlng, Math.max(map.getZoom(), 14), { duration: 1.5 })
-          if (!liveTracking && watchId !== undefined) {
+          if (!liveTrackingRef.current && watchId !== undefined) {
             navigator.geolocation.clearWatch(watchId)
             watchId = undefined
           }
-        } else if (liveTracking && lockedFirstFix && acc < 200) {
-          // Ongoing live-tracking updates; tolerance widened to 200m for movement
-          localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
-          onLiveUpdate(latlng)
+        } else if (liveTrackingRef.current && lockedFirstFix && acc < 200) {
+          // Skip localStorage write in live-update path: cache is for next-visit centering,
+          // not real-time tracking. Real-time writes block the main thread once per second.
+          onLiveUpdateRef.current(latlng)
         }
       },
       (err) => {
@@ -271,7 +282,7 @@ function LocationController({
         onLocating(false)
       }
     }
-  }, [map, onPositionFound, onLiveUpdate, onLocating, onGpsStateChange, liveTracking])
+  }, [map, onPositionFound, onLocating, onGpsStateChange])
 
   return null
 }
@@ -312,13 +323,10 @@ export default function SpotMap({
     }
   }, [])
 
-  const handlePositionFound = useCallback((pos: [number, number]) => {
-    setUserPosition(pos)
-    setHasLivePosition(true)
-    onPositionUpdate?.({ lat: pos[0], lng: pos[1] })
-  }, [onPositionUpdate])
-
-  const handleLiveUpdate = useCallback((pos: [number, number]) => {
+  // Both initial-fix and live-update do the same thing: update user position state +
+  // propagate to parent. LocationController separates them only to gate the watchPosition
+  // lifecycle; here they collapse.
+  const handlePositionUpdate = useCallback((pos: [number, number]) => {
     setUserPosition(pos)
     setHasLivePosition(true)
     onPositionUpdate?.({ lat: pos[0], lng: pos[1] })
@@ -354,8 +362,8 @@ export default function SpotMap({
         <AdminClickController isAdmin={isAdmin} />
         <LocationController
           cachedPosition={cachedPosition}
-          onPositionFound={handlePositionFound}
-          onLiveUpdate={handleLiveUpdate}
+          onPositionFound={handlePositionUpdate}
+          onLiveUpdate={handlePositionUpdate}
           onLocating={handleLocating}
           onGpsStateChange={onGpsStateChange}
           liveTracking={liveTracking}

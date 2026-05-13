@@ -2,10 +2,11 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { IconTrash, IconSearch, IconMessage2 } from '@tabler/icons-react'
+import { IconTrash, IconMessage2 } from '@tabler/icons-react'
 import { adminDeleteDescription } from '@/actions/admin'
 import { SPOT_TYPE_MAP } from '@/lib/spot-types'
 import EmptyState from '@/components/EmptyState'
+import SearchInput from '@/components/ui/SearchInput'
 import type { AdminDescription } from '@/lib/admin-data'
 
 export default function AdminDescriptions({ descriptions: initial }: { descriptions: AdminDescription[] }) {
@@ -38,16 +39,13 @@ export default function AdminDescriptions({ descriptions: initial }: { descripti
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Im Text, User oder Spot-Name suchen…"
-          className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:border-primary"
-        />
-      </div>
+      <SearchInput
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onClear={() => setQuery('')}
+        placeholder="Im Text, User oder Spot-Name suchen…"
+        aria-label="Tipps suchen"
+      />
 
       <p className="text-xs text-gray-500 dark:text-gray-400">
         {filtered.length} von {items.length} Tipps

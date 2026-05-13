@@ -16,6 +16,7 @@ import FavoriteToggle from '@/components/FavoriteToggle'
 import SpotActionMenu from '@/components/SpotActionMenu'
 import SpotShareButton from '@/components/SpotShareButton'
 import EmptyState from '@/components/EmptyState'
+import TabBar from '@/components/ui/TabBar'
 import { useSheetSwipe } from '@/components/useSheetSwipe'
 
 type GpsState = 'unknown' | 'available' | 'denied' | 'unavailable'
@@ -183,24 +184,17 @@ export default function BottomSheet({
 
       {/* Tab bar (list view only) */}
       {!selectedSpotId && (
-        <div className="flex border-b border-gray-100 dark:border-[#2a2f24]">
-          {(['all', 'mine', 'friends', 'favorites'] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => handleViewModeChange(m)}
-              role="tab"
-              aria-selected={viewMode === m}
-              className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                viewMode === m
-                  ? 'text-primary border-primary'
-                  : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
-              {m === 'all' ? 'Alle' : m === 'mine' ? 'Eigene' : m === 'friends' ? 'Freunde' : 'Favoriten'}
-            </button>
-          ))}
-        </div>
+        <TabBar<'all' | 'mine' | 'friends' | 'favorites'>
+          tabs={[
+            { value: 'all', label: 'Alle' },
+            { value: 'mine', label: 'Eigene' },
+            { value: 'friends', label: 'Freunde' },
+            { value: 'favorites', label: 'Favoriten' },
+          ]}
+          active={viewMode}
+          onChange={handleViewModeChange}
+          ariaLabel="Plätzchen-Ansicht"
+        />
       )}
 
       {/* Content (scroll-aware: only swipes when scrolled to top) */}

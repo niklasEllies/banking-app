@@ -2,10 +2,11 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { IconCheck, IconSearch, IconChevronRight } from '@tabler/icons-react'
+import { IconCheck, IconChevronRight } from '@tabler/icons-react'
 import { setAdminRole } from '@/actions/admin'
 import EmptyState from '@/components/EmptyState'
 import { IconUserOff } from '@tabler/icons-react'
+import SearchInput from '@/components/ui/SearchInput'
 import type { AdminUserRow } from '@/lib/admin-data'
 
 export default function AdminUsers({ users, currentUserId }: { users: AdminUserRow[]; currentUserId: string }) {
@@ -27,14 +28,13 @@ export default function AdminUsers({ users, currentUserId }: { users: AdminUserR
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
-          <input
-            type="text"
+        <div className="flex-1">
+          <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onClear={() => setQuery('')}
             placeholder="Username oder E-Mail suchen…"
-            className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:border-primary"
+            aria-label="User suchen"
           />
         </div>
         <select

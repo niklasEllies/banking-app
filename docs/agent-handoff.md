@@ -8,14 +8,12 @@ Dieses Dokument ermöglicht einem AI-Agenten, das Projekt ohne Vorwissen fortzuf
 > 3. `docs/architecture.md` — Tech Stack, Datenfluss, Dateistruktur
 > 4. `docs/database-schema.md` — Tabellen, RLS, Migrationen
 
-## 🔥 Aktuell offen — Stand v0.9.1 (2026-05-06)
+## 🔥 Aktuell offen — Stand v0.9.2 (2026-05-10)
 
 Komprimierte Liste aller offenen Punkte. Nach jeder Phase aktualisieren.
 
 ### Sofort verfügbar (kein Trigger nötig)
 
-- **Welle B — UI-Konsolidierung 2** (Component-Extracts, ~1-2h):
-  `<Button variant size>` für ~20 Stellen ohne einheitliches Padding · `<TabBar items value onChange>` für BottomSheet+Timeline-Scrubber · `<SearchInput>` für AdminUsers/AdminSpots/AdminDescriptions/Friends-Search.
 - **Manueller Real-Device + Lighthouse-Audit** auf der Vercel-Live-URL — Speed-Insights läuft seit v0.8.6.1 und sammelt RUM-Daten (LCP/INP/CLS).
 - **Leaked Password Protection** in Supabase-Dashboard → Auth → Settings einschalten (nicht via MCP machbar).
 

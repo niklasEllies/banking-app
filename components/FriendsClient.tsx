@@ -3,8 +3,11 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { IconUsersGroup, IconInbox, IconSearch, IconChevronRight } from '@tabler/icons-react'
+import Button from '@/components/ui/Button'
 import EmptyState from '@/components/EmptyState'
 import PageHeader from '@/components/ui/PageHeader'
+import TabBar from '@/components/ui/TabBar'
+import SearchInput from '@/components/ui/SearchInput'
 import {
   searchUserByUsername,
   sendFriendRequest,
@@ -130,13 +133,6 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput])
 
-  const tabBtnClass = (active: boolean) =>
-    `flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-      active
-        ? 'text-primary border-primary'
-        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-200'
-    }`
-
   return (
     <div className="min-h-screen bg-surface dark:bg-[#141810]">
       <div className="max-w-md mx-auto px-4 py-8">
@@ -147,35 +143,17 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
           backLabel="Zurück zum Profil"
         />
 
-        {/* Tab bar */}
-        <div className="flex border-b border-gray-200 dark:border-[#2a2f24] mb-4">
-          <button
-            type="button"
-            onClick={() => setTab('friends')}
-            role="tab"
-            aria-selected={tab === 'friends'}
-            className={tabBtnClass(tab === 'friends')}
-          >
-            Freunde ({friends.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('requests')}
-            role="tab"
-            aria-selected={tab === 'requests'}
-            className={tabBtnClass(tab === 'requests')}
-          >
-            Anfragen ({requestsCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('search')}
-            role="tab"
-            aria-selected={tab === 'search'}
-            className={tabBtnClass(tab === 'search')}
-          >
-            Suchen
-          </button>
+        <div className="mb-4">
+          <TabBar<TabKey>
+            tabs={[
+              { value: 'friends', label: 'Freunde', count: friends.length },
+              { value: 'requests', label: 'Anfragen', count: requestsCount },
+              { value: 'search', label: 'Suchen' },
+            ]}
+            active={tab}
+            onChange={setTab}
+            ariaLabel="Freunde-Ansicht"
+          />
         </div>
 
         {tab === 'friends' && (
@@ -296,14 +274,16 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
                       <span className="text-sm text-gray-800 dark:text-gray-200 truncate">
                         @{r.username ?? '—'}
                       </span>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleCancel(r.id)}
                         disabled={isPending}
-                        className="shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-60"
+                        className="shrink-0"
                       >
                         Anfrage zurückziehen
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -316,16 +296,15 @@ export default function FriendsClient({ friends, incoming, outgoing }: FriendsCl
         {tab === 'search' && (
           <div className="space-y-4">
             <div className="relative">
-              <input
-                type="text"
+              <SearchInput
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
+                onClear={() => setSearchInput('')}
                 placeholder="Username suchen… (mind. 1 Zeichen)"
                 aria-label="Username suchen"
-                className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary"
               />
               {searchPending && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">…</span>
+                <span className="absolute right-9 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">…</span>
               )}
             </div>
 

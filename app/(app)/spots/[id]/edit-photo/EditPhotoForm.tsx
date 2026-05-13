@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { IconCamera } from '@tabler/icons-react'
 import { uploadSpotPhoto } from '@/actions/spots'
+import Button from '@/components/ui/Button'
 import PageHeader from '@/components/ui/PageHeader'
 import { resizeImage } from '@/lib/image-utils'
 
@@ -81,13 +82,9 @@ export default function EditPhotoForm({ spotId }: { spotId: string }) {
 
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full bg-primary text-white rounded-lg py-2.5 text-sm font-medium hover:bg-primary-dark disabled:opacity-60"
-          >
+          <Button type="submit" variant="primary" fullWidth loading={isPending}>
             {isPending ? 'Hochladen…' : 'Foto speichern'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

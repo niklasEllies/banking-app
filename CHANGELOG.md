@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.2 — UI-Konsistenz
+*10. Mai 2026*
+
+- 🎨 Konsistenteres Look-and-Feel bei Buttons und Suchfeldern
+- ❎ Clear-Button (X) in allen Suchfeldern — ein Klick leert die Eingabe
+
 ## 0.9.1 — UI-Konsolidierung
 *6. Mai 2026*
 

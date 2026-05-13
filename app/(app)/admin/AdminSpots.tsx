@@ -1,12 +1,13 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { IconTrash, IconSearch, IconMapPinOff } from '@tabler/icons-react'
+import { IconTrash, IconMapPinOff } from '@tabler/icons-react'
 import { adminDeleteSpot } from '@/actions/admin'
 import { spotDisplayName } from '@/lib/spot-utils'
 import { SPOT_TYPES, SPOT_TYPE_MAP, type SpotType } from '@/lib/spot-types'
 import { SPOT_VISIBILITIES, SPOT_VISIBILITY_MAP, type SpotVisibility } from '@/lib/spot-visibility'
 import EmptyState from '@/components/EmptyState'
+import SearchInput from '@/components/ui/SearchInput'
 import type { AdminSpotRow } from '@/lib/admin-data'
 
 export default function AdminSpots({ spots: initial }: { spots: AdminSpotRow[] }) {
@@ -41,14 +42,13 @@ export default function AdminSpots({ spots: initial }: { spots: AdminSpotRow[] }
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative flex-1 min-w-45">
-          <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
-          <input
-            type="text"
+        <div className="flex-1 min-w-45">
+          <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onClear={() => setQuery('')}
             placeholder="Name oder User…"
-            className="w-full rounded-lg border border-gray-200 dark:border-[#2a2f24] bg-white dark:bg-[#1e231a] pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:border-primary"
+            aria-label="Plätzchen suchen"
           />
         </div>
         <select

@@ -194,6 +194,21 @@ Abgeschlossen: 2026-05-06 · v0.9.0
 - Neue Files: `lib/timeline-data.ts` (server, mit cached `getPublicTimelineSpots`), `lib/timeline-types.ts` (client-safe), `components/timeline/{TimelineMap, TimelineScrubber, TimelineHistogram, useTimelineBucketing}`
 - MapHeader hat IconHistory-Link
 
+### Phase 9.4 — Performance Pass 1.5 (v0.9.4) — DONE 2026-05-13
+
+Auf Basis erstem Lighthouse-Audit auf Live-URL nach v0.9.3.
+
+- Fraunces-Font von 4 Varianten (300/500 × normal/italic) auf 1 (300 italic) reduziert — saved ~3 woff2-Files / ~60 KB. Deckt Lighthouse "Render-blocking requests".
+- `images.formats: ['image/avif', 'image/webp']` aktiviert + `minimumCacheTTL: 31536000` für Vercel-Image-Optimizer.
+- `outputFileTracingRoot` in `next.config.ts` setzt project-root explizit — silencet Multi-Lockfile-Warning bei worktree-builds.
+- `browserslist` (chrome/edge/firefox 110+, safari 16+) deklariert in `package.json` für PostCSS/autoprefixer (Next.js SWC ignoriert das, aber gut deklariert).
+- `SpotPopup` Foto-Thumbnail von raw `<img>` auf `next/image` (intrinsic 320×160, sizes="200px"). Browser sah vorher das volle 1600px-Asset für 80px-Slot — jetzt ~5-15 KB statt 100-200 KB pro Popup.
+- LazyMotion-Migration auf der Landing-Page: `<LazyMotion features={domAnimation} strict>` Wrapper im marketing layout, alle `motion.X` → `m.X` in RevealSection/TopoBackground/LivingNumbersClient. Bundle-Wirkung: −8 KB gzip Landing-Page-Total, render/components/motion (~106 KB parsed) lazy-loaded statt eager.
+- Supabase-Storage-Cache-Headers: `cacheControl: '31536000'` auf Photo-Upload + `?v=<timestamp>`-Cache-Bust an stored `photo_url`. Re-uploads bleiben frisch trotz langer TTL. Deckt Lighthouse "Use efficient cache lifetimes" (293 KiB savings).
+- OG-Image: `◆`-Glyph durch rotiertes 14×14-Quadrat ersetzt — silencet Build-Warning "Failed to load dynamic font for ◆" (next/og default-font-subset hat U+25C6 nicht).
+
+**Bonus (orthogonal Bug-Fixes auf master):** Production-Build war seit Phase 8.3 kaputt durch invalides `hasServiceRoleKey`-Re-Export aus `app/(app)/admin/users/[id]/page.tsx` und seit Phase 9.3 durch fehlendes `npm install` (exifr nie extrahiert). Beide gefixt vor Phase 9.4 ([`e49077e`](https://github.com/niklasEllies/banking-app/commit/e49077e)).
+
 ### Phase 9.3 — GPS-UX (v0.9.3) — DONE 2026-05-13
 
 - Live-Tracking auf der Karte: opt-in Toggle-Button neben Center-FAB, watchPosition permanent (ref-basiert um teardown-Flash zu vermeiden), auto-follow via flyTo (500ms), pan-to-break via dragstart+zoomstart (catch mobile-pinch), re-engage über Toggle oder Center-FAB. Accuracy-Filter 200m für live updates, 80m für initial-lock.

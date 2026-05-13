@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
+import { m, useScroll, useTransform, useReducedMotion } from 'motion/react'
 
 export default function TopoBackground() {
   const { scrollYProgress } = useScroll()
@@ -8,7 +8,7 @@ export default function TopoBackground() {
   const y = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -40])
 
   return (
-    <motion.div
+    <m.div
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 opacity-90"
       style={{ y }}
@@ -29,6 +29,6 @@ export default function TopoBackground() {
           <path d="M-50 920 Q 400 800 800 940 T 1650 900" />
         </g>
       </svg>
-    </motion.div>
+    </m.div>
   )
 }

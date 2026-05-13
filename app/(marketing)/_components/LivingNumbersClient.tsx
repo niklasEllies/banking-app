@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import { m, useInView, useReducedMotion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
 import type { LivingNumbers } from '@/lib/marketing-stats'
 
@@ -39,14 +39,14 @@ function Stat({ value, label, size, prefix = '', inView }: { value: number; labe
   const cls = size === 'big' ? 'text-7xl lg:text-[84px]' : size === 'mid' ? 'text-5xl lg:text-6xl' : 'text-4xl lg:text-5xl'
   return (
     <div>
-      <motion.div
+      <m.div
         className={`${cls} font-bold leading-none tracking-tight text-white tabular-nums`}
         initial={{ opacity: 0 }}
         animate={inView ? { opacity: 1 } : {}}
         transition={{ duration: 0.4 }}
       >
         {prefix}<TickUp value={value} active={inView} />
-      </motion.div>
+      </m.div>
       <div className="font-mono text-[11px] uppercase tracking-wider text-[#8aa376] mt-2">{label}</div>
     </div>
   )

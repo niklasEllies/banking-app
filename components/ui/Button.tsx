@@ -1,3 +1,5 @@
+'use client'
+
 import type { ButtonHTMLAttributes, ComponentType } from 'react'
 import type { IconProps } from '@tabler/icons-react'
 

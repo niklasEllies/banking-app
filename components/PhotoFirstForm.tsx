@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { IconCamera, IconMapPin, IconAlertTriangle } from '@tabler/icons-react'
@@ -29,6 +29,18 @@ export default function PhotoFirstForm() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  // Generation counter to guard against race conditions when user re-picks
+  // photos rapidly: stale EXIF reads should not overwrite newer state.
+  const pickGenRef = useRef(0)
+
+  // Revoke the last blob preview URL when the component unmounts to avoid
+  // leaking object URLs (browser keeps them alive until revoked or page unload).
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
+
   const handlePhotoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -38,8 +50,11 @@ export default function PhotoFirstForm() {
     }
     setError(null)
 
+    const myGen = ++pickGenRef.current
+
     // STEP 1: Read EXIF on the ORIGINAL file (before resize would strip it)
     const exif = await readExifGps(file)
+    if (pickGenRef.current !== myGen) return  // stale: another photo was picked
     if (exif) {
       setLat(exif.lat)
       setLng(exif.lng)
@@ -48,11 +63,13 @@ export default function PhotoFirstForm() {
       // Fallback: try current GPS (one-shot, low accuracy OK)
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          if (pickGenRef.current !== myGen) return  // stale
           setLat(pos.coords.latitude)
           setLng(pos.coords.longitude)
           setExifSource('gps')
         },
         () => {
+          if (pickGenRef.current !== myGen) return  // stale
           setExifSource('manual')
         },
         { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 }
@@ -75,20 +92,24 @@ export default function PhotoFirstForm() {
       return
     }
     startTransition(async () => {
-      const resized = await resizeImage(photo)
-      const fd = new FormData()
-      fd.set('photo', resized)
-      fd.set('lat', lat.toString())
-      fd.set('lng', lng.toString())
-      fd.set('type', type)
-      fd.set('visibility', visibility)
-      fd.set('name', name)
-      const result = await createSpot(undefined, fd)
-      if (result?.error) {
-        setError(result.error)
-        return
+      try {
+        const resized = await resizeImage(photo)
+        const fd = new FormData()
+        fd.set('photo', resized)
+        fd.set('lat', lat.toString())
+        fd.set('lng', lng.toString())
+        fd.set('type', type)
+        fd.set('visibility', visibility)
+        fd.set('name', name)
+        const result = await createSpot(undefined, fd)
+        if (result?.error) {
+          setError(result.error)
+          return
+        }
+        router.push('/map')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unbekannter Fehler beim Speichern')
       }
-      router.push('/map')
     })
   }
 

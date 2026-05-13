@@ -16,13 +16,19 @@ interface PinPickerMapProps {
 
 const DE_CENTER: [number, number] = [51.1, 10.4]
 
+const ICON_CACHE = new Map<SpotType, L.DivIcon>()
+
 function makeIcon(type: SpotType): L.DivIcon {
-  return new L.DivIcon({
+  const cached = ICON_CACHE.get(type)
+  if (cached) return cached
+  const icon = new L.DivIcon({
     html: buildPinSvg(type),
     className: '',
     iconSize: PIN_SIZE,
     iconAnchor: PIN_ANCHOR,
   })
+  ICON_CACHE.set(type, icon)
+  return icon
 }
 
 function PinClickHandler({ onPinChange }: { onPinChange: (lat: number, lng: number) => void }) {
@@ -49,7 +55,11 @@ export default function PinPickerMap({ lat, lng, type, onPinChange }: PinPickerM
   const initialZoom = lat !== null && lng !== null ? 16 : 6
 
   return (
-    <div className="h-72 rounded-xl overflow-hidden border border-gray-200 dark:border-[#2a2f24]">
+    <div
+      role="application"
+      aria-label="Karte zum Setzen des Spot-Standorts"
+      className="h-72 rounded-xl overflow-hidden border border-gray-200 dark:border-[#2a2f24]"
+    >
       <MapContainer
         center={initialCenter}
         zoom={initialZoom}

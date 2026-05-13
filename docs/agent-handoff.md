@@ -8,7 +8,7 @@ Dieses Dokument ermöglicht einem AI-Agenten, das Projekt ohne Vorwissen fortzuf
 > 3. `docs/architecture.md` — Tech Stack, Datenfluss, Dateistruktur
 > 4. `docs/database-schema.md` — Tabellen, RLS, Migrationen
 
-## 🔥 Aktuell offen — Stand v0.9.2 (2026-05-10)
+## 🔥 Aktuell offen — Stand v0.9.3 (2026-05-13)
 
 Komprimierte Liste aller offenen Punkte. Nach jeder Phase aktualisieren.
 

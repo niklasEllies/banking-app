@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.3 — GPS-UX
+*13. Mai 2026*
+
+- 📍 Live-Tracking: aktiviere den Tracking-Button auf der Karte und die Karte folgt dir live mit
+- 📷 Spot aus Foto eintragen: wenn das Foto einen Ort enthält, wird der Spot automatisch dort platziert
+- 🗺️ Standort einfach per Tipper auf die Karte setzen — auch wenn das Foto keine GPS-Daten hat
+
 ## 0.9.2 — UI-Konsistenz
 *10. Mai 2026*
 

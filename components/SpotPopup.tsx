@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { IconChevronRight, IconTrash } from '@tabler/icons-react'
 import type { Spot } from '@/components/SpotMap'
 import RarityBadge from '@/components/RarityBadge'
@@ -35,9 +36,12 @@ export default function SpotPopup({
   return (
     <div style={{ minWidth: '160px', fontFamily: 'system-ui' }}>
       {spot.photo_url ? (
-        <img
+        <Image
           src={spot.photo_url}
           alt={typeLabel}
+          width={320}
+          height={160}
+          sizes="200px"
           style={{
             width: '100%',
             height: '80px',

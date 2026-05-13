@@ -194,6 +194,17 @@ Abgeschlossen: 2026-05-06 · v0.9.0
 - Neue Files: `lib/timeline-data.ts` (server, mit cached `getPublicTimelineSpots`), `lib/timeline-types.ts` (client-safe), `components/timeline/{TimelineMap, TimelineScrubber, TimelineHistogram, useTimelineBucketing}`
 - MapHeader hat IconHistory-Link
 
+### Phase 9.3 — GPS-UX (v0.9.3) — DONE 2026-05-13
+
+- Live-Tracking auf der Karte: opt-in Toggle-Button neben Center-FAB, watchPosition permanent (ref-basiert um teardown-Flash zu vermeiden), auto-follow via flyTo (500ms), pan-to-break via dragstart+zoomstart (catch mobile-pinch), re-engage über Toggle oder Center-FAB. Accuracy-Filter 200m für live updates, 80m für initial-lock.
+- Foto-First-Flow `/spots/from-photo`: Foto-Upload → EXIF-GPS-Auto-Fill (oder current-GPS-Fallback oder DE-Default) → tappable/draggable Pin auf kleiner Karte → SpotTypePicker + VisibilityPicker + Name → Submit. Behebt das Lat/Lng-Friemel-Problem.
+- `lib/exif-utils.ts` mit 7 Unit-Tests (pure logic, mock exifr).
+- `<PinPickerMap>` dynamic-ssr-false-wrapper, reuse `buildPinSvg(type)`.
+- FAB auf der Karte navigiert zu `/spots/from-photo` (statt `/spots/new` mit Query-Params).
+- `/spots/new` bleibt erreichbar als "Ohne Foto eintragen"-Link in PhotoFirstForm.
+- Photo-pick race-guard (generation counter) + blob-URL-cleanup (useEffect) + try/catch um createSpot.
+- New dep: `exifr` via mini bundle (`exifr/dist/mini.esm.mjs`, ~10kb gzipped, GPS-only path).
+
 ## Phase 9.2 — UI-Konsolidierung Welle B ✅
 
 Abgeschlossen: 2026-05-10 · v0.9.2

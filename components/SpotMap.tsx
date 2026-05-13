@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { IconCurrentLocation } from '@tabler/icons-react'
+import { IconCurrentLocation, IconLocationFilled } from '@tabler/icons-react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { useRouter } from 'next/navigation'
@@ -132,19 +132,60 @@ function CenterController({ position, trigger }: { position: [number, number] | 
   return null
 }
 
+function FollowController({
+  position,
+  enabled,
+  onPanBreak,
+}: {
+  position: [number, number] | null
+  enabled: boolean
+  onPanBreak: () => void
+}) {
+  const map = useMap()
+  // Auto-fly to position whenever it changes, only when enabled
+  useEffect(() => {
+    if (enabled && position) {
+      map.flyTo(position, map.getZoom(), { duration: 0.5 })
+    }
+  }, [position, enabled, map])
+
+  // Detect user-initiated pan to break follow
+  useMapEvents({
+    dragstart() {
+      onPanBreak()
+    },
+    // User-initiated pinch-zoom on mobile doesn't fire dragstart — catch it via zoomstart.
+    // FollowController's flyTo passes map.getZoom() so zoom doesn't change → no self-trigger.
+    zoomstart() {
+      onPanBreak()
+    },
+  })
+  return null
+}
+
 function LocationController({
   cachedPosition,
   onPositionFound,
+  onLiveUpdate,
   onLocating,
   onGpsStateChange,
+  liveTracking,
 }: {
   cachedPosition: [number, number] | null
   onPositionFound: (pos: [number, number]) => void
+  onLiveUpdate: (pos: [number, number]) => void
   onLocating: (v: boolean) => void
   onGpsStateChange?: (state: GpsState) => void
+  liveTracking: boolean
 }) {
   const map = useMap()
   const centeredRef = useRef(false)
+
+  // Refs let us read latest values from watchPosition callback without re-running the effect
+  const liveTrackingRef = useRef(liveTracking)
+  const onLiveUpdateRef = useRef(onLiveUpdate)
+  useEffect(() => { liveTrackingRef.current = liveTracking }, [liveTracking])
+  useEffect(() => { onLiveUpdateRef.current = onLiveUpdate }, [onLiveUpdate])
 
   // Center on cached position immediately (deferred so Leaflet container is ready)
   useEffect(() => {
@@ -203,20 +244,27 @@ function LocationController({
       { enableHighAccuracy: false, maximumAge: 60000 }
     )
 
-    // Phase 2: Accurate GPS — flies to corrected position when ready
+    // Phase 2: Accurate GPS — first accurate fix locks position; optional live-tracking keeps updating
+    let lockedFirstFix = false
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        if (pos.coords.accuracy < 80) {
-          const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+        const acc = pos.coords.accuracy
+        const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+        if (acc < 80 && !lockedFirstFix) {
+          lockedFirstFix = true
           localStorage.setItem(LOCATION_KEY, JSON.stringify(latlng))
           onPositionFound(latlng)
           onLocating(false)
           onGpsStateChange?.('available')
           map.flyTo(latlng, Math.max(map.getZoom(), 14), { duration: 1.5 })
-          if (watchId !== undefined) {
+          if (!liveTrackingRef.current && watchId !== undefined) {
             navigator.geolocation.clearWatch(watchId)
             watchId = undefined
           }
+        } else if (liveTrackingRef.current && lockedFirstFix && acc < 200) {
+          // Skip localStorage write in live-update path: cache is for next-visit centering,
+          // not real-time tracking. Real-time writes block the main thread once per second.
+          onLiveUpdateRef.current(latlng)
         }
       },
       (err) => {
@@ -261,6 +309,8 @@ export default function SpotMap({
   const [cachedPosition, setCachedPosition] = useState<[number, number] | null>(null)
   const userEmoji = initialMarkerEmoji ?? '🧍‍♂️'
   const [centerTrigger, setCenterTrigger] = useState(0)
+  const [liveTracking, setLiveTracking] = useState(false)
+  const [followBroken, setFollowBroken] = useState(false)
 
   useEffect(() => {
     const raw = localStorage.getItem(LOCATION_KEY)
@@ -273,7 +323,10 @@ export default function SpotMap({
     }
   }, [])
 
-  const handlePositionFound = useCallback((pos: [number, number]) => {
+  // Both initial-fix and live-update do the same thing: update user position state +
+  // propagate to parent. LocationController separates them only to gate the watchPosition
+  // lifecycle; here they collapse.
+  const handlePositionUpdate = useCallback((pos: [number, number]) => {
     setUserPosition(pos)
     setHasLivePosition(true)
     onPositionUpdate?.({ lat: pos[0], lng: pos[1] })
@@ -288,14 +341,7 @@ export default function SpotMap({
   }, [initialSpots])
 
   const handleFabClick = () => {
-    if (userPosition) {
-      router.push(`/spots/new?lat=${userPosition[0].toFixed(6)}&lng=${userPosition[1].toFixed(6)}`)
-      return
-    }
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => router.push(`/spots/new?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`),
-      () => router.push('/spots/new?lat=51.1&lng=10.4')
-    )
+    router.push('/spots/from-photo')
   }
 
   return (
@@ -316,9 +362,16 @@ export default function SpotMap({
         <AdminClickController isAdmin={isAdmin} />
         <LocationController
           cachedPosition={cachedPosition}
-          onPositionFound={handlePositionFound}
+          onPositionFound={handlePositionUpdate}
+          onLiveUpdate={handlePositionUpdate}
           onLocating={handleLocating}
           onGpsStateChange={onGpsStateChange}
+          liveTracking={liveTracking}
+        />
+        <FollowController
+          position={userPosition}
+          enabled={liveTracking && !followBroken}
+          onPanBreak={() => setFollowBroken(true)}
         />
 
         <MarkerClusterGroup chunkedLoading maxClusterRadius={60} iconCreateFunction={createClusterIcon}>
@@ -352,7 +405,40 @@ export default function SpotMap({
 
       {userPosition && (
         <button
-          onClick={() => setCenterTrigger(t => t + 1)}
+          onClick={() => {
+            const next = !liveTracking
+            setLiveTracking(next)
+            if (next) {
+              setFollowBroken(false)
+            }
+          }}
+          disabled={gpsState !== 'available'}
+          aria-pressed={liveTracking}
+          aria-label={liveTracking ? 'Live-Tracking deaktivieren' : 'Live-Tracking aktivieren'}
+          className={`absolute right-4 z-1000 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${
+            gpsState !== 'available'
+              ? 'opacity-40 cursor-not-allowed bg-white dark:bg-[#1e231a]'
+              : liveTracking
+                ? 'bg-primary text-white hover:bg-primary-dark'
+                : 'bg-white dark:bg-[#1e231a] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#242a1e]'
+          }`}
+          style={{
+            bottom: sheetExpanded
+              ? `calc(55vh + ${isAuthenticated ? 168 : 96}px)`
+              : isAuthenticated ? '14.5rem' : '10rem',
+            transition: 'bottom 0.25s ease',
+          }}
+        >
+          <IconLocationFilled size={20} stroke={1.5} aria-hidden />
+        </button>
+      )}
+
+      {userPosition && (
+        <button
+          onClick={() => {
+            setCenterTrigger(t => t + 1)
+            setFollowBroken(false)
+          }}
           disabled={gpsState !== 'available'}
           className={`absolute right-4 z-1000 w-14 h-14 bg-white dark:bg-[#1e231a] rounded-full shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform ${
             gpsState !== 'available'
@@ -379,7 +465,7 @@ export default function SpotMap({
             bottom: sheetExpanded ? 'calc(55vh + 16px)' : '5rem',
             transition: 'bottom 0.25s ease',
           }}
-          aria-label="Bank eintragen"
+          aria-label="Plätzchen mit Foto eintragen"
         >
           +
         </button>

@@ -6,10 +6,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project: Plätzchen (formerly BenchMarks)
 
-**Current state: Phase 9.1 UI-Konsolidierung Welle A complete (v0.9.1).** `<PageHeader>`, `<Card>`, `<ListRow>` extrahiert in `components/ui/`. 8 Pages refactored auf PageHeader (Profile/Friends/Changelog/Admin/Spots-new/SpotEditForm/EditPhotoForm/AdminModeration). Profile-Menü auf ListRow. AdminUsers/[id] bewusst nicht refactored (komplexere Header-Struktur, opportunistic später). Phase 9 Timeline (v0.9.0) davor — `/timeline` mit Scrubber/Histogramm/Play-Button. Phase 8.6/8.6.1 Performance (ISR-Cache, loading.tsx, next/image, IntersectionObserver-Lazy-Hero, @vercel/speed-insights, Bundle-Analyzer).
+**Current state: Phase 9.2 UI-Konsolidierung Welle B complete (v0.9.2).** `<Button>`, `<TabBar>`, `<SearchInput>` extrahiert in `components/ui/`. 9 Buttons + 2 TabBars + 4 SearchInputs migriert. TimelineScrubber bewusst nicht migriert (dark-on-map). Phase 9.1 Welle A (v0.9.1) davor — PageHeader/Card/ListRow. Phase 9 Timeline (v0.9.0) davor — `/timeline` mit Scrubber/Histogramm/Play-Button. Phase 8.6/8.6.1 Performance (ISR-Cache, loading.tsx, next/image, IntersectionObserver-Lazy-Hero, @vercel/speed-insights, Bundle-Analyzer).
 
 **🔥 Aktuell offene Punkte (Single-Source-of-Truth in `docs/agent-handoff.md` — "🔥 Aktuell offen"-Block ganz oben dort):**
-- **Welle B** UI-Konsolidierung 2 (Button/TabBar/SearchInput) — sofort verfügbar
 - **Phase 10** Social-Polish (Notifications/Email-Alerts/Public-Profile/Friend-Activity/Web-Push/Block) — sofort verfügbar
 - **Cookie-Banner** — Spec ready unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`, Trigger = Tracking-Einführung
 - **Performance Phase 2** — Trigger = >5.000 Spots
@@ -37,6 +36,9 @@ Key rules derived from these docs:
 - Pages mit Back-Link nutzen `components/ui/PageHeader.tsx` (`title` + optional `subtitle` + `backHref` + `backLabel`). Nicht selbst back-link + h1 + p schreiben.
 - Listen-/Menü-Items nutzen `components/ui/ListRow.tsx` (Icon + label + optional rightSlot, polymorphic href oder onClick, tone='neutral'|'danger'). Default-rightSlot ist Chevron — pass `rightSlot={null}` zum Suppress, `rightSlot={<Badge/>}` zum Override.
 - Cards (weißer Hintergrund + rounded-xl) nutzen `components/ui/Card.tsx`. Existierende Cards sind opportunistically zu migrieren — kein Big-Bang-Refactor.
+- `<Button variant size? fullWidth? loading? Icon?>` — 4 variants (primary/ghost/outline/danger) × 2 sizes (sm/md). Stateful icon-buttons (FavoriteToggle/ThemeToggle) bleiben custom.
+- `<TabBar tabs active onChange ariaLabel>` — generisch in `<T extends string>`, underline-Style mit ARIA roving-tabindex.
+- `<SearchInput value onChange onClear? placeholder>` — IconSearch links + optional Clear-X rechts. Debounce ist Caller-Sache.
 - Admin-Queries gehen über `lib/admin-data.ts` (`requireAdmin`, `getAllSpots`, `getAllUsers`, `getAdminStats`, `getAllDescriptions`, `getUserDetail`). Spot-Queries MÜSSEN den admin-client (`createAdminClient`) nehmen — user-bound client respektiert RLS und filtert daher private/friends-only Spots heraus. Bei fehlendem `SUPABASE_SERVICE_ROLE_KEY` graceful Fallback + sichtbare Warnung.
 - UI-Emojis sind out — alle in 8.3-8.5 durch `@tabler/icons-react` ersetzt. Map-Marker seit 8.3.1 sind Drop-Pin-SVGs via `lib/spot-marker-svg.ts` (Tabler-Icon-Paths hardcoded — beim Tabler-Update gegenchecken). `SPOT_VISIBILITIES` hat seit 8.5 ebenfalls `Icon`-Field (IconWorld/IconUsers/IconLock). Ausnahmen die Emoji bleiben: EmojiPicker (literal user-marker selection), StarPicker ⭐ (opacity-fill UX-Pattern), GPS-Banner ⚠️ (semantic), `SPOT_TYPES.emoji` und `SPOT_VISIBILITIES.emoji` Felder (Daten-Stopgap, nicht UI-Render — bleiben für Fallbacks).
 - SEO/OG via `lib/site.ts` (SITE_URL, SITE_NAME, SITE_DESCRIPTION). `app/sitemap.ts` und `app/robots.ts` sind dynamic (Next.js 16 App-Router conventions). `app/(marketing)/opengraph-image.tsx` rendert dynamic 1200×630 OG image via `next/og`'s `ImageResponse`. Setze `NEXT_PUBLIC_SITE_URL` in Vercel für canonical URLs (sonst fallback auf `NEXT_PUBLIC_VERCEL_URL` → localhost).

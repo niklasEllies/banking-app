@@ -194,6 +194,18 @@ Abgeschlossen: 2026-05-06 · v0.9.0
 - Neue Files: `lib/timeline-data.ts` (server, mit cached `getPublicTimelineSpots`), `lib/timeline-types.ts` (client-safe), `components/timeline/{TimelineMap, TimelineScrubber, TimelineHistogram, useTimelineBucketing}`
 - MapHeader hat IconHistory-Link
 
+## Phase 9.2 — UI-Konsolidierung Welle B ✅
+
+Abgeschlossen: 2026-05-10 · v0.9.2
+
+- `<Button>` mit 4 Variants (primary/ghost/outline/danger) × 2 Sizes (sm/md), `fullWidth`/`loading`/`Icon` Props
+- `<TabBar>` generisch in `<T extends string>`, underline-Style, optionaler `count`-Suffix, ARIA roving-tabindex
+- `<SearchInput>` mit IconSearch + optionalem Clear-Button (X), `pr-9` reserved für Clear-Slot (kein Layout-Shift)
+- 9 Buttons + 2 TabBars + 4 SearchInputs migriert
+- TimelineScrubber-Tabs bewusst nicht migriert (dark-on-map-spezifisch — analog Welle A's AdminUsers/[id])
+- `FriendsClient.tabBtnClass` Helper gestrichen
+- Bug fixes during welle: outline-Button hover (chips statt surface), Button-cls whitespace, SearchInput dark border (#2a2f24 statt gray-700), TabBar ARIA tabindex
+
 ## Phase 9.1 — UI-Konsolidierung Welle A ✅
 
 Abgeschlossen: 2026-05-06 · v0.9.1
@@ -205,12 +217,6 @@ Abgeschlossen: 2026-05-06 · v0.9.1
 ---
 
 ## 🔜 Roadmap — was kommt als nächstes
-
-### Welle B — UI-Konsolidierung 2
-
-- [ ] `<Button variant="primary|secondary|ghost|danger" size="sm|md|lg">` für ~20 Stellen mit unterschiedlichen Padding/Hover-Inkonsistenzen
-- [ ] `<TabBar items value onChange>` vereinheitlicht BottomSheet (4 Tabs) und Timeline-Scrubber (3 Tabs)
-- [ ] `<SearchInput placeholder value onChange>` für AdminUsers/AdminSpots/AdminDescriptions/Friends-Search
 
 ### Phase 10 — Social-Polish
 

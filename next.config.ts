@@ -5,6 +5,11 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
+// Pin file-tracing to this project root so multi-lockfile setups (e.g. git
+// worktrees nested under a parent checkout) don't trigger Next's auto-detection
+// warning and accidental tracing into the parent.
+const projectRoot = import.meta.dirname
+
 const securityHeaders = [
   // Disallow framing — clickjacking protection
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -17,6 +22,7 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: projectRoot,
   async headers() {
     return [
       {
@@ -26,6 +32,11 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    // Photos are immutable per URL — re-uploads append a ?v= cache-buster
+    // (see actions/spots.ts uploadSpotPhoto), so the optimizer can cache
+    // the transformed output aggressively without serving stale results.
+    minimumCacheTTL: 31536000,
     // Spot photos live in Supabase Storage. The bucket is public-read via
     // direct CDN URL (no SELECT policy on storage.objects — see Phase 7.5).
     remotePatterns: [

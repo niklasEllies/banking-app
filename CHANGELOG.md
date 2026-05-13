@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.4 — Schneller laden
+*13. Mai 2026*
+
+- ⚡ Spürbar schnellere Landing-Page durch schlankere Animations- und Schrift-Bundles
+- 🖼️ Karten-Popups zeigen Foto-Vorschau jetzt deutlich schneller (modernes Bildformat, kleinere Daten)
+- 🗄️ Spot-Fotos werden für ein Jahr im Browser gecached — Wiederholungsbesuche sind sofort da
+
 ## 0.9.3 — GPS-UX
 *13. Mai 2026*
 

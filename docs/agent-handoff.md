@@ -8,41 +8,39 @@ Dieses Dokument ermöglicht einem AI-Agenten, das Projekt ohne Vorwissen fortzuf
 > 3. `docs/architecture.md` — Tech Stack, Datenfluss, Dateistruktur
 > 4. `docs/database-schema.md` — Tabellen, RLS, Migrationen
 
-## 🔥 Aktuell offen — Stand v0.9.3 (2026-05-13)
+## 🔥 Aktuell offen — Stand v0.9.4 (2026-05-13)
 
 Komprimierte Liste aller offenen Punkte. Nach jeder Phase aktualisieren.
 
 ### Sofort verfügbar (kein Trigger nötig)
 
-- **Manueller Real-Device + Lighthouse-Audit** auf der Vercel-Live-URL — Speed-Insights läuft seit v0.8.6.1 und sammelt RUM-Daten (LCP/INP/CLS). Erstes Audit am 2026-05-13: Findings siehe `### Lighthouse-Findings v0.9.3` weiter unten.
+- **Re-Audit auf Live-URL** nach v0.9.4-Deploy — Speed-Insights vergleicht RUM-Daten vorher/nachher. Erwartung: Render-blocking ↓ (Fraunces 4→1), Cache-Lifetimes ↓ (1y Storage-TTL), Image-Delivery ↓ (AVIF + Popup-Thumbs).
+- **Phase 10 Social-Polish** — Notifications/Email-Alerts/Public-Profile/Friend-Activity/Web-Push/Block (siehe `feature-status.md`).
 
 ### Trigger-gebunden (warten auf Auslöser)
 
 - **Cookie-Banner** — Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`. Auslöser: sobald Plausible/PostHog/Sentry-Replay/o.ä. eingeführt wird (TTDSG/DSGVO-Pflicht). Drei-Button-Pattern, Forest-Deep-Aesthetic, "Plätzchen = Sitzplatz UND Keks" Wortspiel.
 - **Performance-Phase 2** — wenn Beta >5.000 Spots erreicht: Server-side bucketing für Timeline-Histogram + bbox-query für /map. Aktuell naiver Client-Filter ausreichend.
-- **OG-Image-Font-Fix** — Build-Warning "Failed to load dynamic font for ◆" in `app/(marketing)/opengraph-image.tsx`. Cosmetic; Mono-Glyph rendert auf manchen Plattformen ohne Spezial-Font-Embed nicht. Fix: Geist-Mono-Font explizit fetchen und an ImageResponse übergeben.
 
 ### Pro-Plan-gated (akzeptiert, kein Aufwand bis Pro-Upgrade)
 
 - **Leaked Password Protection** — nur im Supabase Pro Plan verfügbar. Bis dahin akzeptiert; Re-check beim Pro-Upgrade.
 
-### Lighthouse-Findings v0.9.3 (Audit 2026-05-13)
+### Lighthouse-Findings v0.9.3 (Audit 2026-05-13) — adressiert in v0.9.4
 
-Erstes RUM/Lighthouse-Audit auf Live-URL. Findings nach Impact:
+| Insight | Savings | Status nach v0.9.4 |
+|---|---|---|
+| Use efficient cache lifetimes | 293 KiB | ✅ Storage `cacheControl: '31536000'` + `?v=<ts>`-Bust + `images.minimumCacheTTL` |
+| Improve image delivery | 221 KiB | ✅ AVIF aktiviert + SpotPopup auf next/image (Thumbs ~10× kleiner) |
+| Render-blocking requests | 140 ms | ✅ Fraunces 4→1 Variante |
+| LCP request discovery | — | ⚠️ Re-Audit zeigt's — Hero-h1 wartet jetzt auf weniger Fonts |
+| Network dependency tree | — | ⚠️ Re-Audit zeigt's |
+| Legacy JavaScript | 14 KiB | 🟡 browserslist deklariert, aber Next.js SWC nutzt eigene Defaults |
+| Reduce unused JavaScript | 23 KiB | ✅ LazyMotion lazy-loadet ~106 KB parsed |
+| Page prevented bfcache | — | ❌ NICHT adressiert — Supabase-Realtime auf Landing bleibt offen (Trigger: spürbar?) |
+| Avoid long main-thread tasks | 3 tasks | ❌ NICHT adressiert — Leaflet-Init kostet, akzeptiert |
 
-| Insight | Savings | Wahrscheinliche Quelle | Aufwand |
-|---|---|---|---|
-| Use efficient cache lifetimes | 293 KiB | Supabase Storage `bench-photos` default Cache-Control kurz | M |
-| Improve image delivery | 221 KiB | next/image AVIF aktivieren + alle Spot-Photos durch next/image | S |
-| Render-blocking requests | 140 ms | Fraunces 4 Varianten (300/500 × normal/italic) — display: swap aber 4 Files | S |
-| LCP request discovery | — | Hero-h1 nicht preloaded, oder LCP = HeroMapPreview-Lazy | S |
-| Network dependency tree | — | Folgekette Fonts → CSS → JS | M |
-| Legacy JavaScript | 14 KiB | browserslist zu breit, ES5-polyfills | S |
-| Reduce unused JavaScript | 23 KiB | motion / @tabler/icons-react tree-shaking | S |
-| Page prevented bfcache | — | Supabase Realtime WebSocket auf Landing (LivingNumbers) | M |
-| Avoid long main-thread tasks | 3 tasks | Leaflet-Init bei Lazy-Mount HeroMapPreview | M |
-
-Keine kritischen Issues, alles Phase-2-Material. Priorisierung siehe nächste Phase-Planung.
+Bundle-Effekt v0.9.4: Landing client total 476.9 KB → 468.9 KB gzip. Drei Findings unangetastet (bfcache + main-thread tasks + browserslist-vs-SWC) — bei nächstem Audit re-prüfen, ob das in der Praxis spürbar ist.
 
 ### Bewusst aufgeschoben (Welle C / Phase 10+)
 
@@ -192,6 +190,36 @@ User-facing changelog page at `/changelog`. Source-of-truth: `CHANGELOG.md` in r
 After deploy, returning users see a one-time modal with the new bullets. First-time visitors don't see the modal (would feel like an upgrade nag they didn't earn).
 
 **Important:** Don't import from `lib/changelog-server.ts` in any Client Component. Use `lib/changelog.ts` for shared types + pure functions; the server file uses `node:fs` and is `'server-only'` enforced.
+
+## Phase 9.4 Patterns — Performance Pass 1.5 (v0.9.4, 2026-05-13)
+
+### LazyMotion + `m`-shortcut auf der Landing-Page
+- `app/(marketing)/_components/LandingMotionProvider.tsx` (Client Component) wrapt mit `<LazyMotion features={domAnimation} strict>` — wird im Server-Component `marketing/layout.tsx` gemountet.
+- `strict` Mode ERZWINGT `m.X` statt `motion.X`. Wenn jemand auf der Landing eine neue motion-Komponente baut: NUR `m.div`, `m.span` etc. importieren. `motion.X` wirft zur Laufzeit (build fängt es nicht ab).
+- Hooks (`useScroll`, `useTransform`, `useInView`, `useReducedMotion`) brauchen LazyMotion-Context NICHT — bleiben unverändert importiert.
+- Bundle-Effekt: render/components/motion (~106 KB parsed) lazy-loaded statt eager. −8 KB gzip Landing-Page-Total.
+
+### next/image für Spot-Photos im Popup
+- `SpotPopup` nutzt `<Image width={320} height={160} sizes="200px">` mit Style-Override für 100% × 80px Display.
+- Vercel Image Optimizer (mit AVIF-First seit v0.9.4) liefert ~5-15 KB Thumb statt ~100-200 KB Original.
+- WICHTIG: SpotPopup hat `style={}` everywhere (kein Tailwind) weil Leaflet-Popup eigenen CSS-Context hat. Der Style-Override für next/image folgt diesem Pattern.
+
+### Photo-Cache + Cache-Bust
+- `actions/spots.ts uploadSpotPhoto`: `cacheControl: '31536000'` auf Storage-Upload + `?v=<Date.now()>`-Suffix an public-URL.
+- `next.config.ts images.minimumCacheTTL: 31536000` — Vercel Image-Optimizer cached transformierten Output (AVIF/WebP) 1 Jahr.
+- **Pattern für künftige Storage-Uploads:** lange TTL ist nur safe wenn URL sich bei Inhaltsänderung ändert. Stable-Path + Query-Bust ist der Plätzchen-Standard.
+- Bestehende DB-Rows ohne `?v=` refreshen sich natürlich auf next-edit, kein Backfill nötig.
+
+### `outputFileTracingRoot` + Worktree-Setup
+- In Worktree-Setups (multiple lockfiles) explicitly `outputFileTracingRoot: import.meta.dirname` setzen.
+- Verhindert Multi-Lockfile-Warning UND falsches Tracing in Parent-Repo.
+
+### Font-Slim
+- Nicht für jede UI-Variante alle weights+styles laden. Audit `next/font/google`-Inits regelmäßig auf "was wird WIRKLICH genutzt".
+- Fraunces 4→1 = 60 KB woff2-savings. Faustregel: pro Font ein Variant default, weitere nur on-demand.
+
+### OG-Image: Glyphen außerhalb default-subset vermeiden
+- next/og's default-font-subset enthält nicht alle Unicode-Blocks (z.B. U+25C6 ◆). Build-Warning "Failed to load dynamic font for X" → Glyph durch CSS-Geometrie (rotated div, etc.) oder ASCII-Fallback ersetzen, ODER Custom-Font mit gewünschter Glyph-Coverage explizit fetchen und an `ImageResponse({ fonts: [...] })` übergeben.
 
 ## Phase 9.3 Patterns — GPS-UX (v0.9.3, 2026-05-13)
 

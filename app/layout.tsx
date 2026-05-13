@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 const fraunces = Fraunces({
   variable: '--font-fraunces',
   subsets: ['latin'],
-  weight: ['300', '500'],
-  style: ['normal', 'italic'],
+  weight: ['300'],
+  style: ['italic'],
   display: 'swap',
 });
 

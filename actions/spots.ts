@@ -175,7 +175,13 @@ export async function uploadSpotPhoto(
 
   const { error: uploadError } = await supabase.storage
     .from('bench-photos')
-    .upload(uploadPath, file, { contentType: file.type, upsert: true })
+    .upload(uploadPath, file, {
+      contentType: file.type,
+      upsert: true,
+      // 1 year — paired with the ?v=<timestamp> cache-buster appended
+      // below, so a re-upload still surfaces immediately to clients.
+      cacheControl: '31536000',
+    })
 
   if (uploadError) return { error: uploadError.message }
 
@@ -183,9 +189,13 @@ export async function uploadSpotPhoto(
     .from('bench-photos')
     .getPublicUrl(uploadPath)
 
+  // Cache-bust on re-upload: storage path is stable per spot, so without a
+  // versioned query the browser/CDN keeps the old image for the full TTL.
+  const versionedUrl = `${publicUrl}?v=${Date.now()}`
+
   const { error: updateError } = await supabase
     .from('spots')
-    .update({ photo_url: publicUrl })
+    .update({ photo_url: versionedUrl })
     .eq('id', spotId)
 
   if (updateError) {
@@ -196,5 +206,5 @@ export async function uploadSpotPhoto(
   revalidatePath('/')
   revalidatePath('/map')
   updateTag('marketing-stats')
-  return { url: publicUrl }
+  return { url: versionedUrl }
 }

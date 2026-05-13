@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { IconChevronLeft } from '@tabler/icons-react'
-import { requireAdmin, getUserDetail, hasServiceRoleKey } from '@/lib/admin-data'
+import { requireAdmin, getUserDetail } from '@/lib/admin-data'
 import AdminUserSpots from './AdminUserSpots'
 
 export default async function AdminUserDetailPage({
@@ -80,5 +80,3 @@ function Stat({ label, value }: { label: string; value: number }) {
     </div>
   )
 }
-
-export { hasServiceRoleKey }

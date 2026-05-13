@@ -14,14 +14,35 @@ Komprimierte Liste aller offenen Punkte. Nach jeder Phase aktualisieren.
 
 ### Sofort verfügbar (kein Trigger nötig)
 
-- **Manueller Real-Device + Lighthouse-Audit** auf der Vercel-Live-URL — Speed-Insights läuft seit v0.8.6.1 und sammelt RUM-Daten (LCP/INP/CLS).
-- **Leaked Password Protection** in Supabase-Dashboard → Auth → Settings einschalten (nicht via MCP machbar).
+- **Manueller Real-Device + Lighthouse-Audit** auf der Vercel-Live-URL — Speed-Insights läuft seit v0.8.6.1 und sammelt RUM-Daten (LCP/INP/CLS). Erstes Audit am 2026-05-13: Findings siehe `### Lighthouse-Findings v0.9.3` weiter unten.
 
 ### Trigger-gebunden (warten auf Auslöser)
 
 - **Cookie-Banner** — Spec liegt unter `docs/superpowers/specs/2026-05-06-cookie-banner-spec.md`. Auslöser: sobald Plausible/PostHog/Sentry-Replay/o.ä. eingeführt wird (TTDSG/DSGVO-Pflicht). Drei-Button-Pattern, Forest-Deep-Aesthetic, "Plätzchen = Sitzplatz UND Keks" Wortspiel.
 - **Performance-Phase 2** — wenn Beta >5.000 Spots erreicht: Server-side bucketing für Timeline-Histogram + bbox-query für /map. Aktuell naiver Client-Filter ausreichend.
 - **OG-Image-Font-Fix** — Build-Warning "Failed to load dynamic font for ◆" in `app/(marketing)/opengraph-image.tsx`. Cosmetic; Mono-Glyph rendert auf manchen Plattformen ohne Spezial-Font-Embed nicht. Fix: Geist-Mono-Font explizit fetchen und an ImageResponse übergeben.
+
+### Pro-Plan-gated (akzeptiert, kein Aufwand bis Pro-Upgrade)
+
+- **Leaked Password Protection** — nur im Supabase Pro Plan verfügbar. Bis dahin akzeptiert; Re-check beim Pro-Upgrade.
+
+### Lighthouse-Findings v0.9.3 (Audit 2026-05-13)
+
+Erstes RUM/Lighthouse-Audit auf Live-URL. Findings nach Impact:
+
+| Insight | Savings | Wahrscheinliche Quelle | Aufwand |
+|---|---|---|---|
+| Use efficient cache lifetimes | 293 KiB | Supabase Storage `bench-photos` default Cache-Control kurz | M |
+| Improve image delivery | 221 KiB | next/image AVIF aktivieren + alle Spot-Photos durch next/image | S |
+| Render-blocking requests | 140 ms | Fraunces 4 Varianten (300/500 × normal/italic) — display: swap aber 4 Files | S |
+| LCP request discovery | — | Hero-h1 nicht preloaded, oder LCP = HeroMapPreview-Lazy | S |
+| Network dependency tree | — | Folgekette Fonts → CSS → JS | M |
+| Legacy JavaScript | 14 KiB | browserslist zu breit, ES5-polyfills | S |
+| Reduce unused JavaScript | 23 KiB | motion / @tabler/icons-react tree-shaking | S |
+| Page prevented bfcache | — | Supabase Realtime WebSocket auf Landing (LivingNumbers) | M |
+| Avoid long main-thread tasks | 3 tasks | Leaflet-Init bei Lazy-Mount HeroMapPreview | M |
+
+Keine kritischen Issues, alles Phase-2-Material. Priorisierung siehe nächste Phase-Planung.
 
 ### Bewusst aufgeschoben (Welle C / Phase 10+)
 

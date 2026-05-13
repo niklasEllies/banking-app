@@ -51,7 +51,11 @@ export default async function Image() {
             fontFamily: 'monospace',
           }}
         >
-          <span style={{ color: '#5e9e3e' }}>◆</span>
+          {/* Rotated square stands in for the ◆ brand glyph used on the
+              landing page. Avoids next/og's dynamic-font fetch (which 400s
+              for U+25C6 since the default font subset doesn't include
+              Geometric Shapes) and the resulting build warning. */}
+          <div style={{ width: 14, height: 14, background: '#5e9e3e', transform: 'rotate(45deg)' }} />
           <span>50.94° N</span>
           <span>·</span>
           <span>BETA · FRÜHJAHR 26</span>

@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { readExifGps } from '@/lib/exif-utils'
-import exifr from 'exifr'
 
-vi.mock('exifr', () => ({
-  default: { gps: vi.fn() },
+const { gpsMock } = vi.hoisted(() => ({
+  gpsMock: vi.fn(),
 }))
 
-const gpsMock = vi.mocked(exifr.gps)
+vi.mock('exifr/dist/mini.esm.mjs', () => ({
+  gps: gpsMock,
+}))
 
 function makeFile(type: string): File {
   return new File([new Uint8Array([0xff, 0xd8, 0xff])], 'photo.jpg', { type })
